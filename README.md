@@ -1,17 +1,32 @@
-# tanefer
-
-## Build Setup
+# Tanefer Front-end with nuxt.js framwork
+## Prerequisite
+* Nodejs  : https://nodejs.org/en/download/package-manager/
+* NPM : https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
+* pm2 : https://pm2.io/docs/runtime/guide/installation/
+* create pm2-config.js file  contain the following 
+```
+module.exports = {
+  apps : [{
+    name   : "TaneferFE-nuxt",
+    script : "npm",
+    args: "start",
+    env_production: {
+      PORT: 3000,
+      NODE_ENV: "production"
+    }
+  }]
+}
+```
+## Build & Deploy Setup
 
 ```bash
 # install dependencies
 $ npm install
 
-# serve with hot reload at localhost:3000
-$ npm run dev
-
 # build for production and launch server
 $ npm run build
-$ npm run start
+$ pm2 save && pm2 startup 
+$ pm2 start pm2.config.js # now our App deployed/running on localhost 3000 based on pm2-config.js config 
 
 # generate static project
 $ npm run generate
