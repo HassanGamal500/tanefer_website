@@ -1,0 +1,36 @@
+image: node:16-alpine
+
+stages:          # List of stages for jobs, and their order of execution
+  - build
+  - deploy
+
+build:       # This job runs in the build stage, which runs first.
+  stage: build
+  before_script:
+    - apk update
+    - apk add zip
+  script:
+    - npm install
+    - npm run build 
+    - zip -r dist.zip dist
+  artifacts:
+    paths: 
+      - dist.zip
+
+deploy-dev:      # This job runs in the deploy stage.
+  stage: deploy 
+  only:
+    - dev # It only runs when Push on dev branch 
+  before_script:
+    - 'which ssh-agent || ( apk update && apk add openssh-client)'
+    - apk add zip
+    - rm -rf /var/lib/apt/lists/*
+    - eval "$(ssh-agent -s)"
+    - mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
+    - echo "$PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H 18.216.67.153 >> ~/.ssh/known_hosts
+    - chmod 600 ~/.ssh/known_hosts
+  script:
+    - scp -o StrictHostKeyChecking=no dist.zip ec2-user@ec2-18-216-67-153.us-east-2.compute.amazonaws.com:/var/www/public_html
+    - ssh -o StrictHostKeyChecking=no ec2-user@ec2-18-216-67-153.us-east-2.compute.amazonaws.com "cd /var/www/public_html; unzip -o dist.zip; rm dist.zip"
