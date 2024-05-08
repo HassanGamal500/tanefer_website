@@ -424,27 +424,35 @@
             One inspiring story is worth traveling. Discover more about tradition and history. Read the stories that make you want to travel.
           </p>
           <div class="home-blog-row">
-            <div data-w-id="fd0c4ff5-5379-8fdd-3742-293a91eba6d0" class="blog-col">
-              <a href="https://blog.tanefer.com/egypt-the-first-state-ever/" class="w-inline-block"><img src="~/assets/images/post1.jpg" loading="lazy" alt="">
+            <div v-for="post in posts.slice(0, 3)" :key="post.post_date_gmt" class="blog-col">
+              <a :href="post.articleUrl" class="w-inline-block">
+                <img :src="post.featuredImg" loading="lazy" alt="">
+                <div class="home-post-date">{{ post.post_date }}</div>
+                <div class="home-post-title">{{ post.post_title }}</div>
+              </a>
+            </div>
+            <!-- <div data-w-id="fd0c4ff5-5379-8fdd-3742-293a91eba6d0" class="blog-col">
+              <a href="https://tanefer.com/blog/egypt-the-first-state-ever/" class="w-inline-block">
+                <img src="~/assets/images/post1.jpg" loading="lazy" alt="">
                 <div class="home-post-date">April 26, 2019</div>
                 <div class="home-post-title">Egypt the First State Ever</div>
               </a>
             </div>
             <div data-w-id="2d18928f-b95f-1c14-d608-02bcf415b54f" class="blog-col">
-              <a href="https://blog.tanefer.com/egyptian-empire/" class="w-inline-block"><img src="~/assets/images/post3.jpg" loading="lazy" alt="">
+              <a href="https://tanefer.com/blog/egyptian-empire/" class="w-inline-block"><img src="~/assets/images/post3.jpg" loading="lazy" alt="">
                 <div class="home-post-date">May 13, 2019</div>
                 <div class="home-post-title">Egyptian Empire</div>
               </a>
             </div>
             <div data-w-id="c8cb3511-f607-c19c-6f16-0cc1af296bdb" class="blog-col">
-              <a href="https://blog.tanefer.com/hellenistic-egypt/" class="w-inline-block"><img src="~/assets/images/post2.jpg" loading="lazy" alt="">
+              <a href="https://tanefer.com/blog/hellenistic-egypt/" class="w-inline-block"><img src="~/assets/images/post2.jpg" loading="lazy" alt="">
                 <div class="home-post-date">June 22, 2019</div>
                 <div class="home-post-title">Hellenistic Egypt</div>
               </a>
-            </div>
+            </div> -->
           </div>
           <div data-w-id="ccf02149-becd-9829-4099-aa99d46b54e9" class="align-center">
-            <a href="https://blog.tanefer.com/about-tanefer/" class="min-bt">Read more stories</a>
+            <a href="https://tanefer.com/blog/about-tanefer/" class="min-bt">Read more stories</a>
           </div>
         </div>
       </section>
@@ -454,22 +462,84 @@
 
 <script>
 // import { allCities, headersNoAuth } from '../links'
+import adventureServices from '~/services/activitiesServies'
 
 export default {
   data () {
     return {
       sizes: null,
       currentTab: 'flights',
-      cities: []
+      cities: [],
+      metaData: {
+        page_name: null,
+        seo_title: null,
+        seo_description: null,
+        featured_image: null,
+        slug: null
+      },
+      posts: []
     }
   },
   head () {
     return {
-      title: 'Experience Egypt'
+      // title: 'Experience Egypt'
+      title: this.metaData.seo_title,
+      meta: [
+        {
+          hid: 'description',
+          name: 'description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:title',
+          property: 'og:title',
+          content: this.metaData.seo_title
+        },
+        {
+          hid: 'og:description',
+          property: 'og:description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:image',
+          property: 'og:image',
+          content: this.metaData.featured_image
+        }
+      ]
     }
   },
-  created () {
+  async created () {
     this.sizes = this.$vuetify.breakpoint
+    await this.getMetaData()
+    await this.getPosts()
+  },
+  methods: {
+    async getMetaData () {
+      try {
+        const promise = adventureServices.getMetaData(3)
+        const response = await promise
+        const results = response.data
+        // console.log(results)
+        if (results.data) {
+          this.metaData = results.data
+        }
+      } catch (error) {
+        this.loaded = false
+      }
+    },
+    async getPosts () {
+      try {
+        const promise = adventureServices.getPostsBlog()
+        const response = await promise
+        const results = response.data
+        // console.log(results)
+        if (results.data) {
+          this.posts = results.data
+        }
+      } catch (error) {
+        this.loaded = false
+      }
+    }
   }
 }
 </script>

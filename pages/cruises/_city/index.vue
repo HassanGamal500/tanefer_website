@@ -57,7 +57,7 @@
                 </v-btn>
               </div>
 
-              <v-expansion-panels v-if="item.available_dates.length">
+              <!-- <v-expansion-panels v-if="item.available_dates.length">
                 <v-expansion-panel>
                   <v-expansion-panel-header class="pa-1">
                     <h6>This Crusise is available to book during the following dates:</h6>
@@ -68,7 +68,7 @@
                     </div>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
-              </v-expansion-panels>
+              </v-expansion-panels> -->
               <v-card-actions class="pb-0">
                 <v-btn color="primary white--text px-5" elevation="0" :loading="showDetailsLoading" @click="getCruise(item.id)">
                   View Details
@@ -139,12 +139,12 @@
             <!-- eslint-disable-next-line vue/html-self-closing -->
             <div v-html="cruise.description"></div>
           </v-card-text>
-          <div v-if="cruise.available_dates.length">
+          <!-- <div v-if="cruise.available_dates.length">
             <h6>This Crusise is available to book during the following dates:</h6>
             <div v-for="(season, k) in cruise.available_dates" :key="k">
               <p><strong>From</strong> {{ new Date(season.start_date.replaceAll('-', '/')).toDateString() }} <strong>To</strong> {{ new Date(season.end_date.replaceAll('-', '/')).toDateString() }} </p>
             </div>
-          </div>
+          </div> -->
           <div v-if="cruise.includes.length">
             <p class="text-h6">
               Includes
@@ -239,19 +239,53 @@ export default {
       text: '',
       selectLoading: false,
       textDialog: false,
-      description: ''
+      description: '',
+      metaData: {
+        page_name: null,
+        seo_title: null,
+        seo_description: null,
+        featured_image: null,
+        slug: null
+      }
     }
   },
   async fetch () {
+    // await this.getMetaData()
     await this.getCruises(this.$route.query.page)
   },
   head () {
     return {
-      title: 'Nile cruises in ' + this.$route.params.city
+      // title: 'Nile cruises in ' + this.$route.params.city
+      title: this.metaData.seo_title,
+      meta: [
+        {
+          hid: 'description',
+          name: 'description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:title',
+          property: 'og:title',
+          content: this.metaData.seo_title
+        },
+        {
+          hid: 'og:description',
+          property: 'og:description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:image',
+          property: 'og:image',
+          content: this.metaData.featured_image
+        }
+      ]
     }
   },
   computed: {
     ...mapState(['tripsCity', 'cities'])
+  },
+  async created () {
+    await this.getMetaData()
   },
   methods: {
     selectCruise (id, name) {
@@ -262,12 +296,14 @@ export default {
     async getCruises (page) {
       try {
         let cityId
-        this.$route.query.cityId ? cityId = this.$route.query.cityId : cityId = this.cities.find(city => city.CityName === this.$route.params.city).CityID
+        // this.$route.query.cityId ? cityId = this.$route.query.cityId : cityId = this.cities.find(city => city.CityName === this.$route.params.city).CityID
+        this.$route.query.cityId ? cityId = this.$route.query.cityId : cityId = this.cities.find(city => city.citySlug === this.$route.params.city).CityID
         const promise = cruisesServices.getCityCruises(cityId, parseInt(page) || 1, 10)
         const response = await promise
         const results = response.data
         // eslint-disable-next-line no-console
-        console.log(results.data.cruiseList)
+        // console.log(results.data.cruiseList)
+        // console.log(this.$route.query.cityId)
         if (results.data.cruiseList.length > 0) {
           this.cruises = results.data.cruiseList
         } else { this.loading = false }
@@ -298,6 +334,48 @@ export default {
     },
     changePage (page) {
       this.$router.push({ name: 'cruisesResults', query: { page } })
+    },
+    // async getMetaData () {
+    //   try {
+    //     const promise = cruisesServices.getMetaData(5)
+    //     const response = await promise
+    //     const results = response.data
+    //     // console.log(results)
+    //     if (results.data) {
+    //       this.metaData = results.data
+    //     }
+    //   } catch (error) {
+    //     this.loaded = false
+    //   }
+    // }
+    async getMetaData () {
+      try {
+        const getCityDetails = this.cities.find(city => city.citySlug === this.$route.params.city)
+        // console.log(getCityDetails)
+        if (getCityDetails) {
+          this.metaData.seo_title = getCityDetails.citySEOTitle ? 'Best Nile River Cruises & ' + getCityDetails.citySEOTitle : null
+          this.metaData.seo_description = getCityDetails.citySEODescription ? 'Best Nile River Cruises & ' + getCityDetails.citySEODescription : null
+          this.metaData.featured_image = getCityDetails.citySEOImage ? getCityDetails.citySEOImage : null
+          this.metaData.slug = getCityDetails.citySlug
+        } else if (this.$route.params.city) {
+          const res = cruisesServices.getCityDetails(this.$route.params.city)
+          const results = await res
+          const cityDetails = results.data.data
+          this.metaData.seo_title = cityDetails.citySEOTitle ? 'Best Custom ' + cityDetails.citySEOTitle : null
+          this.metaData.seo_description = cityDetails.citySEODescription ? 'Best Custom ' + cityDetails.citySEODescription : null
+          this.metaData.featured_image = cityDetails.citySEOImage ? cityDetails.citySEOImage : null
+          this.metaData.slug = cityDetails.citySlug
+        } else {
+          const promise = cruisesServices.getMetaData(5)
+          const response = await promise
+          const results = response.data
+          if (results.data) {
+            this.metaData = results.data
+          }
+        }
+      } catch (error) {
+        this.loaded = false
+      }
     }
   }
 }
@@ -318,5 +396,9 @@ export default {
 }
 .w-nav {
   z-index: 200;
+}
+.more-text {
+  height: 44px;
+  overflow: hidden;
 }
 </style>

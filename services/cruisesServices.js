@@ -1,6 +1,9 @@
 import clientAPI from './axiosConfig'
 
-const baseURL = 'https://be.tanefer.com/api/v2'
+// const baseURL = 'https://be.tanefer.com/api/v2'
+// const baseURL = 'http://localhost:8000/api/v2'
+// const baseURL = 'https://tanefer.nahrdev.com/api/v2'
+const baseURL = 'https://api.tanefer.com/api/v2'
 export default {
   // get city cruises
   getCityCruises (cityId, page, limit) {
@@ -25,5 +28,20 @@ export default {
   // book cruise
   bookCruise (id, payload) {
     return clientAPI(baseURL).post(`/cruises/${id}/booking`, payload)
+  },
+
+  // get Meta
+  getMetaData (metaId) {
+    return clientAPI(baseURL).get(`/packages/seo/${metaId}`)
+  },
+
+  // get City Details
+  getCityDetails (slug) {
+    return clientAPI(baseURL).get(`/tours/getcitydetails/${slug}`)
+  },
+
+  // Calculate Cruise Price
+  calculateCruiseAllPrice (id, payload) {
+    return clientAPI(baseURL).post(`/cruises/${id}/select-room`, payload)
   }
 }

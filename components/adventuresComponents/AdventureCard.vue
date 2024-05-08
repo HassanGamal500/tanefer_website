@@ -1,150 +1,332 @@
 <template>
-  <div>
-    <v-card class="mb-5">
-      <v-card-text>
-        <v-row class="">
-          <v-col v-if="adventure.activityImages.length" cols="12" md="4" class="pa-0">
-            <v-img height="100%" :src="adventure.activityImages[0][0]" />
-          </v-col>
-          <v-col cols="12" :md="adventure.activityImages.length ? 8 : 12">
-            <div class="cruise-result-trip headline d-flex justify-space-between">
-              <div>{{ adventure.activityTitle }}</div>
-              <div>
-                <div>${{ adventure.activityPricePerPerson }} <small class="caption">/expected price per person</small></div>
-              </div>
-            </div>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <div class="mb-3" v-html="adventure.activityOverview" />
-
-            <div class="trips-cityname">
-              <v-expansion-panels>
-                <v-expansion-panel v-if="adventure.activityIncludes.length">
-                  <v-expansion-panel-header>
-                    Includes
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content>
-                    <span v-for="(include, i) in adventure.activityIncludes" :key="i">
-                      <v-chip class="my-1 px-1">{{ include }}</v-chip>
-                    </span>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-                <v-expansion-panel v-if="adventure.activityExcludes.length">
-                  <v-expansion-panel-header>
-                    Excludes
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content>
-                    <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
-                      <v-chip class="my-1 px-1">{{ exclude }}</v-chip>
-                    </span>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </div>
-          </v-col>
-        </v-row>
-      </v-card-text>
-      <v-divider class="mb-2" />
-      <v-card-actions>
-        <v-menu
-          v-model="menu"
-          :close-on-content-click="false"
-          :nudge-right="40"
-          transition="scale-transition"
-          offset-y
-          min-width="auto"
-        >
-          <template #activator="{ on, attrs }">
-            <v-text-field
-              v-model="date"
-              label="Adventure Date"
-              prepend-inner-icon="mdi-calendar"
-              append-inner-icon="mdi-pencil"
-              readonly
-              outlined
-              :rules="[v => !!v || 'Date is required!']"
-              v-bind="attrs"
-              :hint="getDateHint(adventure)"
-              persistent-hint
-              v-on="on"
-            />
-          </template>
-          <v-date-picker
-            v-model="date"
-            :allowed-dates="allowedDates"
-            :min="new Date().toISOString().substr(0, 10)"
-            @input="menu = false"
-          />
-        </v-menu>
-        <v-spacer />
-
-        <v-btn
-          v-if="!selected"
-          color="success"
-          @click="addAdventureToSelected"
-        >
-          Select this Adventure
-        </v-btn>
-        <v-btn
-          v-else
-          color="error"
-          @click="removeAdventureFromSelected"
-        >
-          Unselect this Adventure
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </div>
+  <!-- <v-container class="grey lighten-5"> -->
+  <v-row>
+    <v-col cols="12" md="12">
+      <div>
+        <v-card class="mb-5" style="border-radius: 15px;">
+          <v-card-text>
+            <v-row class="">
+              <v-col v-if="adventure.activityImages.length" cols="12" md="4" class="pt-4">
+                <v-img
+                  max-height="350"
+                  :src="adventure.activityImages[0][0]"
+                  max-width="250"
+                  class="rounded-lg"
+                />
+              </v-col>
+              <v-col cols="10" :md="adventure.activityImages.length ? 6 : 10">
+                <div class="cruise-result-trip justify-space-between pt-4">
+                  <div>
+                    <h5 class="text-h5 font-weight-bold">
+                      {{ adventure.activityTitle }}
+                    </h5>
+                  </div>
+                  <div class="black--text">
+                    <h5 class="text-h5 font-weight-bold">
+                      Start from ${{ adventure.activityPricePerPerson }} per person
+                    </h5>
+                  </div>
+                </div>
+              </v-col>
+              <!-- <v-col cols="2" md="2">
+                  <div class="rounded-circle mt-6" style="border: 2px solid #757575;width: 50px;height: 50px;line-height: 50px;text-align: center;">
+                    <v-icon style="font-size: 33px;">mdi-heart-outline</v-icon>
+                  </div>
+                </v-col> -->
+            </v-row>
+            <v-row>
+              <v-col cols="12" md="12">
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <!-- <div class="mb-3" v-html="adventure.activityOverview" /> -->
+                <v-tabs
+                  v-model="tab"
+                  color="deep-black accent-4"
+                >
+                  <v-tab href="#intro">
+                    Intro
+                  </v-tab>
+                  <v-tab href="#itinerary">
+                    Itinerary
+                  </v-tab>
+                  <v-tab href="#notes">
+                    Notes
+                  </v-tab>
+                </v-tabs>
+                <v-tabs-items v-model="tab">
+                  <v-tab-item :value="'intro'">
+                    <v-card flat>
+                      <v-card-text>
+                        <div class="mb-3" v-html="adventure.activityIntro" />
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <v-tab-item :value="'itinerary'">
+                    <v-card flat>
+                      <v-card-text>
+                        <div class="mb-3" v-html="adventure.activityItinerary" />
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                  <v-tab-item :value="'notes'">
+                    <v-card flat>
+                      <v-card-text>
+                        <div class="mb-3" v-html="adventure.activityOverview" />
+                      </v-card-text>
+                    </v-card>
+                  </v-tab-item>
+                </v-tabs-items>
+                <div class="trips-cityname" style="margin: 10px 0;">
+                  <v-expansion-panels>
+                    <v-expansion-panel v-if="adventure.activityIncludes.length">
+                      <v-expansion-panel-header>
+                        Includes
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content>
+                        <span v-for="(include, i) in adventure.activityIncludes" :key="i">
+                          <!-- <v-col v-for="(include, i) in adventure.activityIncludes" :key="i" cols="12" md="4"> -->
+                          <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
+                            <!-- {{ include }} -->
+                            <span class="text-truncate">{{ include }}</span>
+                          </v-chip>
+                        <!-- </v-col> -->
+                        </span>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
+                </div>
+                <div>
+                  <v-expansion-panels>
+                    <v-expansion-panel v-if="adventure.activityExcludes.length">
+                      <v-expansion-panel-header>
+                        Excludes
+                      </v-expansion-panel-header>
+                      <v-expansion-panel-content>
+                        <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
+                          <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
+                            <!-- {{ exclude }} -->
+                            <span class="text-truncate">{{ exclude }}</span>
+                          </v-chip>
+                        </span>
+                      </v-expansion-panel-content>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
+                </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-divider class="mb-2" />
+          <v-card-actions class="mb-0 pb-0">
+            <v-row>
+              <v-col cols="12" md="5">
+                <v-menu
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  :nudge-right="40"
+                  transition="scale-transition"
+                  offset-y
+                  min-width="auto"
+                >
+                  <template #activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="date"
+                      label="Adventure Date"
+                      prepend-inner-icon="mdi-calendar"
+                      append-inner-icon="mdi-pencil"
+                      readonly
+                      outlined
+                      :rules="[v => !!v || 'Date is required!']"
+                      v-bind="attrs"
+                      persistent-hint
+                      v-on="on"
+                    />
+                  </template>
+                  <v-date-picker
+                    v-model="date"
+                    :allowed-dates="allowedDates"
+                    :min="new Date().toISOString().substr(0, 10)"
+                    @input="menu = false"
+                  />
+                </v-menu>
+              </v-col>
+              <v-col cols="12" md="7">
+                <v-btn
+                  v-if="!selected"
+                  color="success"
+                  block
+                  elevation="4"
+                  x-large
+                  :loading="loadingSelectedAdventure"
+                  @click="addAdventureToSelected"
+                >
+                  <v-icon class="mx-2">
+                    mdi-plus-box-multiple
+                  </v-icon>
+                  Add Adventure
+                </v-btn>
+                <v-btn
+                  v-else
+                  color="error"
+                  block
+                  elevation="4"
+                  x-large
+                  :loading="loadingSelectedAdventure"
+                  @click="removeAdventureFromSelected"
+                >
+                  <v-icon class="mx-2">
+                    mdi-minus-box-multiple
+                  </v-icon>
+                  Remove Adventure
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+          <p class="mx-4 mt-0 pb-3 text-left">
+            {{ getDateHint(adventure) }}
+          </p>
+        </v-card>
+      </div>
+    </v-col>
+  </v-row>
+  <!-- </v-container> -->
 </template>
 
 <script>
+import adventureServices from '~/services/activitiesServies'
+
 export default {
   // eslint-disable-next-line vue/require-prop-types
-  props: ['adventure', 'index', 'price'],
+  props: ['adventure', 'index', 'price', 'selectedAdventures', 'isValidateSelected', 'selectedStatusFalse'],
   data () {
     return {
       menu: false,
       date: null,
-      selected: false
+      selected: this.selectedStatusFalse,
+      tab: null,
+      availabilityId: null,
+      loadingSelectedAdventure: false
+      // selectedDates: this.selectedAdventures
     }
   },
   methods: {
     allowedDates (val) {
       const date = new Date(val.replaceAll('-', '/'))
+      // const today = new Date()
       const days = this.adventure.start_days.filter(item => !!item)
-      const seasons = this.adventure.seasons
+      const availabilities = this.adventure.availabilities
       let allowedDay = false
-      if (days.includes(date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()) || !days.length) { allowedDay = true }
-      let allowedSeason = false
-      if (seasons.length) {
-        for (let index = 0; index < seasons.length; index++) {
-          if (date.getTime() >= new Date(seasons[index].from.replaceAll('-', '/')).getTime() && date.getTime() <= new Date(seasons[index].to.replaceAll('-', '/')).getTime()) { allowedSeason = true }
+      let allowedDate = false
+      // let allowedDateSelected = true
+
+      // Check if the date falls within any of the availabilities
+      for (const availability of availabilities) {
+        const fromDate = new Date(availability.from_date.replaceAll('-', '/'))
+        const toDate = new Date(availability.to_date.replaceAll('-', '/'))
+        if (date >= fromDate && date <= toDate) {
+          allowedDate = true
+          this.availabilityId = availability.id
+          break
         }
-      } else { allowedSeason = true }
-      return allowedDay && allowedSeason
+      }
+
+      // for (const selectedAdventures of this.selectedAdventures) {
+      //   // console.log(selectedAdventures.date)
+      //   const selectedDateFormat = new Date(selectedAdventures.date.replaceAll('-', '/'))
+      //   console.log(selectedDateFormat)
+      //   if (+date === +selectedDateFormat) {
+      //     allowedDateSelected = false
+      //     // break
+      //   }
+      // }
+
+      // if (days.includes(date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()) || !days.length) { allowedDay = true }
+      // return allowedDay && allowedDate
+
+      // if (
+      //   !date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() === today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() &&
+      //   (days.includes(date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()) || !days.length)
+      // ) {
+      //   allowedDay = true
+      // }
+
+      // Check if the date is not today and matches the allowed days
+      if (
+        !this.isToday(date) &&
+        (days.includes(date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()) || !days.length)
+      ) {
+        allowedDay = true
+      }
+      return allowedDay && allowedDate
     },
     getDateHint () {
       let text = 'You can choose from allowed dates :'
       for (let index = 0; index < this.adventure.start_days.filter(item => !!item).length; index++) {
         if (this.adventure.start_days[index]) { text += this.adventure.start_days[index] + ',' }
       }
-      for (let index = 0; index < this.adventure.seasons.length; index++) {
-        text += 'from' + this.adventure.seasons[index].from + ' to ' + this.adventure.seasons[index].to + ' / '
-      }
-      if (!this.adventure.start_days.filter(item => !!item).length && !this.adventure.seasons.length) { text = '' }
+      if (!this.adventure.start_days.filter(item => !!item).length) { text = '' }
       return text
     },
-    addAdventureToSelected () {
+    async addAdventureToSelected () {
+      this.loadingSelectedAdventure = true
       if (this.date) {
-        this.selected = true
-        this.$emit('addAdventure', { activityTitle: this.adventure.activityTitle, activity_id: this.adventure.activityID, date: this.date, price: this.price })
+        const body = {
+          activities: []
+        }
+        body.activities.push({
+          activity_id: this.adventure.activityID,
+          from_date: this.date
+        })
+        this.selectedAdventures.forEach((item) => {
+          body.activities.push({
+            activity_id: item.activity_id,
+            from_date: item.date
+          })
+        })
+        try {
+          const promise = adventureServices.validateTimeTour(body)
+          const response = await promise
+          const results = response.data
+          if (results.status === 200) {
+            this.selected = true
+            this.$emit('addAdventure', { activityTitle: this.adventure.activityTitle, activity_id: this.adventure.activityID, date: this.date, price: this.price, availabilityId: this.availabilityId })
+          } else {
+            this.$emit('error', results.errors, 'error')
+          }
+        } catch (error) {
+          this.$emit('error', 'Something went wrong', 'error')
+        }
+        // console.log(this.isValidateSelected)
+        // if (this.isValidateSelected === 'enableSelect') {
+        //   this.selected = true
+        //   this.$emit('addAdventure', { activityTitle: this.adventure.activityTitle, activity_id: this.adventure.activityID, date: this.date, price: this.price, availabilityId: this.availabilityId })
+        // }
       } else {
         this.$emit('error', 'Please select start date!', 'warning')
       }
+      this.loadingSelectedAdventure = false
     },
     removeAdventureFromSelected () {
       this.selected = false
       this.$emit('removeAdventure', this.adventure.activityID)
+    },
+    isToday (someDate) {
+      const today = new Date()
+      return (
+        someDate.getDate() === today.getDate() &&
+        someDate.getMonth() === today.getMonth() &&
+        someDate.getFullYear() === today.getFullYear()
+      )
     }
   }
 }
 </script>
+<style scoped>
+.my-chip {
+  max-width: 100%; /* Set a maximum width if needed */
+}
+
+.text-truncate {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+}
+</style>

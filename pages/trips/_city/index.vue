@@ -113,17 +113,23 @@
                       text
                       small
                       class="px-0"
-                      @click="textDialog = true; description = trip.packageOverview"
+                      @click="textDialog = true; description = trip.packageOverview; includes = trip.packageIncludes; excludes = trip.packageExcludes"
                     >
                       show Full Description
                     </v-btn>
                   </v-col>
                   <v-col cols="12" md="3" align-self="center">
-                    <div v-if="trip.expected_price && trip.expected_price !== '0' && trip.expected_price !== 'null'">
+                    <!-- <div v-if="trip.expected_price && trip.expected_price !== '0' && trip.expected_price !== 'null'">
                       Expected Price
                     </div>
                     <div v-if="trip.expected_price && trip.expected_price !== '0' && trip.expected_price !== 'null'" class="hotel-totlal-price">
                       ${{ trip.expected_price }}
+                    </div> -->
+                    <div v-if="trip.intialprice && trip.intialprice !== '0' && trip.intialprice !== 'null'">
+                      Initial Price
+                    </div>
+                    <div v-if="trip.intialprice && trip.intialprice !== '0' && trip.intialprice !== 'null'" class="hotel-totlal-price">
+                      ${{ trip.intialprice }}
                     </div>
                     <div v-if="trip.starting_airport && trip.starting_airport !== 'null' && trip.starting_airport !== null && trip.starting_airport !== 'undefined'">
                       Package Starting airport
@@ -143,7 +149,7 @@
                     <div v-if="trip.packageDuration && trip.packageDuration !== '0' && trip.packageDuration !== 'null'" class="hotel-totlal-price">
                       {{ trip.packageDuration }} Days
                     </div>
-                    <div style="cursor: pointer" class="select-hotel" @click="$router.push({name: 'trips-city-slug', params: {city: tripsCity.CityName, slug: trip.packageSlug || trip.packageTitle}})">
+                    <div style="cursor: pointer" class="select-hotel" @click="$router.push({name: 'trips-city-slug', params: {city: tripsCity.citySlug, slug: trip.packageSlug || trip.packageTitle}})">
                       Select
                     </div>
                   </v-col>
@@ -166,7 +172,7 @@
 
       <v-dialog
         v-model="textDialog"
-        max-width="500"
+        max-width="800"
       >
         <v-card>
           <v-card-title class="text-h5 grey lighten-2">
@@ -175,6 +181,22 @@
 
           <v-card-text>
             <p v-html="description"></p>
+            <div v-if="includes.length">
+              <p class="text-h6">
+                Includes
+              </p>
+              <v-chip v-for="(item, i) in includes" :key="i" class="ma-1">
+                {{ item }}
+              </v-chip>
+            </div>
+            <div v-if="excludes.length">
+              <p class="text-h6">
+                Excludes
+              </p>
+              <v-chip v-for="(item, i) in excludes" :key="i" class="ma-1">
+                {{ item }}
+              </v-chip>
+            </div>
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -187,6 +209,7 @@ import { mapState } from 'vuex'
 import tripsServices from '~/services/tripsServices'
 
 export default {
+  ssr: false,
   data () {
     return {
       snackbar: false,
@@ -207,7 +230,17 @@ export default {
       tripLength: {},
       lastCity: {},
       textDialog: false,
-      description: ''
+      description: '',
+      includes: [],
+      excludes: [],
+      tripsResults: [],
+      metaData: {
+        page_name: null,
+        seo_title: null,
+        seo_description: null,
+        featured_image: null,
+        slug: null
+      }
     }
   },
   async fetch () {
@@ -222,10 +255,34 @@ export default {
       await this.getTrips()
       await this.getTripsFilters()
     }
+    this.getMetaData()
   },
   head () {
     return {
-      title: 'Trips in ' + this.$route.params.city
+      // title: 'Trips in ' + this.$route.params.city
+      title: this.metaData.seo_title,
+      meta: [
+        {
+          hid: 'description',
+          name: 'description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:title',
+          property: 'og:title',
+          content: this.metaData.seo_title
+        },
+        {
+          hid: 'og:description',
+          property: 'og:description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:image',
+          property: 'og:image',
+          content: this.metaData.featured_image
+        }
+      ]
     }
   },
   computed: {
@@ -235,6 +292,9 @@ export default {
     '$vuetify.breakpoint.smAndDown' (val) {
       if (val) { this.showSearchForm = false } else { this.showSearchForm = true }
     }
+  },
+  created () {
+    this.getMetaData()
   },
   methods: {
     showFilters () {
@@ -247,8 +307,14 @@ export default {
     filteate () {
       const tours = []
       let filtered = []
-      this.$store.state.tripsResults.forEach((trip) => {
-        if (this.prices[1] >= trip.expected_price && trip.expected_price >= this.prices[0]) {
+      // this.$store.state.tripsResults.forEach((trip) => {
+      this.tripsResults.forEach((trip) => {
+        // if (this.prices[1] >= trip.expected_price && trip.expected_price >= this.prices[0]) {
+        //   if (this.durations[1] >= trip.packageDuration && trip.packageDuration >= this.durations[0]) {
+        //     tours.push(trip)
+        //   }
+        // }
+        if (this.prices[1] >= trip.intialprice && trip.intialprice >= this.prices[0]) {
           if (this.durations[1] >= trip.packageDuration && trip.packageDuration >= this.durations[0]) {
             tours.push(trip)
           }
@@ -266,26 +332,34 @@ export default {
     },
     async getTrips () {
       if (this.tripsCity) {
-        this.$store.dispatch('setTripCity', this.cities.find(el => el.CityName === this.$route.params.city))
+        this.$store.dispatch('setTripCity', this.cities.find(el => el.citySlug === this.$route.params.city))
+        this.lastCity = this.cities.find(el => el.citySlug === this.$route.params.city)
       }
-      this.$store.dispatch('removeTripsResults')
-      this.lastCity = this.$store.state.tripsCity
+      // this.$store.dispatch('removeTripsResults')
+      // this.lastCity = this.$store.state.tripsCity
       this.trips = []
       const res = tripsServices.getCityTrips(this.tripsCity.CityID)
       const results = await res
       const trips = results.data.data
-      this.$store.dispatch('setTripsResults', trips.tripList)
+      // console.log(trips)
+      // this.$store.dispatch('setTripsResults', trips.tripList)
+      this.tripsResults = trips.tripList
       if (trips.tripList.length > 0) {
-        this.trips = trips.tripList.filter(item => item.expected_price > 0)
-        this.tripsCount = trips.tripList.filter(item => item.expected_price > 0).length
-        this.min = trips.tripList.filter(item => item.expected_price > 0)[this.tripsCount - 1].expected_price
-        this.max = trips.tripList.filter(item => item.expected_price > 0)[0].expected_price
+        // this.trips = trips.tripList.filter(item => item.expected_price > 0)
+        // this.tripsCount = trips.tripList.filter(item => item.expected_price > 0).length
+        // this.min = trips.tripList.filter(item => item.expected_price > 0)[this.tripsCount - 1].expected_price
+        // this.max = trips.tripList.filter(item => item.expected_price > 0)[0].expected_price
+        this.trips = trips.tripList.filter(item => item.intialprice > 0)
+        this.tripsCount = trips.tripList.filter(item => item.intialprice > 0).length
+        this.min = trips.tripList.filter(item => item.intialprice > 0)[this.tripsCount - 1].intialprice
+        this.max = trips.tripList.filter(item => item.intialprice > 0)[0].intialprice
         this.prices = [this.min, this.max]
       }
     },
     async getTripsFilters () {
       if (this.tripsCity) {
-        this.$store.dispatch('setTripCity', this.cities.find(el => el.CityName === this.$route.params.city))
+        this.$store.dispatch('setTripCity', this.cities.find(el => el.citySlug === this.$route.params.city))
+        this.lastCity = this.cities.find(el => el.citySlug === this.$route.params.city)
       }
       const res = tripsServices.getCityTripsFilters(this.tripsCity.CityID)
       const results = await res
@@ -295,6 +369,39 @@ export default {
         this.tripLengthes = filters.tripLength
         this.tripLength = filters.tripLength[0]
         if (this.tripLength) { this.durations = [0, this.tripLength.duration] }
+      }
+    },
+    // async getMetaData () {
+    //   try {
+    //     const promise = tripsServices.getMetaData(6)
+    //     const response = await promise
+    //     const results = response.data
+    //     // console.log(results)
+    //     if (results.data) {
+    //       this.metaData = results.data
+    //     }
+    //   } catch (error) {
+    //     this.loaded = false
+    //   }
+    // }
+    async getMetaData () {
+      try {
+        if (this.lastCity) {
+          this.metaData.seo_title = this.lastCity.citySEOTitle ? 'Best Custom ' + this.lastCity.citySEOTitle : null
+          this.metaData.seo_description = this.lastCity.citySEODescription ? 'Best Custom ' + this.lastCity.citySEODescription : null
+          this.metaData.featured_image = this.lastCity.citySEOImage ? this.lastCity.citySEOImage : null
+          this.metaData.slug = this.lastCity.citySlug
+        } else if (this.$route.params.city) {
+          const res = tripsServices.getCityDetails(this.$route.params.city)
+          const results = await res
+          const cityDetails = results.data.data
+          this.metaData.seo_title = cityDetails.citySEOTitle ? 'Best Custom ' + cityDetails.citySEOTitle : null
+          this.metaData.seo_description = cityDetails.citySEODescription ? 'Best Custom ' + cityDetails.citySEODescription : null
+          this.metaData.featured_image = cityDetails.citySEOImage ? cityDetails.citySEOImage : null
+          this.metaData.slug = cityDetails.citySlug
+        }
+      } catch (error) {
+        this.loaded = false
       }
     }
   }

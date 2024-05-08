@@ -2,6 +2,12 @@
 // import axios from 'axios'
 
 export default {
+  router: {
+    base: ''
+  },
+  // serverMiddleware: [
+  //   { path: '/', handler: '~/server-middleware/redirects.js' }
+  // ],
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     titleTemplate: '%s | Tanefer',
@@ -16,7 +22,8 @@ export default {
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/icon.png' }
+      { rel: 'icon', type: 'image/x-icon', href: '/icon.png' },
+      { rel: 'stylesheet', type: 'text/css', href: 'https://unpkg.com/@mdi/font@7.2.96/css/materialdesignicons.min.css' }
     ],
     script: [
       { src: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js', body: true }
@@ -31,13 +38,15 @@ export default {
   css: [
     '~/assets/style/normalize.css',
     '~/assets/style/webflow.css',
-    '~/assets/style/tanefer.webflow.css'
+    '~/assets/style/tanefer.webflow.css',
+    '~/assets/style/custom.css'
   ],
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
     { src: '~/plugins/vuex-persist', ssr: false },
-    { src: '~/plugins/vue-gallery.js', ssr: false }
+    { src: '~/plugins/vue-gallery.js', ssr: false },
+    { src: '~/plugins/vueSocial.js', ssr: false }
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -60,18 +69,22 @@ export default {
         key: 'AIzaSyCMpLmI6ZbrtqkEA_hIP7aWCJvRsCLz11c',
         libraries: ['places']
       }
-    ]
+    ],
+    'vue-social-sharing/nuxt'
   ],
 
+  // baseURL = 'https://be.tanefer.com/api/v2'
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
-    baseURL: 'https://be.tanefer.com/api/v2'
+    // baseURL: 'https://tanefer.nahrdev.com/api/v2'
+    baseURL: 'https://api.tanefer.com/api/v2'
   },
 
   // private API secret
   env: {
-    clientSecret: 'GshMa0/o/hOZlR79Ns6hkg=='
+    clientSecret: 'GshMa0/o/hOZlR79Ns6hkg==',
+    wpClientSecret: 'XQfhNag1poc2i1tnC5Id2VyAuoFegRqR'
   },
 
   privateRuntimeConfig: {},
@@ -95,29 +108,38 @@ export default {
     }
   },
 
-  // target: 'static',
+  target: 'static',
   generate: {
+    // interval: 100,
     fallback: true,
     routes: [
       '/',
       '/trips',
       '/booking/trip',
-      '/trips/Cairo',
-      '/trips/Luxor',
-      '/trips/Aswan',
-      '/trips/Alexandria',
-      '/trips/Hurghada',
-      '/trips/Sharm El Sheikh',
-      '/trips/Dahab',
+      // '/trips/Cairo',
+      // '/trips/Luxor',
+      // '/trips/Aswan',
+      // '/trips/Alexandria',
+      // '/trips/Hurghada',
+      // '/trips/Sharm El Sheikh',
+      // '/trips/Dahab',
       '/adventures',
       '/booking/adventure',
-      '/adventures/Cairo',
-      '/adventures/Luxor',
-      '/adventures/Aswan',
-      '/adventures/Alexandria',
-      '/adventures/Hurghada',
+      // '/adventures/Cairo',
+      '/adventures/cairo',
+      // '/adventures/Luxor',
+      '/adventures/luxor',
+      // '/adventures/Aswan',
+      '/adventures/aswan',
+      // '/adventures/Alexandria',
+      '/adventures/alexandria',
+      // '/adventures/Hurghada',
+      '/adventures/hurghada',
       '/adventures/Sharm El Sheikh',
-      '/adventures/Dahab',
+      // '/adventures/Dahab',
+      '/adventures/dahab',
+      // '/adventures/Giza',
+      '/adventures/giza',
       '/booking/cruise',
       '/cruises/Cairo',
       '/cruises/Luxor',
@@ -132,5 +154,11 @@ export default {
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {}
+  build: {
+    extend (config, ctx) {
+      if (ctx.isDev) {
+        config.devtool = ctx.isClient ? 'source-map' : 'inline-source-map'
+      }
+    }
+  }
 }

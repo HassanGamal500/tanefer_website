@@ -16,12 +16,12 @@
       </v-row>
     </v-snackbar>
     <v-form ref="form" v-model="travellersFormValid">
-      <v-card outlined class="pa-5 mb-5">
-        <p class="body-1 font-weight-bold late--text">
-          Contact person details
-        </p>
+      <p class="body-1 font-weight-bold text-h5">
+        Contact person details
+      </p>
+      <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
         <v-row>
-          <v-col class="py-0" cols="12" sm="4" md="3">
+          <v-col class="py-0" cols="12" sm="6" md="6">
             <v-text-field
               v-model="name"
               outlined
@@ -29,12 +29,10 @@
               label="Full Name"
               required
               color="blue"
+              class="rounded-lg"
             />
           </v-col>
-          <v-col class="py-0" cols="12" sm="4" md="5">
-            <mobile-input @update="assignPhone" />
-          </v-col>
-          <v-col class="py-0" cols="12" sm="4" md="4">
+          <v-col class="py-0" cols="12" sm="6" md="6">
             <v-text-field
               v-model="email"
               outlined
@@ -42,183 +40,257 @@
               label="E-mail"
               required
               color="blue"
+              class="rounded-lg"
             />
+          </v-col>
+          <v-col class="py-0" cols="12" sm="6" md="6">
+            <mobile-input @update="assignPhone" />
           </v-col>
         </v-row>
       </v-card>
-      <v-card v-for="n in passengersNum" :key="n" class="mb-5 pa-5" outlined>
-        <p class="body-1 late--text">
-          Traveller {{ n }} <span>({{ adultsNum >= n ? 'Adult' : (childrenNum >= ( n - adultsNum) ? 'Child' : (infantsNum >= (n - (adultsNum + childrenNum)) ? 'Infant' : null)) }})</span>
-        </p>
-        <v-row>
-          <v-col cols="12" :sm="adultsNum >= n ? 6 : 12" class="py-0 my-0">
-            <v-select
-              v-model="passengerGender[n-1]"
-              :items="['Male', 'Female']"
-              label="Gender"
-              outlined
-              prepend-inner-icon="mdi-gender-male-female"
-              required
-              class="pa-0"
-              height="56px"
-              color="blue"
-            >
-              <template #selection="{ item }">
-                <span class="primary--text caption">{{ item }}</span>
-              </template>
-            </v-select>
-          </v-col>
-          <v-col v-if="adultsNum >= n" cols="12" sm="6" class="my-0 py-0">
-            <v-combobox
-              v-model="passengerTitle[n-1]"
-              :items="['Mr', 'Mrs', 'Ms', 'Miss']"
-              :search-input.sync="search[n-1]"
-              hide-selected
-              hint="Add title and press enter to append it"
-              label="Title"
-              outlined
-              prepend-inner-icon="mdi-card-account-details"
-              :rules="requiredRule"
-              class="pa-0"
-              height="56px"
-              color="blue"
-            >
-              <template #no-data>
-                <v-list-item>
-                  <v-list-item-content>
-                    <v-list-item-title>
-                      No results matching "<strong>{{ search }}</strong>". Press <kbd>enter</kbd> to create a new one
-                    </v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
-            </v-combobox>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col class="py-0" cols="12" sm="4">
-            <v-text-field
-              v-model="passengerFirstName[n-1]"
-              outlined
-              prepend-inner-icon="mdi-account"
-              :rules="nameRules"
-              label="First name"
-              required
-              color="blue"
-            />
-          </v-col>
-          <v-col class="py-0" cols="12" sm="4">
-            <v-text-field
-              v-model="passengerLastName[n-1]"
-              outlined
-              prepend-inner-icon="mdi-account"
-              :rules="nameRules"
-              label="Last name"
-              required
-              color="blue"
-            />
-          </v-col>
-          <v-col class="py-0" cols="12" sm="4">
-            <v-menu
-              ref="menu1"
-              v-model="menu1[n-1]"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              min-width="290px"
-            >
-              <template #activator="{ on }">
-                <v-text-field
-                  v-model="dateOfBirthText[n-1]"
-                  prepend-inner-icon="mdi-calendar"
-                  label="Birthday"
-                  readonly
-                  color="blue"
+      <p class="body-1 font-weight-bold text-h5">
+        Traverller Details
+      </p>
+      <v-expansion-panels v-model="panelExpandedTraveller" focusable class="mb-5">
+        <v-expansion-panel v-model="panelExpandedTraveller" style="border-radius: 18px;">
+          <v-expansion-panel-header color="#4C4C4C" class="white--text font-weight-bold text-h6 change-icon-style" style="border-radius: 18px; line-height: 2;">
+            Traveller Contacts
+          </v-expansion-panel-header>
+          <v-expansion-panel-content class="my-8">
+            <v-row>
+              <v-col cols="12" sm="6" class="py-0 my-0">
+                <v-select
+                  v-model="passengerGender"
+                  :items="['Male', 'Female']"
+                  label="Gender"
                   outlined
-                  :rules="[() => !!dateOfBirth[n-1] || 'This field is required']"
-                  v-on="on"
-                  @focus="getProperDate(n)"
-                />
-              </template>
-              <v-date-picker
-                ref="picker"
-                v-model="dateOfBirth[n-1]"
-                :max="adultsNum >= n ? adultsMaxDate : ((childrenNum >= (n - adultsNum)) ? childrenMaxDate : new Date().toISOString().substr(0, 10))"
-                :min="adultsNum >= n ? '1950-01-01' : ((childrenNum >= (n - adultsNum)) ? childrenMinDate : infantsMinDate)"
-                color="brown"
-                @input="menu1[n-1] = false, formatDate(dateOfBirth[n-1] , n - 1, 'birthDate')"
-              />
-            </v-menu>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" sm="4" class="my-0 py-0">
-            <v-text-field
-              v-model="passNum[n-1]"
-              label="Passport number"
-              prepend-inner-icon="mdi-passport"
-              :rules="[() => !!passNum[n-1] || 'This field is required', () => /^[a-z0-9A-Z0-9]*$/.test(passNum[n-1]) || 'No special characters allowed', () => passNum[n-1].length >= 5 || 'Passport number must be at least 5 characters', () => passNum[n-1].length <= 15 || 'Passport number must be at most 15 characters']"
-              outlined
-              color="blue"
-              @focus="addValue(n-1)"
-            />
-          </v-col>
-          <v-col cols="12" sm="4" class="my-0 py-0">
-            <v-menu
-              v-model="passportMenus[n-1]"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              min-width="290px"
-            >
-              <template #activator="{ on }">
-                <v-text-field
-                  v-model="passExpireDateText[n-1]"
-                  outlined
-                  label="Passport expire date"
-                  readonly
-                  prepend-inner-icon="mdi-calendar"
-                  :rules="[() => !!passExpireDate[n-1] || 'This field is required']"
+                  required
+                  class="pa-0 rounded-lg"
+                  height="56px"
                   color="blue"
-                  v-on="on"
-                  @focus="expire(n-1)"
+                  :menu-props="{ zIndex: 9999 }"
                 />
-              </template>
-              <v-date-picker
-                v-model="passExpireDate[n-1]"
-                color="late"
-                :rules="[() => !!passExpireDate[n-1] || 'This field is required']"
-                :min="minExpireDate"
-                type="date"
-                @input="passportMenus[n-1] = false, formatDate(passExpireDate[n-1] , n-1, 'passport')"
-              />
-            </v-menu>
-          </v-col>
-          <v-col cols="12" sm="4" class="my-0 py-0">
-            <v-autocomplete
-              v-model="issueCountry[n-1]"
-              :rules="[() => !!issueCountry[n-1] || 'This field is required']"
-              :items="countries"
-              item-text="name"
-              item-value="code"
-              placeholder="Issuing Country"
-              name="issue-country-for-passports"
-              required
-              outlined
-              prepend-inner-icon="mdi-flag"
-              hide-no-data
-              color="blue"
-              autocomplete="off"
-              :menu-props="{ auto: true, maxWidth: 200, overflowY: true }"
-            />
-          </v-col>
-        </v-row>
-      </v-card>
+              </v-col>
+              <v-col cols="12" sm="6" class="my-0 py-0">
+                <v-combobox
+                  v-model="passengerTitle"
+                  :items="['Mr', 'Mrs', 'Ms', 'Miss']"
+                  :search-input.sync="search"
+                  hide-selected
+                  hint="Add title and press enter to append it"
+                  label="Title"
+                  outlined
+                  :rules="requiredRule"
+                  class="pa-0 rounded-lg"
+                  height="56px"
+                  color="blue"
+                  :menu-props="{ zIndex: 9999 }"
+                >
+                  <template #no-data>
+                    <v-list-item>
+                      <v-list-item-content>
+                        <v-list-item-title>
+                          No results matching "<strong>{{ search }}</strong>". Press <kbd>enter</kbd> to create a new one
+                        </v-list-item-title>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </template>
+                </v-combobox>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col class="py-0" cols="12" sm="6">
+                <v-text-field
+                  v-model="passengerFirstName"
+                  outlined
+                  :rules="nameRules"
+                  label="First name"
+                  required
+                  color="blue"
+                  class="rounded-lg"
+                />
+              </v-col>
+              <v-col class="py-0" cols="12" sm="6">
+                <v-text-field
+                  v-model="passengerLastName"
+                  outlined
+                  :rules="nameRules"
+                  label="Last name"
+                  required
+                  color="blue"
+                  class="rounded-lg"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col class="py-0" cols="12" sm="6">
+                <v-menu
+                  ref="menu1"
+                  v-model="menu1"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  min-width="290px"
+                  :z-index="9999"
+                >
+                  <template #activator="{ on }">
+                    <v-text-field
+                      v-model="dateOfBirthText"
+                      label="Birthday"
+                      readonly
+                      color="blue"
+                      outlined
+                      :rules="[() => !!dateOfBirth || 'This field is required']"
+                      class="rounded-lg"
+                      v-on="on"
+                    />
+                  </template>
+                  <v-date-picker
+                    ref="picker"
+                    v-model="dateOfBirth"
+                    :max="new Date().toISOString().substr(0, 10)"
+                    color="brown"
+                    @input="menu1 = false, formatDate(dateOfBirth, 1, 'birthDate')"
+                  />
+                </v-menu>
+              </v-col>
+              <v-col cols="12" sm="6" class="my-0 py-0">
+                <v-text-field
+                  v-model="passNum"
+                  label="Passport number"
+                  :rules="[() => !!passNum || 'This field is required', () => /^[a-z0-9A-Z0-9]*$/.test(passNum) || 'No special characters allowed', () => passNum != null && passNum.length >= 5 || 'Passport number must be at least 5 characters', () => passNum != null && passNum.length <= 15 || 'Passport number must be at most 15 characters']"
+                  outlined
+                  color="blue"
+                  class="rounded-lg"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12" sm="6" class="my-0 py-0">
+                <v-menu
+                  v-model="passportMenus"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  min-width="290px"
+                  :z-index="9999"
+                >
+                  <template #activator="{ on }">
+                    <v-text-field
+                      v-model="passExpireDateText"
+                      outlined
+                      label="Passport expire date"
+                      readonly
+                      :rules="[() => !!passExpireDate || 'This field is required']"
+                      color="blue"
+                      class="rounded-lg"
+                      v-on="on"
+                    />
+                  </template>
+                  <v-date-picker
+                    v-model="passExpireDate"
+                    color="late"
+                    :rules="[() => !!passExpireDate || 'This field is required']"
+                    :min="minExpireDate"
+                    type="date"
+                    @input="passportMenus = false, formatDate(passExpireDate, 1, 'passport')"
+                  />
+                </v-menu>
+              </v-col>
+              <v-col cols="12" sm="6" class="my-0 py-0">
+                <v-autocomplete
+                  v-model="issueCountry"
+                  :rules="[() => !!issueCountry || 'This field is required']"
+                  :items="countries"
+                  item-text="name"
+                  item-value="code"
+                  placeholder="Issuing Country"
+                  name="issue-country-for-passports"
+                  required
+                  outlined
+                  hide-no-data
+                  color="blue"
+                  autocomplete="off"
+                  :menu-props="{ auto: true, maxWidth: 200, overflowY: true, zIndex: 9999 }"
+                  class="rounded-lg"
+                />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="5" sm="5" class="my-0 py-0">
+                <v-btn
+                  class="white--text text-capitalize"
+                  color="#A4713C"
+                  elevation="6"
+                  x-large
+                  block
+                  raised
+                  @click="submit"
+                >
+                  Next
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+      <v-expansion-panels v-model="panelExpandedPayNow" focusable class="mb-5">
+        <v-expansion-panel v-model="panelExpandedPayNow" style="border-radius: 18px;">
+          <v-expansion-panel-header color="#4C4C4C" class="white--text font-weight-bold text-h6 change-icon-style" style="border-radius: 18px; line-height: 2;">
+            Payment
+          </v-expansion-panel-header>
+          <v-expansion-panel-content class="my-8">
+            <v-row>
+              <v-col cols="12" sm="12" class="my-0 py-0">
+                <v-btn
+                  class="white--text text-capitalize"
+                  color="#A4713C"
+                  elevation="6"
+                  x-large
+                  block
+                  raised
+                  :loading="loading"
+                  :disabled="!enablePayNow"
+                  @click="nextSteps('pay')"
+                >
+                  <span v-if="module === 'cruise' || (module === 'trip' && hasCruise === true)">Book Now</span>
+                  <span v-else>Pay Now</span>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+      <!-- <v-expansion-panels focusable class="mb-5">
+        <v-expansion-panel style="border-radius: 18px;">
+          <v-expansion-panel-header color="#4C4C4C" class="white--text font-weight-bold text-h6 change-icon-style" style="border-radius: 18px; line-height: 2;">
+            Confirmation
+          </v-expansion-panel-header>
+          <v-expansion-panel-content class="my-8">
+            <v-row>
+              <v-col cols="12" sm="12" class="my-0 py-0">
+                <v-btn class="white--text text-capitalize"
+                  color="#A4713C"
+                  elevation="6"
+                  x-large
+                  block
+                  raised
+                  :loading="loading"
+                  @click="nextSteps('confirm')"
+                  :disabled="!openConfirmButton"
+                >
+                Confirm Booking
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels> -->
     </v-form>
-    <v-btn v-if="travellers" block :loading="loading" class="late px-12 py-5 white--text" @click="submit">
+    <!-- <v-btn v-if="travellers" block :loading="loading" class="late px-12 py-5 white--text" @click="submit">
       book now
     </v-btn>
     <v-btn v-else class="brown px-12 py-5 white--text" @click="submit">
       Continue to payment
-    </v-btn>
+    </v-btn> -->
   </div>
 </template>
 
@@ -226,11 +298,11 @@
 
 export default {
   // eslint-disable-next-line vue/require-prop-types
-  props: ['travellers', 'loading'],
+  props: ['travellers', 'loading', 'openConfirmButton', 'module', 'hasCruise'],
   data () {
     return {
-      menu1: [],
-      passportMenus: [],
+      menu1: null,
+      passportMenus: null,
       travellersFormValid: true,
       name: '',
       nameRules: [v => (!!v && v.length > 1) || 'Item is required at least 2 characters',
@@ -242,26 +314,32 @@ export default {
         v => !!v || 'E-mail is required',
         v => /^([A-Za-z0-9_\-.])+@([A-Za-z0-9_\-.])+\.([A-Za-z]{2,4})$/.test(v) || 'E-mail must be valid'
       ],
-      passengerTitle: [],
-      passengerGender: [],
-      search: [],
-      passengerFirstName: [],
-      passengerLastName: [],
-      dateOfBirth: [],
-      dateOfBirthText: [],
-      passExpireDate: [],
-      passExpireDateText: [],
-      minExpireDate: '',
-      passNum: [''],
-      issueCountry: [],
-      travellersData: [],
+      passengerTitle: null,
+      passengerGender: null,
+      search: null,
+      passengerFirstName: null,
+      passengerLastName: null,
+      dateOfBirth: null,
+      dateOfBirthText: null,
+      passExpireDate: null,
+      passExpireDateText: null,
+      minExpireDate: null,
+      passNum: null,
+      issueCountry: null,
+      travellersData: null,
       passengers: null,
       requiredRule: [
         v => !!v || 'Field is required'
       ],
       snackbar: false,
       color: '',
-      text: ''
+      text: '',
+      openPaymentPanel: false,
+      openConfirmationPanel: false,
+      enablePayNow: false,
+      enableConfirmation: false,
+      panelExpandedTraveller: 0,
+      panelExpandedPayNow: null
     }
   },
   computed: {
@@ -313,13 +391,20 @@ export default {
           infants: 0
         }
       : this.$store.state.passengers
-    const passengersNum = Number(this.passengers.adults) + Number(this.passengers.children) + Number(this.passengers.infants)
-    for (let i = 0; i < passengersNum; i++) {
-      this.passportMenus[i] = false
-      this.menu1[i] = false
-      this.dateOfBirth.push('')
-      this.passNum.push('')
-    }
+    // const passengersNum = Number(this.passengers.adults) + Number(this.passengers.children) + Number(this.passengers.infants)
+    // for (let i = 0; i < passengersNum; i++) {
+    //   this.passportMenus[i] = false
+    //   this.menu1[i] = false
+    //   this.dateOfBirth.push('')
+    //   this.passNum.push('')
+    // }
+    this.passportMenus = false
+    this.menu1 = false
+    this.dateOfBirth = null
+    this.passNum = null
+    // this.dateOfBirth.push('')
+    // this.passNum.push('')
+    // }
   },
   methods: {
     assignPhone (phone) {
@@ -330,8 +415,10 @@ export default {
       const [year, month, day] = date.split('-')
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       const newDate = `${day} ${months[month - 1]} ${year}`
-      if (type === 'passport') { this.passExpireDateText[i] = newDate }
-      if (type === 'birthDate') { this.dateOfBirthText[i] = newDate }
+      // if (type === 'passport') { this.passExpireDateText[i] = newDate }
+      // if (type === 'birthDate') { this.dateOfBirthText[i] = newDate }
+      if (type === 'passport') { this.passExpireDateText = newDate }
+      if (type === 'birthDate') { this.dateOfBirthText = newDate }
     },
     getProperDate (n) {
       if (!this.dateOfBirth[n - 1]) {
@@ -355,45 +442,59 @@ export default {
       this.minExpireDate = today.toISOString().substring(0, 10)
     },
     prepareTravellersData () {
-      this.travellersData = []
-      for (let index = 0; index < this.passengersNum; index++) {
-        let type
-        let title
-        let gender
-        if (this.passengerGender[index]) {
-          this.passengerGender[index] === 'Male' ? gender = 'M' : gender = 'F'
-        }
-        if (this.adultsNum >= (index + 1)) {
-          type = 'ADT'
-          title = this.passengerTitle[index]
-          if (this.passengerGender[index] === undefined) {
-            if (title === 'Mr') {
-              this.passengerGender[index] = 'M'
-              gender = 'M'
-            } else if (['Mrs', 'Ms', 'Miss'].includes(title)) {
-              this.passengerGender[index] = 'F'
-              gender = 'F'
-            }
-          }
-        } else if (this.childrenNum >= ((index + 1) - this.adultsNum)) {
-          type = 'CNN'
-          title = 'CHD'
-        } else if (this.infantsNum >= ((index + 1) - (this.adultsNum + this.childrenNum))) {
-          type = 'INF'
-          title = 'INF'
-        }
-        this.travellersData.push({
-          passengerType: type,
-          passengerTitle: title,
-          passengerGender: gender,
-          passengerFirstName: this.passengerFirstName[index],
-          passengerLastName: this.passengerLastName[index],
-          date_of_birth: this.dateOfBirth[index],
-          passport_number: this.passNum[index],
-          passport_expire_date: this.passExpireDate[index],
-          passport_issue_country: this.issueCountry[index]
-        })
+      this.travellersData = null
+      // const type
+      // const title
+      // const gender
+      // if (this.passengerGender) {
+      //   this.passengerGender === 'Male' ? gender = 'M' : gender = 'F'
+      // }
+      // type = 'ADT'
+      // title = this.passengerTitle
+      this.travellersData = {
+        passengerType: 'ADT',
+        passengerTitle: this.passengerTitle,
+        // passengerGender: this.passengerGender ? (this.passengerGender === 'Male' ? 'M' : 'F') : '',
+        passengerGender: this.passengerGender ? (this.passengerGender === 'Male' ? 'male' : 'female') : '',
+        passengerFirstName: this.passengerFirstName,
+        passengerLastName: this.passengerLastName,
+        date_of_birth: this.dateOfBirth,
+        passport_number: this.passNum,
+        passport_expire_date: this.passExpireDate,
+        passport_issue_country: this.issueCountry
       }
+      // for (let index = 0; index < this.passengersNum; index++) {
+      //   if (this.adultsNum >= (index + 1)) {
+      //     type = 'ADT'
+      //     title = this.passengerTitle[index]
+      //     if (this.passengerGender[index] === undefined) {
+      //       if (title === 'Mr') {
+      //         this.passengerGender[index] = 'M'
+      //         gender = 'M'
+      //       } else if (['Mrs', 'Ms', 'Miss'].includes(title)) {
+      //         this.passengerGender[index] = 'F'
+      //         gender = 'F'
+      //       }
+      //     }
+      //   } else if (this.childrenNum >= ((index + 1) - this.adultsNum)) {
+      //     type = 'CNN'
+      //     title = 'CHD'
+      //   } else if (this.infantsNum >= ((index + 1) - (this.adultsNum + this.childrenNum))) {
+      //     type = 'INF'
+      //     title = 'INF'
+      //   }
+      //   this.travellersData.push({
+      //     passengerType: type,
+      //     passengerTitle: title,
+      //     passengerGender: gender,
+      //     passengerFirstName: this.passengerFirstName[index],
+      //     passengerLastName: this.passengerLastName[index],
+      //     date_of_birth: this.dateOfBirth[index],
+      //     passport_number: this.passNum[index],
+      //     passport_expire_date: this.passExpireDate[index],
+      //     passport_issue_country: this.issueCountry[index]
+      //   })
+      // }
     },
     getBirthdate (date) {
       let newDate = ''
@@ -406,35 +507,39 @@ export default {
     submit () {
       this.$refs.form.validate()
       if (this.travellersFormValid) {
-        const fullNames = []
-        for (let index = 0; index < this.passengerFirstName.length; index++) {
-          fullNames.push(`${this.passengerFirstName[index]} ${this.passengerLastName[index]}`)
-        }
-        if (new Set(fullNames).size === fullNames.length) {
-          if (this.phone.isValid) {
-            this.snackbar = false
-            this.prepareTravellersData()
-            const contactInfo = {
-              name: this.name,
-              email: this.email,
-              phone: this.phone
-            }
-            this.$emit('dataReady', this.travellersData, contactInfo)
-          } else {
-            this.snackbar = true
-            this.color = 'error'
-            this.text = 'Please provide a valid phone number'
+        if (this.phone.isValid) {
+          this.snackbar = false
+          this.prepareTravellersData()
+          const contactInfo = {
+            name: this.name,
+            email: this.email,
+            phone: this.phone
           }
+          this.$emit('dataReady', this.travellersData, contactInfo)
+          this.enablePayNow = true
+          this.panelExpandedPayNow = 0
+          this.panelExpandedTraveller = null
         } else {
           this.snackbar = true
-          this.color = 'warning'
-          this.text = 'Please avoid using similar names for passengers'
-          return false
+          this.color = 'error'
+          this.text = 'Please provide a valid phone number'
         }
       } else {
         this.snackbar = true
         this.color = 'warning'
         this.text = 'Please fill all fields to cotinue'
+      }
+    },
+    nextSteps (step) {
+      // this.openPaymentPanel = true
+      // Additional logic for other steps, if needed
+      if (step === 'pay') {
+        this.$emit('submitPayment')
+        this.enablePayNow = false
+        this.enableConfirmation = true
+      } else {
+        this.$emit('submitConfirmation')
+        this.enableConfirmation = false
       }
     }
   }

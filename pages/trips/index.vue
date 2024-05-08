@@ -22,7 +22,7 @@
           v-for="item in tours"
           :key="item.packageID"
           class="city-block"
-          @click="$router.push({name: 'trips-city-slug', params: {city: item.packageStartCity.cityName, slug: item.packageSlug || item.packageTitle}})"
+          @click="$router.push({name: 'trips-city-slug', params: {city: 'cairo', slug: item.packageSlug || item.packageTitle}})"
         >
           <div class="city-inner-block">
             <img
@@ -61,20 +61,68 @@ import tripsServices from '../../services/tripsServices'
 export default {
   data () {
     return {
-      tours: []
+      tours: [],
+      metaData: {
+        page_name: null,
+        seo_title: null,
+        seo_description: null,
+        featured_image: null,
+        slug: null
+      }
     }
   },
-
   //  get top tours
   async fetch () {
+    // await this.getMetaData()
     const res = tripsServices.getTopTours()
     const results = await res
     this.tours = results.data.data
   },
-
+  // ssr: false,
   head () {
     return {
-      title: 'Package Cities'
+      // title: 'Package Cities'
+      title: this.metaData.seo_title,
+      meta: [
+        {
+          hid: 'description',
+          name: 'description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:title',
+          property: 'og:title',
+          content: this.metaData.seo_title
+        },
+        {
+          hid: 'og:description',
+          property: 'og:description',
+          content: this.metaData.seo_description
+        },
+        {
+          hid: 'og:image',
+          property: 'og:image',
+          content: this.metaData.featured_image
+        }
+      ]
+    }
+  },
+  async created () {
+    await this.getMetaData()
+  },
+  methods: {
+    async getMetaData () {
+      try {
+        const promise = tripsServices.getMetaData(6)
+        const response = await promise
+        const results = response.data
+        // console.log(results)
+        if (results.data) {
+          this.metaData = results.data
+        }
+      } catch (error) {
+        this.loaded = false
+      }
     }
   }
 }

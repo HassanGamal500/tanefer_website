@@ -1,0 +1,13 @@
+.hide-overflow {
+    overflow: hidden !important;
+}
+
+.dialog-cart-footer {
+    border-top: 1px solid #4f3316;
+    background-color: #F1F1F1;
+}
+
+.change-icon-style .v-expansion-panel-header__icon .v-icon {
+    color: #fff !important;
+    font-size: 44px !important;
+}

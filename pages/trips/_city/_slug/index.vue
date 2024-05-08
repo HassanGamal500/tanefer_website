@@ -1,199 +1,2708 @@
 <!-- eslint-disable vue/no-v-html -->
 <template>
   <div>
-    <client-only>
+    <LoadingScreen v-if="isLoading" />
+    <v-img
+      :src="packageDetails.packageImage ? packageDetails.packageImage : require(`~/assets/images/${getCityImage('')}`)"
+      alt="img"
+      class="image-fit"
+      max-height="400"
+    >
+      <v-row
+        align="center"
+        justify="center"
+      >
+        <v-col
+          class="text-center"
+          cols="12"
+        >
+          <h1
+            :class="{
+              'text-h1': $vuetify.breakpoint.mdAndUp,
+              'text-h4': $vuetify.breakpoint.xs
+            }"
+            class="white--text font-weight-bold my-4"
+            :style="{
+              'line-height': $vuetify.breakpoint.mdAndUp ? '8rem' : '2rem'
+            }"
+          >
+            <!-- {{ packageDetails.packageTitle }} - {{ packageDetails.packageDuration }} Days / {{ packageDetails.packageNightsNumber }} Nights -->
+            {{ packageDetails.packageTitle }}
+          </h1>
+        </v-col>
+      </v-row>
+      <v-btn
+        rounded
+        color="#4f3316"
+        style="background-color: #4f3316;border: 1px solid #fff;color: #fff;"
+        dark
+        absolute
+        right
+        :disabled="galleries.length === 0"
+        @click="openGallery"
+      >
+        <v-icon color="white">
+          mdi-image-multiple
+        </v-icon>
+        Gallery
+      </v-btn>
+    </v-img>
+
+    <v-container class="grey lighten-5" style="margin-top: -7rem;">
       <v-snackbar
         v-model="snackbar"
+        :timeout="3000"
         :color="color"
-        :timeout="5000"
         top
       >
-        <v-row>
-          <span v-html="text" />
-          <v-spacer />
-          <v-icon small color="white" class="ml-3" @click="alert = false">
-            mdi-close
-          </v-icon>
-        </v-row>
-      </v-snackbar>
-    </client-only>
-    <v-img v-if="$fetchState.pendeing" max-width="200" class="blink-2 mx-auto" src="~/assets/images/tanfer.png" />
-    <client-only placeholder="loading...">
-      <div v-if="!$fetchState.error">
-        <div v-if="packageDetails" class="t-container py-12">
-          <v-row justify="space-between" class="headline px-5 my-5 late--text font-weight-black">
-            <h1>
-              {{ packageDetails.packageTitle }}
-              <br>
-              <span v-if="packageDetails.packageStartDate" class="caption grey--text">
-                <date-display :date="packageDetails.packageStartDate" />
-              </span>
-            </h1>
-          </v-row>
-          <v-img :alt="packageDetails.packageImageAlt" class="mb-5 mt-3" :src="packageDetails.packageImage" contain max-height="200" />
-          <span class="d-none">{{ packageDetails.packageImageCaption }}</span>
-          <v-card>
-            <v-card-title class="my-5 late--text">
-              Add Start Date
-            </v-card-title>
-            <v-menu
-              v-model="startDateMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              min-width="290px"
-            >
-              <template #activator="{ on }">
-                <v-text-field
-                  v-model="startDate"
-                  outlined
-                  label="Package Start Date"
-                  readonly
-                  prepend-inner-icon="mdi-calendar"
-                  color="late"
-                  class="mx-5"
-                  persistent-hint
-                  :hint="getDateHint()"
-                  v-on="on"
-                />
-              </template>
-              <v-date-picker
-                v-model="startDate"
-                color="late"
-                :allowed-dates="allowedDates"
-                :min="new Date().toISOString()"
-                type="date"
-                @input="startDateMenu = false; formatDate()"
-              />
-            </v-menu>
-          </v-card>
+        {{ text }}
 
-          <div class="d-block my-5 d-md-flex">
-            <aside class="aside-route">
-              <div class="route-side">
-                <div class="custom-side-title-block">
-                  <div class="route-title-hed">
-                    <span class="coustum-title">Customize your<br></span>Trip Route
-                  </div>
+        <template #action="{ attrs }">
+          <v-btn
+            color="white"
+            text
+            v-bind="attrs"
+            @click="snackbar = false"
+          >
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </template>
+      </v-snackbar>
+      <div style="" class="px-0 my-5">
+        <div>
+          <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
+            <v-row>
+              <v-col cols="12" md="12">
+                <v-menu
+                  v-model="menu"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  min-width="auto"
+                >
+                  <template #activator="{ on }">
+                    <v-text-field
+                      v-model="packageStartDayText"
+                      label="Package Start Day"
+                      prepend-inner-icon="mdi-calendar-range"
+                      append-inner-icon="mdi-pencil"
+                      readonly
+                      outlined
+                      v-on="on"
+                    />
+                  </template>
+                  <v-date-picker
+                    ref="picker"
+                    v-model="packageStartDay"
+                    :allowed-dates="allowedDates"
+                    @input="menu = false, formatDate(packageStartDay, 1, 'packageStartDay')"
+                  />
+                </v-menu>
+              </v-col>
+            </v-row>
+          </v-card>
+        </div>
+      </div>
+      <div>
+        <v-row>
+          <v-col cols="12" md="8" class="order-last order-md-first order-sm-last order-xs-last">
+            <div class="results ma-1">
+              <v-stepper v-model="e1" color="#F6F6F6">
+                <v-stepper-header>
+                  <v-stepper-step
+                    :complete="e1 > 1"
+                    step="1"
+                  >
+                    Activity
+                  </v-stepper-step>
+
+                  <v-divider />
+
+                  <v-stepper-step
+                    :complete="e1 > 2"
+                    step="2"
+                  >
+                    Acomidation
+                  </v-stepper-step>
+
+                  <v-divider />
+
+                  <v-stepper-step step="3">
+                    Trip Summary
+                  </v-stepper-step>
+                </v-stepper-header>
+
+                <v-stepper-items>
+                  <v-stepper-content step="1">
+                    <v-card
+                      class="mb-12"
+                    >
+                      <p class="font-weight-bold" style="background-color: transparent;">
+                        Trip Route
+                      </p>
+                      <div v-for="(activity, i) in packageDetails.activities" :key="i">
+                        <v-expansion-panels v-model="panelExpandedActivities[i]" focusable class="mb-5">
+                          <v-expansion-panel style="border-radius: 18px;">
+                            <v-expansion-panel-header class="font-weight-bold text-h6 change-icon-style" style="border-radius: 8px;">
+                              <v-row v-if="activity.type === 'adventure'" justify="center">
+                                <v-col cols="12" lg="8" md="4" sm="4" xs="12">
+                                  {{ activity.cityname }}
+                                </v-col>
+                                <v-col cols="12" lg="4" md="8" sm="8" xs="12">
+                                  <span style="float: right;">
+                                    <v-row>
+                                      <v-col cols="2">
+                                        <v-btn
+                                          style="background-color: transparent; border: 1px solid #4f3316;"
+                                          elevation="4"
+                                          icon
+                                          small
+                                          @click="changeDayNumber(i, '-1')"
+                                        >
+                                          <v-icon color="#4f3316">
+                                            mdi-minus
+                                          </v-icon>
+                                        </v-btn>
+                                      </v-col>
+                                      <v-col cols="6" class="text-center">
+                                        <span class="quantity text-center font-weight-bold">{{ activity.days_number }} days</span>
+                                      </v-col>
+                                      <v-col cols="2">
+                                        <v-btn
+                                          style="background-color: #4f3316;"
+                                          color="#4f3316"
+                                          elevation="4"
+                                          icon
+                                          small
+                                          @click="changeDayNumber(i, '1')"
+                                        >
+                                          <v-icon color="#FFF">
+                                            mdi-plus
+                                          </v-icon>
+                                        </v-btn>
+                                      </v-col>
+                                    </v-row>
+                                  </span>
+                                </v-col>
+                              </v-row>
+                              <v-row v-else>
+                                <v-col cols="12">
+                                  {{ activity.cityname }}
+                                </v-col>
+                              </v-row>
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content class="my-8">
+                              <div v-if="activity.type === 'adventure'">
+                                <v-card v-for="(day, x) in activity.days" :key="x" class="my-2">
+                                  <v-card-title class="white--text" style="background-color: #4f3316;">
+                                    <v-row>
+                                      <v-col cols="12">
+                                        Day <span v-if="day.start_day !== null"> {{ day.start_day }}</span> <span v-if="packageStartDay !== null" class="ml-4">{{ day.start_text_day }}</span>
+                                        <v-btn
+                                          text
+                                          color="white"
+                                          style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+                                          elevation="4"
+                                          icon
+                                          small
+                                          absolute
+                                          right
+                                          class="float-right"
+                                          @click="addNewAdventureToActivity(i, x, activity.city_id, day.start_format_day, day.days)"
+                                        >
+                                          <v-icon color="white">
+                                            mdi-plus
+                                          </v-icon>
+                                        </v-btn>
+                                      </v-col>
+                                    </v-row>
+                                  </v-card-title>
+                                  <v-card-text class="pt-4">
+                                    <v-row>
+                                      <v-col cols="12">
+                                        <div v-if="day.days.length > 0">
+                                          <div v-for="(adventures, adventureIndex) in day.days" :key="adventureIndex">
+                                            <div v-if="adventures.adventrue">
+                                              <v-row>
+                                                <v-col cols="10">
+                                                  <h4>{{ adventures.adventrue.activityTitle }}</h4>
+                                                </v-col>
+                                                <v-col cols="2">
+                                                  <v-menu offset-y>
+                                                    <template #activator="{ on, attrs }">
+                                                      <v-btn
+                                                        color="#4f3316"
+                                                        icon
+                                                        v-bind="attrs"
+                                                        v-on="on"
+                                                      >
+                                                        <v-icon>mdi-dots-horizontal</v-icon>
+                                                      </v-btn>
+                                                    </template>
+                                                    <v-list>
+                                                      <v-list-item
+                                                        v-for="(item, index) in items"
+                                                        :key="index"
+                                                        link
+                                                      >
+                                                        <v-list-item-title @click="itemAction(item.action, activity.city_id, i, x, adventureIndex, adventures.adventrue)">
+                                                          {{ item.title }}
+                                                        </v-list-item-title>
+                                                      </v-list-item>
+                                                    </v-list>
+                                                  </v-menu>
+                                                </v-col>
+                                              </v-row>
+                                            </div>
+                                            <v-divider class="my-2" />
+                                          </div>
+                                        </div>
+                                        <div v-else>
+                                          <h4>You Have Free Time</h4>
+                                        </div>
+                                      </v-col>
+                                    </v-row>
+                                  </v-card-text>
+                                </v-card>
+                              </div>
+                              <div v-else>
+                                <v-card class="my-2">
+                                  <v-card-title class="white--text" style="background-color: #4f3316;display: flow-root;">
+                                    <span class="float-left">Day {{ activity.package_day }}</span> <span v-if="packageStartDay !== null" class="ml-4">{{ activity.package_text_day }}</span> <span class="float-right">Nile Cruise</span>
+                                  </v-card-title>
+                                  <v-card-text class="pt-4">
+                                    <v-row>
+                                      <v-col cols="12">
+                                        <div v-for="(cruise, c) in activity.cruise" :key="c">
+                                          <v-row class="">
+                                            <v-col v-if="cruise.master_image" cols="12" md="4" class="pt-4">
+                                              <v-img
+                                                max-height="350"
+                                                :src="cruise.master_image"
+                                                max-width="250"
+                                                class="rounded-lg"
+                                              />
+                                            </v-col>
+                                            <v-col cols="10" :md="cruise.master_image ? 6 : 10">
+                                              <div class="cruise-result-trip justify-space-between pt-4">
+                                                <div>
+                                                  <h5 class="text-h5 font-weight-bold">
+                                                    {{ cruise.name }}
+                                                  </h5>
+                                                </div>
+                                                <!-- <div class="black--text">
+                                                  <h5 class="text-h5 font-weight-bold"></h5>
+                                                </div> -->
+                                              </div>
+                                            </v-col>
+                                            <v-col cols="10" :md="cruise.master_image ? 2 : 10">
+                                              <div class="cruise-result-trip justify-space-between pt-4">
+                                                <v-btn
+                                                  color="secondary"
+                                                  @click="viewCruiseDetails(cruise)"
+                                                >
+                                                  view
+                                                </v-btn>
+                                              </div>
+                                            </v-col>
+                                          </v-row>
+                                        </div>
+                                      </v-col>
+                                    </v-row>
+                                  </v-card-text>
+                                </v-card>
+                              </div>
+                            </v-expansion-panel-content>
+                          </v-expansion-panel>
+                        </v-expansion-panels>
+                      </div>
+                    </v-card>
+
+                    <v-btn
+                      color="primary"
+                      :disabled="!isButtonEnabled"
+                      @click="checkPackageDateIsExist"
+                    >
+                      Next
+                    </v-btn>
+                  </v-stepper-content>
+
+                  <v-stepper-content step="2">
+                    <v-card
+                      class="mb-12"
+                    >
+                      <div v-for="(hotel, h) in listGtaHotelDetails" :key="h">
+                        <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
+                          <v-row>
+                            <v-col cols="12" md="5">
+                              <v-menu
+                                v-model="menuStartDates[h]"
+                                :close-on-content-click="false"
+                                transition="scale-transition"
+                                min-width="auto"
+                              >
+                                <template #activator="{ on }">
+                                  <v-text-field
+                                    v-model="hotelStartDatesText[h]"
+                                    label="Start Date"
+                                    prepend-inner-icon="mdi-calendar-range"
+                                    append-inner-icon="mdi-pencil"
+                                    readonly
+                                    outlined
+                                    v-on="on"
+                                  />
+                                </template>
+                                <v-date-picker
+                                  ref="'picker' + h"
+                                  v-model="hotelStartDates[h]"
+                                  @input="menuStartDates[h] = false, formatDate(hotelStartDates[h], 1, 'hotelStartDate', h)"
+                                />
+                              </v-menu>
+                            </v-col>
+                            <v-col cols="12" md="5">
+                              <v-menu
+                                v-model="menuEndDates[h]"
+                                :close-on-content-click="false"
+                                transition="scale-transition"
+                                min-width="auto"
+                              >
+                                <template #activator="{ on }">
+                                  <v-text-field
+                                    v-model="hotelEndDatesText[h]"
+                                    label="End Date"
+                                    prepend-inner-icon="mdi-calendar-range"
+                                    append-inner-icon="mdi-pencil"
+                                    readonly
+                                    outlined
+                                    v-on="on"
+                                  />
+                                </template>
+                                <v-date-picker
+                                  ref="'picker' + h"
+                                  v-model="hotelEndDates[h]"
+                                  @input="menuEndDates[h] = false, formatDate(hotelEndDates[h], 1, 'hotelEndDate', h)"
+                                />
+                              </v-menu>
+                            </v-col>
+                            <v-col cols="12" md="2" class="mb-4">
+                              <v-btn
+                                class="white--text text-capitalize"
+                                color="#575757"
+                                elevation="6"
+                                x-large
+                                block
+                                raised
+                                rounded-lg
+                                @click="checkHotelAvailabilityByHotel(hotel, h)"
+                              >
+                                Check
+                              </v-btn>
+                            </v-col>
+                          </v-row>
+                        </v-card>
+                        <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                          <v-col cols="12" md="4" class="pt-4">
+                            <v-img
+                              max-height="400"
+                              :src="hotel.Images && hotel.Images.Image[1].Type === 'THB' ? hotel.Images.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
+                              max-width="400"
+                              class="rounded-lg"
+                            />
+                          </v-col>
+                          <v-col cols="10" md="6">
+                            <div class="cruise-result-trip justify-space-between">
+                              <div>
+                                <h6 class="text-h6 font-weight-bold">
+                                  {{ hotel.city_name }}
+                                </h6>
+                              </div>
+                              <div class="black--text">
+                                <p class="" style="font-size: 15px;margin: 2px 0;">
+                                  <strong>Hotel Name:</strong> {{ hotel.HotelName }}
+                                </p>
+                                <p class="" style="font-size: 15px;margin: 2px 0;">
+                                  <strong>Address:</strong> {{ hotel.Address.Address }}
+                                </p>
+                                <p class="" style="font-size: 15px;margin: 2px 0;">
+                                  <strong>Category:</strong> {{ hotel.HotelCategory._ }}
+                                </p>
+                                <a class="" style="font-size: 15px;margin: 2px 0;" @click="showHotels(h)">Change Hotel</a> <v-icon class="mx-2" style="color: black;">
+                                  mdi-swap-horizontal
+                                </v-icon> <a class="" style="font-size: 15px;margin: 2px 0;" @click="showRooms(h)">Select Room</a>
+                                <div class="cruise-result-trip justify-space-between pt-4">
+                                  <!-- <v-btn
+                                   class="float-right mx-2"
+                                   disabled
+                                  >
+                                    test
+                                  </v-btn> -->
+                                  <template>
+                                    <div class="text-center">
+                                      <div v-if="isAvailables[h]">
+                                        <v-chip
+                                          class="float-left ma-2"
+                                          color="green"
+                                          text-color="white"
+                                        >
+                                          Available
+                                        </v-chip>
+                                      </div>
+                                      <div v-else>
+                                        <v-chip
+                                          class="float-left ma-2"
+                                          color="red"
+                                          text-color="white"
+                                        >
+                                          Not Available
+                                        </v-chip>
+                                      </div>
+                                    </div>
+                                  </template>
+                                  <v-btn
+                                    color="primary"
+                                    class="float-right"
+                                    @click="showHotelDetails(h)"
+                                  >
+                                    view
+                                  </v-btn>
+                                </div>
+                              </div>
+                            </div>
+                          </v-col>
+                          <!-- <v-col cols="12" md="12">
+                            <div v-if="selectedRoomGta !== null">
+                              <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                                <v-col cols="12" md="12">
+                                  <div class="cruise-result-trip justify-space-between">
+                                    <div>
+                                      <h6 class="text-h6 font-weight-bold">
+                                        Board: {{ selectedRoomGta.Board._ }}
+                                      </h6>
+                                    </div>
+                                    <div class="black--text">
+                                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="selectedRoomGta.AdditionalElements && selectedRoomGta.AdditionalElements.HotelOffers">
+                                        <strong>Hotel Offer:</strong> {{ selectedRoomGta.AdditionalElements.HotelOffers.HotelOffer.Name }}
+                                      </p>
+                                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                                        <strong>Hotel Rooms:</strong>
+                                        <div style="font-size: 15px;margin: 2px 0;">
+                                          {{ selectedRoomGta.HotelRooms.HotelRoom.Name }} - Adults: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
+                                        </div>
+                                      </p>
+                                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                                        <strong>Prices:</strong> {{ selectedRoomGta.Prices.Price.TotalFixAmounts.Nett }} {{ selectedRoomGta.Prices.Price.Currency }}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </v-col>
+                                <v-col cols="12" md="12">
+                                  <v-btn
+                                    v-if="e1 === 2"
+                                    class="white--text"
+                                    color="#4f3316"
+                                    elevation="6"
+                                    large
+                                    block
+                                    raised
+                                    :disabled="getRatePlanCode === null || confirmedSelectedRoom"
+                                    @click="confirmSelectedRoom"
+                                  >
+                                    <span v-if="getbookingRule === null">Confirm Selected Rooms</span>
+                                    <span v-else>Confirmed Successfully</span>
+                                  </v-btn>
+                                </v-col>
+                              </v-row>
+                            </div>
+                          </v-col>
+                          <v-col cols="12" md="12">
+                            <div v-if="confirmedSelectedRoom">
+                              <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                                <v-col cols="12" md="12">
+                                  <div class="cruise-result-trip justify-space-between">
+                                    <v-form ref="form" v-model="travellersFormValid">
+                                      <p class="body-1 font-weight-bold text-h5">
+                                        Holder Information
+                                      </p>
+                                      <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
+                                        <v-row>
+                                          <v-col class="py-0" cols="12" sm="6" md="6">
+                                            <v-text-field
+                                              v-model="name"
+                                              outlined
+                                              :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
+                                              label="Full Name"
+                                              required
+                                              color="blue"
+                                              class="rounded-lg"
+                                            />
+                                          </v-col>
+                                          <v-col class="py-0" cols="12" sm="6" md="6">
+                                            <v-text-field
+                                              v-model="surname"
+                                              outlined
+                                              :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
+                                              label="Surname"
+                                              required
+                                              color="blue"
+                                              class="rounded-lg"
+                                            />
+                                          </v-col>
+                                          <v-col class="py-0" cols="12" sm="6" md="6">
+                                            <mobile-input @update="assignPhone" />
+                                          </v-col>
+                                          <v-col class="py-0" cols="12" sm="6" md="6">
+                                            <v-text-field
+                                              v-model="email"
+                                              outlined
+                                              :rules="emailRules"
+                                              label="E-mail"
+                                              required
+                                              color="blue"
+                                              class="rounded-lg"
+                                            />
+                                          </v-col>
+                                          <v-col class="py-0" cols="12" sm="6" md="6">
+                                            <v-text-field
+                                              v-model="age"
+                                              outlined
+                                              label="Age"
+                                              required
+                                              color="blue"
+                                              class="rounded-lg"
+                                            />
+                                          </v-col>
+                                          <v-col class="py-0" cols="12" sm="6" md="6">
+                                            <v-combobox
+                                              v-model="title"
+                                              :items="['Mr', 'Mrs', 'Ms', 'Miss']"
+                                              :search-input.sync="search"
+                                              hide-selected
+                                              hint="Add title and press enter to append it"
+                                              label="Title"
+                                              outlined
+                                              :rules="requiredRule"
+                                              class="pa-0 rounded-lg"
+                                              height="56px"
+                                              color="blue"
+                                            >
+                                              <template #no-data>
+                                                <v-list-item>
+                                                  <v-list-item-content>
+                                                    <v-list-item-title>
+                                                      No results matching "<strong>{{ search }}</strong>". Press <kbd>enter</kbd> to create a new one
+                                                    </v-list-item-title>
+                                                  </v-list-item-content>
+                                                </v-list-item>
+                                              </template>
+                                            </v-combobox>
+                                          </v-col>
+                                          <v-col class="py-0" cols="12" sm="6" md="6">
+                                            <v-autocomplete
+                                              v-model="issueCountry"
+                                              :rules="[() => !!issueCountry || 'This field is required']"
+                                              :items="countries"
+                                              item-text="name"
+                                              item-value="code"
+                                              placeholder="Issuing Country"
+                                              name="issue-country-for-passports"
+                                              required
+                                              outlined
+                                              hide-no-data
+                                              color="blue"
+                                              autocomplete="off"
+                                              :menu-props="{ auto: true, maxWidth: 200, overflowY: true }"
+                                              class="rounded-lg"
+                                            />
+                                          </v-col>
+                                        </v-row>
+                                      </v-card>
+                                    </v-form>
+                                  </div>
+                                </v-col>
+                                <div v-for="(traveller, t) in otherTravellers" :key="t">
+                                  <v-col cols="12" md="12">
+                                    <div class="cruise-result-trip justify-space-between">
+                                      <v-form ref="form" v-model="travellersFormValids">
+                                        <p class="body-1 font-weight-bold text-h5">
+                                          Traveller ({{ traveller.id }}) Information
+                                        </p>
+                                        <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
+                                          <v-row>
+                                            <v-col class="py-0" cols="12" sm="12" md="12">
+                                              <v-text-field
+                                                v-model="bNames[t]"
+                                                outlined
+                                                :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
+                                                label="Full Name"
+                                                required
+                                                color="blue"
+                                                class="rounded-lg"
+                                              />
+                                            </v-col>
+                                            <v-col class="py-0" cols="12" sm="6" md="6">
+                                              <v-text-field
+                                                v-model="bSurnames[t]"
+                                                outlined
+                                                :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
+                                                label="Surname"
+                                                required
+                                                color="blue"
+                                                class="rounded-lg"
+                                              />
+                                            </v-col>
+                                            <v-col class="py-0" cols="12" sm="6" md="6">
+                                              <v-text-field
+                                                v-model="bAges[t]"
+                                                outlined
+                                                label="Age"
+                                                required
+                                                color="blue"
+                                                class="rounded-lg"
+                                              />
+                                            </v-col>
+                                          </v-row>
+                                        </v-card>
+                                      </v-form>
+                                    </div>
+                                  </v-col>
+                                </div>
+                                <div v-for="(children, c) in otherChildren" :key="c">
+                                  <v-col cols="12" md="12">
+                                    <div class="cruise-result-trip justify-space-between">
+                                      <v-form ref="form" v-model="travellersFormValids">
+                                        <p class="body-1 font-weight-bold text-h5">
+                                          Children ({{ children.id }}) Information
+                                        </p>
+                                        <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
+                                          <v-row>
+                                            <v-col class="py-0" cols="12" sm="12" md="12">
+                                              <v-text-field
+                                                v-model="bNamesChild[c]"
+                                                outlined
+                                                :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
+                                                label="Full Name"
+                                                required
+                                                color="blue"
+                                                class="rounded-lg"
+                                              />
+                                            </v-col>
+                                            <v-col class="py-0" cols="12" sm="6" md="6">
+                                              <v-text-field
+                                                v-model="bSurnamesChild[c]"
+                                                outlined
+                                                :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
+                                                label="Surname"
+                                                required
+                                                color="blue"
+                                                class="rounded-lg"
+                                              />
+                                            </v-col>
+                                            <v-col class="py-0" cols="12" sm="6" md="6">
+                                              <v-text-field
+                                                v-model="bAgesChild[c]"
+                                                outlined
+                                                label="Age"
+                                                required
+                                                color="blue"
+                                                class="rounded-lg"
+                                              />
+                                            </v-col>
+                                          </v-row>
+                                        </v-card>
+                                      </v-form>
+                                    </div>
+                                  </v-col>
+                                </div>
+                                <v-col>
+                                  <v-btn
+                                    v-if="e1 === 2"
+                                    class="white--text"
+                                    color="#4f3316"
+                                    elevation="6"
+                                    large
+                                    block
+                                    raised
+                                    :disabled="!isButtonEnabledFormValidation || isBooked"
+                                    @click="finalBookHotel"
+                                  >
+                                    <span v-if="!isBooked">Book Hotel</span>
+                                    <span v-else>Booked Successfully</span>
+                                  </v-btn>
+                                </v-col>
+                              </v-row>
+                            </div>
+                          </v-col> -->
+                        </v-row>
+                      </div>
+                    </v-card>
+                    <v-card
+                      class="mb-12"
+                    >
+                      <!-- <div v-if="selectedRoomGta !== null">
+                        <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                          <v-col cols="12" md="12" class="pt-4">
+                            <div v-if="selectedRoomGta !== null">
+                              <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                                <v-col cols="12" md="12">
+                                  <div class="cruise-result-trip justify-space-between">
+                                    <div>
+                                      <h6 class="text-h6 font-weight-bold">
+                                        Board: {{ selectedRoomGta.Board._ }}
+                                      </h6>
+                                    </div>
+                                    <div class="black--text">
+                                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="selectedRoomGta.AdditionalElements && selectedRoomGta.AdditionalElements.HotelOffers">
+                                        <strong>Hotel Offer:</strong> {{ selectedRoomGta.AdditionalElements.HotelOffers.HotelOffer.Name }}
+                                      </p>
+                                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                                        <strong>Hotel Rooms:</strong>
+                                        <div style="font-size: 15px;margin: 2px 0;">
+                                          {{ selectedRoomGta.HotelRooms.HotelRoom.Name }} - Adults: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
+                                        </div>
+                                      </p>
+                                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                                        <strong>Prices:</strong> {{ selectedRoomGta.Prices.Price.TotalFixAmounts.Nett }} {{ selectedRoomGta.Prices.Price.Currency }}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </v-col>
+                              </v-row>
+                            </div>
+                          </v-col>
+                        </v-row>
+                      </div> -->
+                      <div v-for="(gta, g) in selectedRoomGtaArray" :key="g">
+                        <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                          <v-col cols="12" md="12" class="pt-4">
+                            <div>
+                              <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                                <v-col cols="12" md="12">
+                                  <div class="cruise-result-trip justify-space-between">
+                                    <div>
+                                      <h6 class="text-h6 font-weight-bold">
+                                        Board: {{ gta.Board._ }}
+                                      </h6>
+                                    </div>
+                                    <div class="black--text">
+                                      <p v-if="gta.AdditionalElements && gta.AdditionalElements.HotelOffers" class="" style="font-size: 15px;margin: 2px 0;">
+                                        <strong>Hotel Offer:</strong> {{ gta.AdditionalElements.HotelOffers.HotelOffer.Name }}
+                                      </p>
+                                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                                        <strong>Hotel Rooms:</strong>
+                                      </p><div style="font-size: 15px;margin: 2px 0;">
+                                        <span v-if="Array.isArray(gta.HotelRooms.HotelRoom)">
+                                          <div v-for="(room, r) in gta.HotelRooms.HotelRoom" :key="r">
+                                            <div>
+                                              {{ room.Name }} - Adults: {{ room.RoomOccupancy.Adults }} - Children: {{ room.RoomOccupancy.Children }}
+                                            </div>
+                                          </div>
+                                        </span>
+                                        <span v-else>
+                                          {{ gta.HotelRooms.HotelRoom.Name }} - Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
+                                        </span>
+                                      </div>
+                                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                                        <strong>Prices:</strong> {{ gta.Prices.Price.TotalFixAmounts.Nett }} {{ gta.Prices.Price.Currency }}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </v-col>
+                                <!-- <v-col cols="12" md="12">
+                                  <v-btn
+                                    v-if="e1 === 2"
+                                    class="white--text"
+                                    color="#4f3316"
+                                    elevation="6"
+                                    large
+                                    block
+                                    raised
+                                    :disabled="getRatePlanCode === null || confirmedSelectedRoom"
+                                    @click="confirmSelectedRoom"
+                                  >
+                                    <span v-if="getbookingRule === null">Confirm Selected Rooms</span>
+                                    <span v-else>Confirmed Successfully</span>
+                                  </v-btn>
+                                </v-col> -->
+                              </v-row>
+                            </div>
+                          </v-col>
+                        </v-row>
+                      </div>
+                    </v-card>
+                    <v-card
+                      class="mb-12"
+                    >
+                      <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                        <v-col cols="12" md="12">
+                          <v-btn
+                            v-if="e1 === 2"
+                            class="white--text"
+                            color="#4f3316"
+                            elevation="6"
+                            large
+                            block
+                            raised
+                            :disabled="(getRatePlanCodeArray.length === 0 && getRatePlanCodes.length === 0) || confirmedSelectedRoom"
+                            @click="confirmSelectedRoom"
+                          >
+                            <span v-if="getRatePlanCodeArray.length === 0 || getRatePlanCodes.length === 0">Confirm Selected Rooms</span>
+                            <span v-else>Confirmed Successfully</span>
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card>
+                    <v-card
+                      class="mb-12"
+                    >
+                      <div v-if="confirmedSelectedRoom">
+                        <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                          <v-col cols="12" md="12">
+                            <div class="cruise-result-trip justify-space-between">
+                              <v-form ref="form" v-model="travellersFormValid">
+                                <p class="body-1 font-weight-bold text-h5">
+                                  Holder Information
+                                </p>
+                                <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
+                                  <v-row>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="name"
+                                        outlined
+                                        :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
+                                        label="Full Name"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="surname"
+                                        outlined
+                                        :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
+                                        label="Surname"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <mobile-input @update="assignPhone" />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="email"
+                                        outlined
+                                        :rules="emailRules"
+                                        label="E-mail"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="age"
+                                        outlined
+                                        label="Age"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-combobox
+                                        v-model="title"
+                                        :items="['Mr', 'Mrs', 'Ms', 'Miss']"
+                                        :search-input.sync="search"
+                                        hide-selected
+                                        hint="Add title and press enter to append it"
+                                        label="Title"
+                                        outlined
+                                        :rules="requiredRule"
+                                        class="pa-0 rounded-lg"
+                                        height="56px"
+                                        color="blue"
+                                      >
+                                        <template #no-data>
+                                          <v-list-item>
+                                            <v-list-item-content>
+                                              <v-list-item-title>
+                                                No results matching "<strong>{{ search }}</strong>". Press <kbd>enter</kbd> to create a new one
+                                              </v-list-item-title>
+                                            </v-list-item-content>
+                                          </v-list-item>
+                                        </template>
+                                      </v-combobox>
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-autocomplete
+                                        v-model="issueCountry"
+                                        :rules="[() => !!issueCountry || 'This field is required']"
+                                        :items="countries"
+                                        item-text="name"
+                                        item-value="code"
+                                        placeholder="Issuing Country"
+                                        name="issue-country-for-passports"
+                                        required
+                                        outlined
+                                        hide-no-data
+                                        color="blue"
+                                        autocomplete="off"
+                                        :menu-props="{ auto: true, maxWidth: 200, overflowY: true }"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="identification_document_pax"
+                                        outlined
+                                        label="Identification Document"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="address_pax"
+                                        outlined
+                                        label="Address"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="city_pax"
+                                        outlined
+                                        label="City"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="country_pax"
+                                        outlined
+                                        label="Country"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                    <v-col class="py-0" cols="12" sm="6" md="6">
+                                      <v-text-field
+                                        v-model="postal_code_pax"
+                                        outlined
+                                        :rules="[v => (v.length <= 12) || 'Maximum Postal Code is 12 digits']"
+                                        label="Postal Code"
+                                        required
+                                        color="blue"
+                                        class="rounded-lg"
+                                      />
+                                    </v-col>
+                                  </v-row>
+                                </v-card>
+                              </v-form>
+                            </div>
+                          </v-col>
+                          <div v-for="(traveller, t) in otherTravellers" :key="t">
+                            <v-col cols="12" md="12">
+                              <div class="cruise-result-trip justify-space-between">
+                                <v-form ref="form" v-model="travellersFormValids">
+                                  <p class="body-1 font-weight-bold text-h5">
+                                    Traveller ({{ traveller.id }}) Information
+                                  </p>
+                                  <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
+                                    <v-row>
+                                      <v-col class="py-0" cols="12" sm="12" md="12">
+                                        <v-text-field
+                                          v-model="bNames[t]"
+                                          outlined
+                                          :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
+                                          label="Full Name"
+                                          required
+                                          color="blue"
+                                          class="rounded-lg"
+                                        />
+                                      </v-col>
+                                      <v-col class="py-0" cols="12" sm="6" md="6">
+                                        <v-text-field
+                                          v-model="bSurnames[t]"
+                                          outlined
+                                          :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
+                                          label="Surname"
+                                          required
+                                          color="blue"
+                                          class="rounded-lg"
+                                        />
+                                      </v-col>
+                                      <v-col class="py-0" cols="12" sm="6" md="6">
+                                        <v-text-field
+                                          v-model="bAges[t]"
+                                          outlined
+                                          label="Age"
+                                          required
+                                          color="blue"
+                                          class="rounded-lg"
+                                        />
+                                      </v-col>
+                                    </v-row>
+                                  </v-card>
+                                </v-form>
+                              </div>
+                            </v-col>
+                          </div>
+                          <div v-for="(children, c) in otherChildren" :key="c">
+                            <v-col cols="12" md="12">
+                              <div class="cruise-result-trip justify-space-between">
+                                <v-form ref="form" v-model="travellersFormValids">
+                                  <p class="body-1 font-weight-bold text-h5">
+                                    Children ({{ children.id }}) Information
+                                  </p>
+                                  <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
+                                    <v-row>
+                                      <v-col class="py-0" cols="12" sm="12" md="12">
+                                        <v-text-field
+                                          v-model="bNamesChild[c]"
+                                          outlined
+                                          :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
+                                          label="Full Name"
+                                          required
+                                          color="blue"
+                                          class="rounded-lg"
+                                        />
+                                      </v-col>
+                                      <v-col class="py-0" cols="12" sm="6" md="6">
+                                        <v-text-field
+                                          v-model="bSurnamesChild[c]"
+                                          outlined
+                                          :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
+                                          label="Surname"
+                                          required
+                                          color="blue"
+                                          class="rounded-lg"
+                                        />
+                                      </v-col>
+                                      <v-col class="py-0" cols="12" sm="6" md="6">
+                                        <v-text-field
+                                          v-model="bAgesChild[c]"
+                                          outlined
+                                          label="Age"
+                                          required
+                                          color="blue"
+                                          class="rounded-lg"
+                                        />
+                                      </v-col>
+                                    </v-row>
+                                  </v-card>
+                                </v-form>
+                              </div>
+                            </v-col>
+                          </div>
+                          <v-col>
+                            <v-btn
+                              v-if="e1 === 2"
+                              class="white--text"
+                              color="#4f3316"
+                              elevation="6"
+                              large
+                              block
+                              raised
+                              :disabled="!isButtonEnabledFormValidation || isBooked"
+                              @click="finalBookHotel"
+                            >
+                              <span v-if="!isBooked">Book Hotel</span>
+                              <span v-else>Booked Successfully</span>
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </div>
+                    </v-card>
+
+                    <v-btn
+                      color="primary"
+                      :disabled="!isBooked"
+                      @click="checkTheStepCurrent"
+                    >
+                      Next
+                    </v-btn>
+
+                    <v-btn
+                      color="warning"
+                      @click="e1 = 1"
+                    >
+                      Back
+                    </v-btn>
+                  </v-stepper-content>
+
+                  <v-stepper-content step="3">
+                    <v-card
+                      class="mb-12"
+                      color="grey lighten-1"
+                      height="200px"
+                    />
+
+                    <v-btn
+                      color="warning"
+                      @click="e1 = 2"
+                    >
+                      Back
+                    </v-btn>
+
+                    <v-btn text>
+                      Cancel
+                    </v-btn>
+                  </v-stepper-content>
+                </v-stepper-items>
+              </v-stepper>
+            </div>
+          </v-col>
+          <v-col cols="12" md="4" class="order-first order-md-last order-sm-first order-xs-first">
+            <div style="position: sticky;top: 1rem;z-index: 2;">
+              <v-card v-if="e1 === 1" class="" style="border-radius: 15px;">
+                <div v-if="checkHasCruise">
+                  <v-card-text>
+                    <h4 class="text-h4 black--text" color="black">
+                      Number of guests
+                    </h4>
+                    <p class="font-weight-bold">
+                      Rooms
+                      <span style="float: right;">
+                        <v-btn
+                          style="background-color: transparent; border: 1px solid #4f3316;"
+                          elevation="4"
+                          icon
+                          small
+                          @click="changeCounterRoom(0, 'rooms', -1)"
+                        >
+                          <v-icon color="#4f3316">
+                            mdi-minus
+                          </v-icon>
+                        </v-btn>
+
+                        <span class="quantity px-2 font-weight-bold">{{ room_count }}</span>
+
+                        <v-btn
+                          style="background-color: #4f3316;"
+                          color="#4f3316"
+                          elevation="4"
+                          icon
+                          small
+                          @click="changeCounterRoom(0, 'rooms', 1)"
+                        >
+                          <v-icon color="#FFF">
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </span>
+                    </p>
+                    <v-divider class="my-2" />
+                    <p v-for="(room, index) in rooms" :key="index" class="font-weight-bold">
+                      Room {{ index + 1 }}
+                      <v-card class="" style="border-radius: 15px;">
+                        <v-card-text>
+                          <p class="font-weight-bold">
+                            Adults
+                            <span style="float: right;">
+                              <v-btn
+                                style="background-color: transparent; border: 1px solid #4f3316;"
+                                elevation="4"
+                                icon
+                                small
+                                @click="changeCounterRoom(index, 'travelers', -1)"
+                              >
+                                <v-icon color="#4f3316">
+                                  mdi-minus
+                                </v-icon>
+                              </v-btn>
+
+                              <span class="quantity px-2 font-weight-bold">{{ room.travelers }}</span>
+
+                              <v-btn
+                                style="background-color: #4f3316;"
+                                color="#4f3316"
+                                elevation="4"
+                                icon
+                                small
+                                @click="changeCounterRoom(index, 'travelers', 1)"
+                              >
+                                <v-icon color="#FFF">
+                                  mdi-plus
+                                </v-icon>
+                              </v-btn>
+                            </span>
+                          </p>
+                          <v-divider class="my-2" />
+                          <p class="font-weight-bold">
+                            Children
+                            <span style="float: right;">
+                              <v-btn
+                                style="background-color: transparent; border: 1px solid #4f3316;"
+                                elevation="4"
+                                icon
+                                small
+                                @click="changeCounterRoom(index, 'children', -1)"
+                              >
+                                <v-icon color="#4f3316">
+                                  mdi-minus
+                                </v-icon>
+                              </v-btn>
+
+                              <span class="quantity px-2 font-weight-bold">{{ room.children }}</span>
+
+                              <v-btn
+                                style="background-color: #4f3316;"
+                                color="#4f3316"
+                                elevation="4"
+                                icon
+                                small
+                                @click="changeCounterRoom(index, 'children', 1)"
+                              >
+                                <v-icon color="#FFF">
+                                  mdi-plus
+                                </v-icon>
+                              </v-btn>
+                            </span>
+                          </p>
+                          <div v-if="room.ageSelects.length > 0">
+                            Children's Ages
+                            <v-row>
+                              <v-col v-for="(ageSelect, childIndex) in room.ageSelects" :key="childIndex" cols="4">
+                                <v-select
+                                  v-model="ageSelect.age"
+                                  :items="ages"
+                                  required
+                                  :error-messages="getRoomAgeSelectErrorMessages(index, childIndex)"
+                                  label="0"
+                                  persistent-hint
+                                  return-object
+                                  single-line
+                                  dense
+                                  outlined
+                                  @change="onChangeSelectAge($event)"
+                                />
+                              </v-col>
+                            </v-row>
+                          </div>
+                          <v-divider class="my-2" />
+                        </v-card-text>
+                      </v-card>
+                    </p>
+                    <v-card v-if="false" class="" style="border-radius: 15px;">
+                      <v-card-text>
+                        <p class="font-weight-bold">
+                          Adults
+                          <span style="float: right;">
+                            <v-btn
+                              style="background-color: transparent; border: 1px solid #4f3316;"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterAdult('-1')"
+                            >
+                              <v-icon color="#4f3316">
+                                mdi-minus
+                              </v-icon>
+                            </v-btn>
+
+                            <span class="quantity px-2 font-weight-bold">{{ travellers }}</span>
+
+                            <v-btn
+                              style="background-color: #4f3316;"
+                              color="#4f3316"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterAdult('1')"
+                            >
+                              <v-icon color="#FFF">
+                                mdi-plus
+                              </v-icon>
+                            </v-btn>
+                          </span>
+                        </p>
+                        <v-divider class="my-2" />
+                        <p class="font-weight-bold">
+                          Children
+                          <span style="float: right;">
+                            <v-btn
+                              style="background-color: transparent; border: 1px solid #4f3316;"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterChild('-1')"
+                            >
+                              <v-icon color="#4f3316">
+                                mdi-minus
+                              </v-icon>
+                            </v-btn>
+
+                            <span class="quantity px-2 font-weight-bold">{{ children }}</span>
+
+                            <v-btn
+                              style="background-color: #4f3316;"
+                              color="#4f3316"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterChild('1')"
+                            >
+                              <v-icon color="#FFF">
+                                mdi-plus
+                              </v-icon>
+                            </v-btn>
+                          </span>
+                        </p>
+                        <div v-if="ageSelects.length > 0">
+                          Children's Ages
+                          <v-row>
+                            <v-col v-for="(ageSelect, index) in ageSelects" :key="index" cols="4">
+                              <v-select
+                                v-model="ageSelect.age"
+                                :items="ages"
+                                required
+                                :error-messages="getAgeSelectErrorMessages(index)"
+                                label="0"
+                                persistent-hint
+                                return-object
+                                single-line
+                                dense
+                                outlined
+                              />
+                            </v-col>
+                          </v-row>
+                        </div>
+                      </v-card-text>
+                    </v-card>
+                    <v-divider class="my-2" />
+                    <p class="font-weight-bold">
+                      Initial Price
+                      <span style="float: right;">
+                        <span class="quantity px-2 font-weight-bold">$ {{ initialPrice }}</span>
+                      </span>
+                    </p>
+                    <v-btn
+                      v-if="e1 === 2"
+                      class="white--text"
+                      color="#4f3316"
+                      elevation="6"
+                      large
+                      block
+                      raised
+                    >
+                      Save Trip
+                    </v-btn>
+                    <!-- <v-divider class="my-2" />
+                    <v-btn
+                      v-if="e1 === 2"
+                      class="white--text"
+                      color="#4f3316"
+                      elevation="6"
+                      large
+                      block
+                      raised
+                      @click="openBookFlight"
+                    >
+                      Book Flight
+                    </v-btn> -->
+                  </v-card-text>
                 </div>
-                <div class="w-form">
-                  <div id="email-form-3" name="email-form-3" data-name="Email Form 3">
-                    <div v-for="(city, i) in packageDetails.packageCities" :key="city.packageCityID" class="my-5">
-                      <div class="route-city-row">
-                        <div class="rout-city-row-inner">
-                          <div class="city-order">
-                            {{ i + 1 }}
-                          </div>
-                          <div class="route-city-name">
-                            {{ city.cityName }}
-                          </div>
-                          <div class="nights-row">
-                            <button
-                              class="w-inline-block"
-                              :disabled="city.cityDaysNumber < 2"
-                              @click="
-                                city.cityDaysNumber--;
-                                city.cityDuration--;
-                                minimisePrice(city.cityActivities['day_'+(city.cityDaysNumber+1)]);
-                                delete city.cityActivities['day_'+(city.cityDaysNumber+1)];
-                                city.selectedRooms = [];
-                                citiesRooms = [];
-                                roomsNum = 0;
-                                editingCityId = city.cityID
-                              "
-                            >
-                              <img src="~/assets/images/min-icon.png" loading="lazy" alt="" class="nights-change">
-                            </button>
-                            <div class="nights-num">
-                              {{ city.cityDaysNumber }} <span class="night-lite">Days</span>
-                            </div>
-                            <button
-                              class="w-inline-block"
-                              @click="
-                                city.cityDaysNumber++;
-                                city.cityDuration++;
-                                city.cityActivities['day_'+(Object.keys(city.cityActivities).length+1)] = [];
-                                city.selectedRooms = [];
-                                citiesRooms = [];
-                                roomsNum = 0;
-                                editingCityId = city.cityID
-                              "
-                            >
-                              <img src="~/assets/images/plus-icon.png" loading="lazy" alt="" class="nights-change">
-                            </button>
-                          </div>
-                        </div>
-                        <button v-if="i > 0" class="remove-city-link w-inline-block" @click="removeCity(i); city.selectedRooms = []; citiesRooms = []; roomsNum = 0;">
-                          <img src="~/assets/images/del-icpn.png" loading="lazy" alt="" class="remove-city-icon">
-                        </button>
-                      </div>
-                      <div class="route-transport-block">
-                        <div v-for="(trans, j) in city.cityTransportations" :key="trans.transportationID" class="trans-row">
-                          <label class="w-radio">
-                            <div :id="`check-icon-${i}-${j}`" :class="`w-form-formradioinput-${i} w-form-formradioinput w-form-formradioinput--inputType-custom trans-radio w-radio-input w--redirected-checked`" />
-                            <img v-if="trans.transportationType === 'flight' || trans.transportationType === 'train' || trans.transportationType === 'limousine'" :src="trans.transportationType === 'flight' ? '' : (trans.transportationType === 'train' ? '~/assets/images/transport-train.png' : '~/assets/images/limousine.png')" loading="lazy" alt="" class="transport-bt-icon mx-wid-32">
-                            <v-icon v-else class="transport-bt-icon" color="#333" left>{{ trans.transportationType === 'coaster' ? 'mdi-bus-side' : (trans.transportationType === 'hiac' ? 'mdi-car-estate' : 'mdi-bus') }}</v-icon>
-                            <span v-if="trans.transportationType !== 'flight'" :id="`trans-label-${i}-${j}`" class="transport-m w-form-label" @click="showCheckIcon(i, j, trans.transportationType, trans.transportationPricePerPerson)">{{ trans.transportationType }} to {{ city.cityName }} &gt;</span>
-                            <div v-else>
-                              <span v-if="i === 0" :id="`trans-label-${i}-${j}`" class="transport-m w-form-label" @click="addFlightDialog = !addFlightDialog; editingCityIndex = i; showCheckIcon(i, j, 'air', 0);">Add Flight to {{ city.cityName }} &gt;</span>
-                              <span v-else :id="`trans-label-${i}-${j}`" class="transport-m w-form-label" @click="editingCityIndex = i; showCheckIcon(i, j, 'air', 0); searchFlights();">Add Flight to {{ city.cityName }} &gt;</span>
-                            </div>
-                          </label>
-                          <button v-if="trans.transportationType === 'flight' && trans.flight" data-w-id="17d6cb79-faec-cc6f-7468-c12e8db760e8" class="r-link frist-link" @click="showFlight(trans.flight)">
-                            Details
-                          </button>
-                          <button v-if="trans.transportationType !== 'flight'" data-w-id="17d6cb79-faec-cc6f-7468-c12e8db760e8" class="r-link frist-link" @click="transDataDialog = true; transportation = trans">
-                            Details
-                          </button>
-                          <button v-if="trans.transportationType === 'flight' && trans.flight" class="r-link" @click="editingCityIndex = i; searchFlights()">
-                            Edit
-                          </button>
-                        </div>
-                      </div>
+                <div v-else>
+                  <v-card-text>
+                    <h4 class="text-h4 black--text" color="black">
+                      Number of guests
+                    </h4>
+                    <p class="font-weight-bold">
+                      Adults
+                      <span style="float: right;">
+                        <v-btn
+                          style="background-color: transparent; border: 1px solid #4f3316;"
+                          elevation="4"
+                          icon
+                          small
+                          @click="changeCounterAdult('-1')"
+                        >
+                          <v-icon color="#4f3316">
+                            mdi-minus
+                          </v-icon>
+                        </v-btn>
+
+                        <span class="quantity px-2 font-weight-bold">{{ travellers }}</span>
+
+                        <v-btn
+                          style="background-color: #4f3316;"
+                          color="#4f3316"
+                          elevation="4"
+                          icon
+                          small
+                          @click="changeCounterAdult('1')"
+                        >
+                          <v-icon color="#FFF">
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </span>
+                    </p>
+                    <v-divider class="my-2" />
+                    <p class="font-weight-bold">
+                      Children
+                      <span style="float: right;">
+                        <v-btn
+                          style="background-color: transparent; border: 1px solid #4f3316;"
+                          elevation="4"
+                          icon
+                          small
+                          @click="changeCounterChild('-1')"
+                        >
+                          <v-icon color="#4f3316">
+                            mdi-minus
+                          </v-icon>
+                        </v-btn>
+
+                        <span class="quantity px-2 font-weight-bold">{{ children }}</span>
+
+                        <v-btn
+                          style="background-color: #4f3316;"
+                          color="#4f3316"
+                          elevation="4"
+                          icon
+                          small
+                          @click="changeCounterChild('1')"
+                        >
+                          <v-icon color="#FFF">
+                            mdi-plus
+                          </v-icon>
+                        </v-btn>
+                      </span>
+                    </p>
+                    <div v-if="ageSelects.length > 0">
+                      Children's Ages
+                      <v-row>
+                        <v-col v-for="(ageSelect, index) in ageSelects" :key="index" cols="4">
+                          <v-select
+                            v-model="ageSelect.age"
+                            :items="ages"
+                            required
+                            :error-messages="getAgeSelectErrorMessages(index)"
+                            label="0"
+                            persistent-hint
+                            return-object
+                            single-line
+                            dense
+                            outlined
+                            @change="onChangeSelectAge($event)"
+                          />
+                        </v-col>
+                      </v-row>
                     </div>
-                    <a href="/flights" target="_blank">
-                      <v-btn large class="px-10" tile color="blue white--text" elevation="0">Book flight</v-btn>
-                    </a>
+                    <v-divider class="my-2" />
+                    <p class="font-weight-bold">
+                      Initial Price
+                      <span style="float: right;">
+                        <span class="quantity px-2 font-weight-bold">$ {{ initialPrice }}</span>
+                      </span>
+                    </p>
+                  </v-card-text>
+                </div>
+              </v-card>
+              <v-card v-if="e1 === 2" class="" style="border-radius: 15px;">
+                <v-card-text>
+                  <h4 class="text-h4 black--text" color="black">
+                    Number of guests
+                  </h4>
+                  <p class="font-weight-bold">
+                    Rooms
+                    <span style="float: right;">
+                      <v-btn
+                        style="background-color: transparent; border: 1px solid #4f3316;"
+                        elevation="4"
+                        icon
+                        small
+                        @click="changeCounterRoom(0, 'rooms', -1)"
+                      >
+                        <v-icon color="#4f3316">
+                          mdi-minus
+                        </v-icon>
+                      </v-btn>
+
+                      <span class="quantity px-2 font-weight-bold">{{ room_count }}</span>
+
+                      <v-btn
+                        style="background-color: #4f3316;"
+                        color="#4f3316"
+                        elevation="4"
+                        icon
+                        small
+                        @click="changeCounterRoom(0, 'rooms', 1)"
+                      >
+                        <v-icon color="#FFF">
+                          mdi-plus
+                        </v-icon>
+                      </v-btn>
+                    </span>
+                  </p>
+                  <v-divider class="my-2" />
+                  <p class="font-weight-bold">
+                    Select Board Type
+                    <v-select
+                      v-model="boardType"
+                      :items="boardsWithAll"
+                      item-text="_"
+                      item-value="Type"
+                      required
+                      label="Select Board Type"
+                      persistent-hint
+                      return-object
+                      single-line
+                      dense
+                      outlined
+                    />
+                  </p>
+                  <p v-for="(room, index) in rooms" :key="index" class="font-weight-bold">
+                    Room {{ index + 1 }}
+                    <v-card class="" style="border-radius: 15px;">
+                      <v-card-text>
+                        <p class="font-weight-bold">
+                          Adults
+                          <span style="float: right;">
+                            <v-btn
+                              style="background-color: transparent; border: 1px solid #4f3316;"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterRoom(index, 'travelers', -1)"
+                            >
+                              <v-icon color="#4f3316">
+                                mdi-minus
+                              </v-icon>
+                            </v-btn>
+
+                            <span class="quantity px-2 font-weight-bold">{{ room.travelers }}</span>
+
+                            <v-btn
+                              style="background-color: #4f3316;"
+                              color="#4f3316"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterRoom(index, 'travelers', 1)"
+                            >
+                              <v-icon color="#FFF">
+                                mdi-plus
+                              </v-icon>
+                            </v-btn>
+                          </span>
+                        </p>
+                        <v-divider class="my-2" />
+                        <p class="font-weight-bold">
+                          Children
+                          <span style="float: right;">
+                            <v-btn
+                              style="background-color: transparent; border: 1px solid #4f3316;"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterRoom(index, 'children', -1)"
+                            >
+                              <v-icon color="#4f3316">
+                                mdi-minus
+                              </v-icon>
+                            </v-btn>
+
+                            <span class="quantity px-2 font-weight-bold">{{ room.children }}</span>
+
+                            <v-btn
+                              style="background-color: #4f3316;"
+                              color="#4f3316"
+                              elevation="4"
+                              icon
+                              small
+                              @click="changeCounterRoom(index, 'children', 1)"
+                            >
+                              <v-icon color="#FFF">
+                                mdi-plus
+                              </v-icon>
+                            </v-btn>
+                          </span>
+                        </p>
+                        <div v-if="room.ageSelects.length > 0">
+                          Children's Ages
+                          <v-row>
+                            <v-col v-for="(ageSelect, childIndex) in room.ageSelects" :key="childIndex" cols="4">
+                              <v-select
+                                v-model="ageSelect.age"
+                                :items="ages"
+                                required
+                                :error-messages="getRoomAgeSelectErrorMessages(index, childIndex)"
+                                label="0"
+                                persistent-hint
+                                return-object
+                                single-line
+                                dense
+                                outlined
+                              />
+                            </v-col>
+                          </v-row>
+                        </div>
+                        <v-divider class="my-2" />
+                        <p class="font-weight-bold">
+                          Select Category
+                          <v-select
+                            v-model="room.roomCategory"
+                            :items="roomCategoriesWithAll"
+                            item-text="_"
+                            item-value="Type"
+                            required
+                            label="Select Category"
+                            persistent-hint
+                            return-object
+                            single-line
+                            dense
+                            outlined
+                          />
+                        </p>
+                        <!-- <div v-if="ageSelects.length > 0">
+                          Children's Ages
+                          <v-row>
+                            <v-col v-for="(ageSelect, index) in ageSelects" :key="index" cols="4">
+                              <v-select
+                                v-model="ageSelect.age"
+                                :items="ages"
+                                required
+                                :error-messages="getAgeSelectErrorMessages(index)"
+                                label="0"
+                                persistent-hint
+                                return-object
+                                single-line
+                                dense
+                                outlined
+                              />
+                            </v-col>
+                          </v-row>
+                        </div> -->
+                      </v-card-text>
+                    </v-card>
+                  </p>
+                  <v-card v-if="false" class="" style="border-radius: 15px;">
+                    <v-card-text>
+                      <p class="font-weight-bold">
+                        Adults
+                        <span style="float: right;">
+                          <v-btn
+                            style="background-color: transparent; border: 1px solid #4f3316;"
+                            elevation="4"
+                            icon
+                            small
+                            @click="changeCounterAdult('-1')"
+                          >
+                            <v-icon color="#4f3316">
+                              mdi-minus
+                            </v-icon>
+                          </v-btn>
+
+                          <span class="quantity px-2 font-weight-bold">{{ travellers }}</span>
+
+                          <v-btn
+                            style="background-color: #4f3316;"
+                            color="#4f3316"
+                            elevation="4"
+                            icon
+                            small
+                            @click="changeCounterAdult('1')"
+                          >
+                            <v-icon color="#FFF">
+                              mdi-plus
+                            </v-icon>
+                          </v-btn>
+                        </span>
+                      </p>
+                      <v-divider class="my-2" />
+                      <p class="font-weight-bold">
+                        Children
+                        <span style="float: right;">
+                          <v-btn
+                            style="background-color: transparent; border: 1px solid #4f3316;"
+                            elevation="4"
+                            icon
+                            small
+                            @click="changeCounterChild('-1')"
+                          >
+                            <v-icon color="#4f3316">
+                              mdi-minus
+                            </v-icon>
+                          </v-btn>
+
+                          <span class="quantity px-2 font-weight-bold">{{ children }}</span>
+
+                          <v-btn
+                            style="background-color: #4f3316;"
+                            color="#4f3316"
+                            elevation="4"
+                            icon
+                            small
+                            @click="changeCounterChild('1')"
+                          >
+                            <v-icon color="#FFF">
+                              mdi-plus
+                            </v-icon>
+                          </v-btn>
+                        </span>
+                      </p>
+                      <div v-if="ageSelects.length > 0">
+                        Children's Ages
+                        <v-row>
+                          <v-col v-for="(ageSelect, index) in ageSelects" :key="index" cols="4">
+                            <v-select
+                              v-model="ageSelect.age"
+                              :items="ages"
+                              required
+                              :error-messages="getAgeSelectErrorMessages(index)"
+                              label="0"
+                              persistent-hint
+                              return-object
+                              single-line
+                              dense
+                              outlined
+                            />
+                          </v-col>
+                        </v-row>
+                      </div>
+                    </v-card-text>
+                  </v-card>
+                  <v-divider class="my-2" />
+                  <p class="font-weight-bold">
+                    Initial Price
+                    <span style="float: right;">
+                      <span class="quantity px-2 font-weight-bold">$ {{ initialPrice }}</span>
+                    </span>
+                  </p>
+                  <v-btn
+                    v-if="e1 === 2"
+                    class="white--text"
+                    color="#4f3316"
+                    elevation="6"
+                    large
+                    block
+                    raised
+                  >
+                    Save Trip
+                  </v-btn>
+                  <!-- <v-divider class="my-2" />
+                  <v-btn
+                    v-if="e1 === 2"
+                    class="white--text"
+                    color="#4f3316"
+                    elevation="6"
+                    large
+                    block
+                    raised
+                    @click="openBookFlight"
+                  >
+                    Book Flight
+                  </v-btn> -->
+                </v-card-text>
+              </v-card>
+            </div>
+          </v-col>
+        </v-row>
+      </div>
+      <v-dialog v-model="showGallery" max-width="900" content-class="rounded-xl hide-overflow" style="z-index: 9999;" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Gallery
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showGallery = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text v-if="galleries.length > 0" class="pt-4">
+            <v-carousel hide-delimiters>
+              <v-carousel-item
+                v-for="(gallery,i) in galleries"
+                :key="i"
+                :src="gallery.src"
+              />
+            </v-carousel>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showCheckout" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Trip Summary
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showCheckout = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <v-row>
+              <v-col cols="6" sm="2">
+                <v-text-field
+                  :value="travellers"
+                  label="Adults"
+                  prepend-inner-icon="mdi-account"
+                  readonly
+                />
+              </v-col>
+
+              <v-col cols="6" sm="2">
+                <v-text-field
+                  :value="children"
+                  label="Children"
+                  prepend-inner-icon="mdi-account"
+                  readonly
+                />
+              </v-col>
+            </v-row>
+            <div>
+              <div>
+                <!-- <p class="font-weight-bold" style="font-size: 25px;color: #000;">
+                  Adventures
+                </p> -->
+                <v-row class="mt-4">
+                  <v-col cols="12" md="9">
+                    <!-- <div v-for="(activity, a) in packageDetails.activities" :key="a">
+                      <div v-for="(day, d) in packageDetails.activities[a].days" :key="d">
+                        <div v-for="(adventure, d2) in packageDetails.activities[a].days[d].days" :key="d2">
+                          <p>{{ packageDetails.activities[a].days[d].days[d2].adventrue.activityTitle }}</p>
+                        </div>
+                      </div>
+                    </div> -->
+                    <p class="font-weight-bold" style="font-size: 25px;color: #000;">
+                      Adventures
+                    </p>
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <p>$ {{ initialPrice }}</p>
+                  </v-col>
+                </v-row>
+              </div>
+              <v-divider class="mb-4" />
+              <div>
+                <!-- <p class="font-weight-bold" style="font-size: 25px;color: #000;">
+                  Hotels
+                </p> -->
+                <v-row class="mt-4">
+                  <v-col cols="12" md="9">
+                    <!-- <div v-for="(hotel, h) in listGtaHotelDetails" :key="h">
+                      <p>{{ hotel.HotelName }}</p>
+                    </div> -->
+                    <p class="font-weight-bold" style="font-size: 25px;color: #000;">
+                      Hotels
+                    </p>
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <p>$ {{ getTotalHotelPrices() }}</p>
+                  </v-col>
+                </v-row>
+              </div>
+              <v-divider class="mb-4" />
+              <div>
+                <v-row class="mt-4">
+                  <v-col cols="12" md="9">
+                    <p class="font-weight-bold" style="font-size: 25px;color: #000;">
+                      Additional Cost
+                    </p>
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <p>$ {{ additionalPrice }}</p>
+                  </v-col>
+                </v-row>
+              </div>
+              <v-divider class="mb-4" />
+              <div>
+                <v-row class="mt-4">
+                  <v-col cols="12" md="9">
+                    <p class="font-weight-bold" style="font-size: 25px;color: #000;">
+                      Discount
+                    </p>
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <p>% {{ discountPercentage }}</p>
+                  </v-col>
+                </v-row>
+              </div>
+            </div>
+          </v-card-text>
+          <v-card-actions class="dialog-cart-footer" style="background-color: #fff">
+            <v-row align="center" justify="center" class="px-5">
+              <v-col cols="12" md="12">
+                <v-row class="mt-2">
+                  <v-col cols="8">
+                    <h5 class="text-h5">
+                      Total
+                    </h5>
+                  </v-col>
+                  <v-col cols="4">
+                    <p>$ {{ totalAllPrices }}</p>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="12">
+                <v-btn
+                  class="rounded"
+                  style="margin-bottom: 15px;"
+                  x-large
+                  tile
+                  elevation="0"
+                  dark
+                  color="#4f3316"
+                  block
+                  :disabled="!openProceed"
+                  @click="bookAdventures"
+                >
+                  Complete Checkout
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showHotelsDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Change Hotel
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showHotelsDialog = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <div v-for="(hotel, h) in listGtaHotelJpds" :key="h">
+              <v-row class="" style="padding: 5px;margin: 10px 0">
+                <v-col cols="12" md="4" class="pt-4">
+                  <v-img
+                    max-height="400"
+                    :src="hotel.Images.Image[1].Type === 'THB' ? hotel.Images.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
+                    max-width="400"
+                    class="rounded-lg"
+                  />
+                </v-col>
+                <v-col cols="12" md="6">
+                  <div class="cruise-result-trip justify-space-between">
+                    <div>
+                      <h6 class="text-h6 font-weight-bold">
+                        {{ hotel.HotelName }}
+                      </h6>
+                    </div>
+                    <div class="black--text">
+                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <strong>Address:</strong> {{ hotel.Address.Address }}
+                      </p>
+                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <strong>Category:</strong> {{ hotel.HotelCategory._ }}
+                      </p>
+                    </div>
                   </div>
-                  <div class="w-form-done">
-                    <div>Thank you! Your submission has been received!</div>
-                  </div>
-                  <div class="w-form-fail">
-                    <div>Oops! Something went wrong while submitting the form.</div>
-                  </div>
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-btn
+                    class="rounded"
+                    large
+                    tile
+                    elevation="0"
+                    dark
+                    color="#4f3316"
+                    block
+                    @click="selectHotelGta(h)"
+                  >
+                    Select
+                  </v-btn>
+                </v-col>
+              </v-row>
+              <v-divider class="mb-4" />
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showRoomsDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Change Room
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showRoomsDialog = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <div v-if="hotelAvails !== null">
+              <div v-if="Array.isArray(hotelAvails.HotelOptions.HotelOption)">
+                <div v-for="(hotelOption, hO) in hotelAvails.HotelOptions.HotelOption" :key="hO">
+                  <v-card v-if="hotelOption" class="my-4">
+                    <v-card-title class="white--text" style="background-color: #4f3316;">
+                      Board: <span v-if="hotelOption.Board && hotelOption.Board._">{{ hotelOption.Board._ }}, </span><span v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">{{ hotelOption.HotelRooms.HotelRoom.Name }}</span>
+                    </v-card-title>
+                    <v-card-text class="pt-4">
+                      <v-row class="" style="padding: 5px;margin: 10px 0">
+                        <v-col cols="12" md="10">
+                          <div class="cruise-result-trip justify-space-between">
+                            <div class="black--text">
+                              <p v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
+                                <span v-if="Array.isArray(hotelOption.HotelRooms.HotelRoom)">
+                                  <div v-for="(room, r) in hotelOption.HotelRooms.HotelRoom" :key="r">
+                                    <strong>Room Name:</strong> {{ room.Name }} <br>
+                                    <strong>Room Category:</strong> {{ room.RoomCategory._ }} <br>
+                                    <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
+                                    <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
+                                    <hr>
+                                  </div>
+                                </span>
+                                <span v-else>
+                                  <strong>Room Name:</strong> {{ hotelOption.HotelRooms.HotelRoom.Name }} <br>
+                                  <strong>Room Category:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br>
+                                  <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
+                                  <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                </span>
+                              </p>
+                              <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">
+                                <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
+                                <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                              </p> -->
+                              <p v-if="hotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">
+                                <strong>Hotel Offer:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
+                                <strong>Hotel Offer Description:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
+                              </p>
+                              <v-divider class="mb-4" />
+                              <p v-if="hotelOption.Prices && hotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
+                                <strong>Prices:</strong> {{ hotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotelOption.Prices.Price.Currency }}
+                              </p>
+                            </div>
+                          </div>
+                        </v-col>
+                        <v-col cols="12" md="2">
+                          <v-btn
+                            class="rounded"
+                            large
+                            tile
+                            elevation="0"
+                            dark
+                            color="#4f3316"
+                            block
+                            @click="selectRoomHotelGta(hO, selectedHotelIndex)"
+                          >
+                            Select
+                          </v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-card-text>
+                  </v-card>
                 </div>
               </div>
-
-              <v-divider class="my-3" />
-
-              <div class="route-side">
-                <div class="custom-side-title-block">
-                  <div class="route-title-hed">
-                    <span class="coustum-title">Customize your<br></span>Cruise
-                  </div>
-                </div>
-                <v-card outlined class="my-5">
-                  <v-card-title class="d-flex justify-space-between flex-wrap">
-                    Nile Cruise
-                    <v-btn v-if="!packageDetails.cruise" icon color="primary" @click="addCruiseDialog = true">
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                    <div v-else>
-                      <v-btn icon color="error" @click="packageDetails.cruise = null; selectedCruise = null;">
-                        <v-icon>mdi-trash-can</v-icon>
-                      </v-btn>
-                      <v-btn icon color="primary" @click="cruiseDialog = true">
-                        <v-icon>mdi-eye</v-icon>
-                      </v-btn>
-                    </div>
+              <div v-else>
+                <v-card v-if="hotelAvails.HotelOptions.HotelOption" class="my-4">
+                  <v-card-title class="white--text" style="background-color: #4f3316;">
+                    Board: <span v-if="hotelAvails.HotelOptions.HotelOption.Board && hotelAvails.HotelOptions.HotelOption.Board._">{{ hotelAvails.HotelOptions.HotelOption.Board._ }}, </span><span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom">{{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name }}</span>
                   </v-card-title>
-                  <v-card-text v-if="packageDetails.cruise" class="pb-0">
-                    <v-img max-height="200" :src="packageDetails.cruise.master_image" />
-                    <div class="d-flex justify-space-between align-center">
-                      <h3 class="my-1">
-                        {{ packageDetails.cruise.name }} <small class="body-2">/ {{ packageDetails.cruise.number_of_nights }} nights</small>
-                      </h3>
+                  <v-card-text class="pt-4">
+                    <v-row class="" style="padding: 5px;margin: 10px 0">
+                      <v-col cols="12" md="10">
+                        <div class="cruise-result-trip justify-space-between">
+                          <div class="black--text">
+                            <p v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
+                              <span v-if="Array.isArray(hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom)">
+                                <div v-for="(room, r) in hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" :key="r">
+                                  <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
+                                  <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
+                                  <hr>
+                                </div>
+                              </span>
+                              <span v-else>
+                                <strong>Number of Adults:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
+                                <strong>Number of Children:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                              </span>
+                            </p>
+                            <p v-if="hotelAvails.HotelOptions.HotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">
+                              <strong>Hotel Offer:</strong> {{ hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
+                              <strong>Hotel Offer Description:</strong> {{ hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
+                            </p>
+                            <v-divider class="mb-4" />
+                            <p v-if="hotelAvails.HotelOptions.HotelOption.Prices && hotelAvails.HotelOptions.HotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
+                              <strong>Prices:</strong> {{ hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotelAvails.HotelOptions.HotelOption.Prices.Price.Currency }}
+                            </p>
+                          </div>
+                        </div>
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-btn
+                          class="rounded"
+                          large
+                          tile
+                          elevation="0"
+                          dark
+                          color="#4f3316"
+                          block
+                          @click="selectRoomHotelGta(hO, selectedHotelIndex)"
+                        >
+                          Select
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+              </div>
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showAddNewAdventuresDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            City Activities
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showAddNewAdventuresDialog = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <div v-if="adventures.length">
+              <v-row>
+                <v-col cols="12" md="12">
+                  <div v-for="(adventure, n) in adventures" :key="n">
+                    <v-card class="mb-5" style="border-radius: 15px;">
+                      <v-card-text>
+                        <v-row class="">
+                          <v-col v-if="adventure.activityImages.length" cols="12" md="4" class="pt-4">
+                            <v-img
+                              max-height="350"
+                              :src="adventure.activityImages[0][0]"
+                              max-width="250"
+                              class="rounded-lg"
+                            />
+                          </v-col>
+                          <v-col cols="10" :md="adventure.activityImages.length ? 6 : 10">
+                            <div class="cruise-result-trip justify-space-between pt-4">
+                              <div>
+                                <h5 class="text-h5 font-weight-bold">
+                                  {{ adventure.activityTitle }}
+                                </h5>
+                              </div>
+                              <div class="black--text">
+                                <h5 class="text-h5 font-weight-bold">
+                                  Start from ${{ adventure.activityPricePerPerson }} per person
+                                </h5>
+                              </div>
+                            </div>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col cols="12" md="12">
+                            <!-- eslint-disable-next-line vue/no-v-html -->
+                            <v-tabs
+                              v-model="tab"
+                              color="deep-black accent-4"
+                            >
+                              <v-tab href="#intro">
+                                Intro
+                              </v-tab>
+                              <v-tab href="#itinerary">
+                                Itinerary
+                              </v-tab>
+                              <v-tab href="#notes">
+                                Notes
+                              </v-tab>
+                            </v-tabs>
+                            <v-tabs-items v-model="tab">
+                              <v-tab-item :value="'intro'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventure.activityIntro" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                              <v-tab-item :value="'itinerary'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventure.activityItinerary" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                              <v-tab-item :value="'notes'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventure.activityOverview" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                            </v-tabs-items>
+                            <div class="trips-cityname" style="margin: 10px 0;">
+                              <v-expansion-panels>
+                                <v-expansion-panel v-if="adventure.activityIncludes.length">
+                                  <v-expansion-panel-header>
+                                    Includes
+                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-content>
+                                    <span v-for="(include, i) in adventure.activityIncludes" :key="i">
+                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
+                                        <span class="text-truncate">{{ include }}</span>
+                                      </v-chip>
+                                    </span>
+                                  </v-expansion-panel-content>
+                                </v-expansion-panel>
+                              </v-expansion-panels>
+                            </div>
+                            <div>
+                              <v-expansion-panels>
+                                <v-expansion-panel v-if="adventure.activityExcludes.length">
+                                  <v-expansion-panel-header>
+                                    Excludes
+                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-content>
+                                    <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
+                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
+                                        <span class="text-truncate">{{ exclude }}</span>
+                                      </v-chip>
+                                    </span>
+                                  </v-expansion-panel-content>
+                                </v-expansion-panel>
+                              </v-expansion-panels>
+                            </div>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                      <v-divider class="mb-2" />
+                      <v-card-actions class="mb-2 pb-2">
+                        <v-row>
+                          <v-col cols="12" md="12">
+                            <v-btn
+                              v-if="!selected"
+                              color="success"
+                              block
+                              elevation="4"
+                              x-large
+                              :loading="loadingSelectedAdventure"
+                              @click="addAdventureToSelected(adventure)"
+                            >
+                              <v-icon class="mx-2">
+                                mdi-plus-box-multiple
+                              </v-icon>
+                              Add This Adventure
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </v-card-actions>
+                      <!-- <p class="mx-4 mt-0 pb-3 text-left">{{ getDateHint(adventure) }}</p> -->
+                    </v-card>
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
+            <div v-else-if="!adventures.length" class="my-5 text-center">
+              No published adventures available now!
+            </div>
+            <div v-else>
+              <v-img max-width="200" class="blink-2 mx-auto" src="~/assets/images/tanfer.png" />
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showAdventureDetailsDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Adventure Details
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showAdventureDetailsDialog = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <div v-if="adventureDetails !== null">
+              <v-row>
+                <v-col cols="12" md="12">
+                  <div>
+                    <v-card class="mb-5" style="border-radius: 15px;">
+                      <v-card-text>
+                        <v-row class="">
+                          <v-col v-if="adventureDetails.activityImages.length" cols="12" md="4" class="pt-4">
+                            <v-img
+                              max-height="350"
+                              :src="adventureDetails.activityImages[0][0]"
+                              max-width="250"
+                              class="rounded-lg"
+                            />
+                          </v-col>
+                          <v-col cols="10" :md="adventureDetails.activityImages.length ? 6 : 10">
+                            <div class="cruise-result-trip justify-space-between pt-4">
+                              <div>
+                                <h5 class="text-h5 font-weight-bold">
+                                  {{ adventureDetails.activityTitle }}
+                                </h5>
+                              </div>
+                              <div class="black--text">
+                                <h5 class="text-h5 font-weight-bold">
+                                  Start from ${{ adventureDetails.activityPricePerPerson }} per person
+                                </h5>
+                              </div>
+                            </div>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col cols="12" md="12">
+                            <!-- eslint-disable-next-line vue/no-v-html -->
+                            <v-tabs
+                              v-model="tab"
+                              color="deep-black accent-4"
+                            >
+                              <v-tab href="#intro">
+                                Intro
+                              </v-tab>
+                              <v-tab href="#itinerary">
+                                Itinerary
+                              </v-tab>
+                              <v-tab href="#notes">
+                                Notes
+                              </v-tab>
+                            </v-tabs>
+                            <v-tabs-items v-model="tab">
+                              <v-tab-item :value="'intro'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventureDetails.activityIntro" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                              <v-tab-item :value="'itinerary'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventureDetails.activityItinerary" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                              <v-tab-item :value="'notes'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventureDetails.activityOverview" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                            </v-tabs-items>
+                            <div class="trips-cityname" style="margin: 10px 0;">
+                              <v-expansion-panels>
+                                <v-expansion-panel v-if="adventureDetails.activityIncludes.length">
+                                  <v-expansion-panel-header>
+                                    Includes
+                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-content>
+                                    <span v-for="(include, i) in adventureDetails.activityIncludes" :key="i">
+                                      <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ include }}</v-chip>
+                                    </span>
+                                  </v-expansion-panel-content>
+                                </v-expansion-panel>
+                              </v-expansion-panels>
+                            </div>
+                            <div>
+                              <v-expansion-panels>
+                                <v-expansion-panel v-if="adventureDetails.activityExcludes.length">
+                                  <v-expansion-panel-header>
+                                    Excludes
+                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-content>
+                                    <span v-for="(exclude, i) in adventureDetails.activityExcludes" :key="i">
+                                      <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ exclude }}</v-chip>
+                                    </span>
+                                  </v-expansion-panel-content>
+                                </v-expansion-panel>
+                              </v-expansion-panels>
+                            </div>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                    </v-card>
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
+            <div v-else class="my-5 text-center">
+              Not selected adventure!
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showReplaceAdventureDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Replace Adventure
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showReplaceAdventureDialog = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <div v-if="adventures.length">
+              <v-row>
+                <v-col cols="12" md="12">
+                  <div v-for="(adventure, n) in adventures" :key="n">
+                    <v-card class="mb-5" style="border-radius: 15px;">
+                      <v-card-text>
+                        <v-row class="">
+                          <v-col v-if="adventure.activityImages.length" cols="12" md="4" class="pt-4">
+                            <v-img
+                              max-height="350"
+                              :src="adventure.activityImages[0][0]"
+                              max-width="250"
+                              class="rounded-lg"
+                            />
+                          </v-col>
+                          <v-col cols="10" :md="adventure.activityImages.length ? 6 : 10">
+                            <div class="cruise-result-trip justify-space-between pt-4">
+                              <div>
+                                <h5 class="text-h5 font-weight-bold">
+                                  {{ adventure.activityTitle }}
+                                </h5>
+                              </div>
+                              <div class="black--text">
+                                <h5 class="text-h5 font-weight-bold">
+                                  Start from ${{ adventure.activityPricePerPerson }} per person
+                                </h5>
+                              </div>
+                            </div>
+                          </v-col>
+                        </v-row>
+                        <v-row>
+                          <v-col cols="12" md="12">
+                            <!-- eslint-disable-next-line vue/no-v-html -->
+                            <v-tabs
+                              v-model="tab"
+                              color="deep-black accent-4"
+                            >
+                              <v-tab href="#intro">
+                                Intro
+                              </v-tab>
+                              <v-tab href="#itinerary">
+                                Itinerary
+                              </v-tab>
+                              <v-tab href="#notes">
+                                Notes
+                              </v-tab>
+                            </v-tabs>
+                            <v-tabs-items v-model="tab">
+                              <v-tab-item :value="'intro'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventure.activityIntro" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                              <v-tab-item :value="'itinerary'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventure.activityItinerary" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                              <v-tab-item :value="'notes'">
+                                <v-card flat>
+                                  <v-card-text>
+                                    <div class="mb-3" v-html="adventure.activityOverview" />
+                                  </v-card-text>
+                                </v-card>
+                              </v-tab-item>
+                            </v-tabs-items>
+                            <div class="trips-cityname" style="margin: 10px 0;">
+                              <v-expansion-panels>
+                                <v-expansion-panel v-if="adventure.activityIncludes.length">
+                                  <v-expansion-panel-header>
+                                    Includes
+                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-content>
+                                    <span v-for="(include, i) in adventure.activityIncludes" :key="i">
+                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
+                                        <span class="text-truncate">{{ include }}</span>
+                                      </v-chip>
+                                    </span>
+                                  </v-expansion-panel-content>
+                                </v-expansion-panel>
+                              </v-expansion-panels>
+                            </div>
+                            <div>
+                              <v-expansion-panels>
+                                <v-expansion-panel v-if="adventure.activityExcludes.length">
+                                  <v-expansion-panel-header>
+                                    Excludes
+                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-content>
+                                    <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
+                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
+                                        <span class="text-truncate">{{ exclude }}</span>
+                                      </v-chip>
+                                    </span>
+                                  </v-expansion-panel-content>
+                                </v-expansion-panel>
+                              </v-expansion-panels>
+                            </div>
+                          </v-col>
+                        </v-row>
+                      </v-card-text>
+                      <v-divider class="mb-2" />
+                      <v-card-actions class="mb-2 pb-2">
+                        <v-row>
+                          <v-col cols="12" md="12">
+                            <v-btn
+                              v-if="!selected"
+                              color="success"
+                              block
+                              elevation="4"
+                              x-large
+                              style="padding: 0;"
+                              :loading="loadingSelectedAdventure"
+                              @click="replaceAdventureSelected(adventure)"
+                            >
+                              <v-icon class="mx-2">
+                                mdi-plus-box-multiple
+                              </v-icon>
+                              Replace This Adventure
+                            </v-btn>
+                          </v-col>
+                        </v-row>
+                      </v-card-actions>
+                      <!-- <p class="mx-4 mt-0 pb-3 text-left">{{ getDateHint(adventure) }}</p> -->
+                    </v-card>
+                  </div>
+                </v-col>
+              </v-row>
+            </div>
+            <div v-else-if="!adventures.length" class="my-5 text-center">
+              No published adventures available now!
+            </div>
+            <div v-else>
+              <v-img max-width="200" class="blink-2 mx-auto" src="~/assets/images/tanfer.png" />
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="showCruiseDetailsDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Cruise Details
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showCruiseDetailsDialog = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <div v-if="cruiseDetails !== null">
+              <v-row>
+                <v-col cols="12" md="12">
+                  <v-card class="pa-3">
+                    <v-row>
+                      <v-col cols="12" md="6">
+                        <v-img :src="image" height="200" class="rounded" />
+                      </v-col>
+                      <v-col cols="12" md="6" class="d-flex flex-wrap">
+                        <v-img
+                          v-for="(item, i) in cruiseDetails.images"
+                          :key="i"
+                          :src="item.image"
+                          height="70"
+                          width="70"
+                          class="rounded ma-1 gallery-image"
+                          @click="image = item.image"
+                        />
+                      </v-col>
+                    </v-row>
+                    <v-card-title class="d-flex justify-space-between flex-wrap align-cener px-0 py-0">
+                      {{ cruiseDetails.name }}
                       <v-rating
-                        background-color="gray"
+                        background-color="green lighten-2"
                         color="warning"
                         dense
                         empty-icon="mdi-star-outline"
@@ -201,1528 +2710,1777 @@
                         length="5"
                         readonly
                         size="15"
-                        :value="packageDetails.cruise.stars"
+                        :value="cruiseDetails.stars"
                       />
-                    </div>
-                    <p v-html="packageDetails.cruise.description" />
-                    <p>
-                      <v-icon left color="primary">
-                        mdi-map-marker
-                      </v-icon> {{ packageDetails.cruise.cruise_line }}
-                    </p>
-                    <p>
-                      <v-icon left color="primary">
-                        mdi-ferry
-                      </v-icon> {{ packageDetails.cruise.ship_name }}
-                    </p>
-                  </v-card-text>
-
-                  <v-card-actions class="py-0">
-                    <v-spacer />
-                    <v-btn v-if="packageDetails.cruise" tile color="primary" class="my-1" @click="addCruiseDialog = true">
-                      Change Cruise
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-              </div>
-            </aside>
-
-            <!-- hotels & itenrary -->
-            <div>
-              <div v-for="(city, i) in packageDetails.packageCities" :key="city.cityId" style="width: 100%" class="day-by-day">
-                <div v-if="i === 0" class="custom-side-title-block">
-                  <div class="route-title-hed">
-                    <span class="coustum-title">Customize your<br></span>Day By Day Itinerary
-                  </div>
-                </div>
-                <p class="text-h3 late--text">
-                  {{ city.cityName }}
-                </p>
-
-                <!-- hotel -->
-                <div v-if="city.cityHotels.length > 0" class="city-hotel">
-                  <img :src="city.cityHotels[0].hotelImage" loading="lazy" sizes="(max-width: 479px) 100vw, (max-width: 767px) 96vw, (max-width: 991px) 97vw, (max-width: 1279px) 55vw, 670px" alt="Hotel Image" class="city-hotel-img">
-                  <div class="city-hotel-details">
-                    <div class="day-city-name">
-                      {{ city.cityName }} {{ city.cityDaysNumber }} Days
-                    </div>
-                    <div class="city-hotel-layer">
-                      <div class="day-hotel-name">
-                        {{ city.cityHotels[0].hotelName }}
-                      </div>
-
-                      <div class="city-hotel-bt-row">
-                        <button class="city-hotel-bt" @click="getHotels(city.cityID, i); editingCityId = city.cityID; editingCity = city;">
-                          Change Hotel
-                        </button>
-                        <button class="city-hotel-bt" @click="getHotelDetails(city.cityHotels[0].hotelID); editingCity = city; editingCityId = city.cityID">
-                          Change Room
-                        </button>
-                        <button
-                          class="city-hotel-bt-remove"
-                          @click="
-                            editingCity = city;
-                            editingCityId = city.cityID;
-                            city.cityHotels = [];
-                          "
-                        >
-                          Remove hotel
-                        </button>
+                    </v-card-title>
+                    <v-card-subtitle class="py-0 px-0 my-1">
+                      Cruise Line: {{ cruiseDetails.cruise_line }} / Ship: {{ cruiseDetails.ship_name }} / Nights: {{ cruiseDetails.number_of_nights }} / Cities:
+                      <span v-for="(item, i) in cruiseDetails.cities" :key="i">{{ item.name + ', ' }}</span>
+                    </v-card-subtitle>
+                    <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
+                    <v-card-text class="px-0" v-html="cruiseDetails.description" />
+                    <div v-if="cruiseDetails.available_dates.length">
+                      <h6>This Crusise is available to book during the following dates:</h6>
+                      <div v-for="(season, k) in cruiseDetails.available_dates" :key="k">
+                        <p><strong>From</strong> {{ new Date(season.start_date.replaceAll('-', '/')).toDateString() }} <strong>To</strong> {{ new Date(season.end_date.replaceAll('-', '/')).toDateString() }} </p>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div v-else>
-                  <v-btn tile class="late white--text my-3" @click="getHotels(city.cityID, i); editingCityId = city.cityID">
-                    add hotel
-                  </v-btn>
-                  <v-divider class="my-3" />
-                </div>
-
-                <!-- activities -->
-                <div v-for="(value, key, index) in city.cityActivities" :key="index">
-                  <div v-if="city.days[index] === 'open'">
-                    <div v-if="value.length > 0 && !updatingActivities">
-                      <div class="day-by-day-date">
-                        Day
-                        <span>{{ prevDaysNum(i) + index + 1 }}</span>
-                      </div>
-                      <div v-for="(item, j) in value" :key="j" class="itenary-row">
-                        <div class="d-mark">
-                          <div>+</div>
-                        </div>
-                        <div v-if="item.activity">
-                          <div class="day-time">
-                            {{ item.activity.activityStartTime }}<br>{{ item.activity.activityEndTime }}
-                          </div>
-                          <div>{{ item.activity.activityTitle }}</div>
-                          <button class="remove-place w-inline-block" @click="activityDetails = item.activity; activityDetailsDialog = !activityDetailsDialog">
-                            <v-icon color="blue">
-                              mdi-eye
-                            </v-icon>
-                          </button>
-                          <button class="remove-place w-inline-block" @click="removeActivity(i,j,key)">
-                            <img src="~/assets/images/del-icpn.png" loading="lazy" alt="">
-                          </button>
-                        </div>
-                      </div>
-                      <div v-if="value.find(el => el.activity && el.activity.activityType !== 'cruise')" class="itenary-row">
-                        <div class="d-mark">
-                          <div>+</div>
-                        </div>
-                        <div class="day-time">
-                          Free<br>Time
-                        </div>
-                        <div>You have free time</div>
-                        <button class="remove-place w-inline-block blue--text" @click="getActivities(city.cityID); editingCityId = city.cityID; editingActivityDay = key">
-                          Add Activity
-                        </button>
-                      </div>
+                    <div v-if="cruiseDetails.includes.length">
+                      <p class="text-h6">
+                        Includes
+                      </p>
+                      <v-chip v-for="(item, i) in cruiseDetails.includes" :key="i" class="ma-1">
+                        {{ item }}
+                      </v-chip>
                     </div>
-                    <div v-else>
-                      <div class="day-sparator" />
-                      <div class="day-by-day-date">
-                        Day <span>{{ prevDaysNum(i) + index + 1 }}</span>
-                      </div>
-                      <div class="itenary-row">
-                        <div>Free day</div>
-                        <button class="remove-place w-inline-block blue--text" @click="getActivities(city.cityID); editingCityId = city.cityID; editingActivityDay = key">
-                          Add Activity
-                        </button>
-                      </div>
+                    <div v-if="cruiseDetails.excludes.length">
+                      <p class="text-h6">
+                        Excludes
+                      </p>
+                      <v-chip v-for="(item, i) in cruiseDetails.excludes" :key="i" class="ma-1">
+                        {{ item }}
+                      </v-chip>
                     </div>
-                  </div>
-                  <div v-else>
-                    <div class="day-by-day-date">
-                      Day
-                      <span>{{ prevDaysNum(i) + index + 1 }}</span>
+                    <div v-if="cruiseDetails.facilities.length">
+                      <p class="text-h6">
+                        Facilities
+                      </p>
+                      <v-chip v-for="(item, i) in cruiseDetails.facilities" :key="i" class="ma-1">
+                        {{ item }}
+                      </v-chip>
                     </div>
-                    <div class="itenary-row">
-                      <div class="d-mark">
-                        <div>+</div>
-                      </div>
-                      <div>
-                        Continue Cruise
-                      </div>
+                    <div v-if="cruiseDetails.policies.length">
+                      <p class="text-h6">
+                        Policies
+                      </p>
+                      <v-chip v-for="(item, i) in cruiseDetails.policies" :key="i" class="ma-1">
+                        {{ item }}
+                      </v-chip>
                     </div>
-                  </div>
-                </div>
-              </div>
+                    <div v-if="cruiseDetails.start_days.length">
+                      <p class="text-h6">
+                        Start Days
+                      </p>
+                      <v-chip v-for="(item, i) in cruiseDetails.start_days" :key="i" class="ma-1">
+                        {{ item }}
+                      </v-chip>
+                    </div>
+                  </v-card>
+                </v-col>
+              </v-row>
             </div>
-
-            <!-- occupancy -->
-            <div>
-              <div class="custom-side-title-block">
-                <div class="route-title-hed">
-                  <span class="coustum-title">Customize your<br></span>Occupancy
-                </div>
-              </div>
-              <rooms-and-guests @save="setGuests" />
-              <v-checkbox
-                v-if="EnteredAdults > 1"
-                v-model="singleSupplement"
-                label="Single Supplement"
-                class="mx-5"
-                @change="change_adults"
-              />
-              <v-text-field
-                v-if="singleSupplement"
-                v-model="single_travellers_num"
-                outlined
-                label="Single Supplement travllers number"
-                prepend-inner-icon="mdi-account-group"
-                color="late"
-                :min="1"
-                type="number"
-                class="mx-5 mb-5"
-                hide-details
-                @input="change_adults"
-              />
+            <div v-else class="my-5 text-center">
+              Not selected cruise!
             </div>
-          </div>
-
-          <!-- pricing -->
-          <div class="trip-total-price">
-            <div class="stiky-10">
-              <div class="price-details-block stikty-top pa-0">
-                <div class="price-details-title mb-0">
-                  <v-row class="px-5" justify="space-between" align="center">
-                    <div>
-                      Initial Price<br>
-                      <div>${{ totalpricevalue || packageDetails.packagePricePerPerson }}<sub v-if="!totalpricevalue" class="caption">Initial Price / person</sub> <br></div>
-                    </div>
-                    <div class="custop-trip-bt mt-4" @click="emailDilog = true">
-                      <div class="px-10 pt-1">
-                        Save Trip
-                      </div>
-                    </div>
-                    <div class="custop-trip-bt mt-4" @click="calculateprice">
-                      <div class="px-10 pt-1">
-                        Book Trip
-                      </div>
-                    </div>
-                  </v-row>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p v-else class="text-center my-10 headline font-weight-light">
-        Couldn't get the package
-      </p>
-    </client-only>
-
-    <!-- pop ups -->
-    <div v-if="packageDetails">
-      <!-- trans -->
-      <v-dialog v-model="transDataDialog" max-width="500">
-        <v-card v-if="transportation">
-          <v-card-title class="late white--text">
-            <v-row justify="space-between">
-              <span>{{ transportation.transportationType }} Details</span>
-              <v-btn icon color="white" @click="transDataDialog = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </v-row>
-          </v-card-title>
-          <v-card-text class="pa-5">
-            <v-row class="px-5" justify="space-between">
-              <div>
-                <p class="headline">
-                  Date
-                </p>
-                <p class="late--text font-weight-bold">
-                  <date-display :date="transportation.transportationDate" />
-                </p>
-              </div>
-              <div>
-                <p class="headline">
-                  Price<sub>/person</sub>
-                </p>
-                <p class="late--text font-weight-bold">
-                  ${{ transportation.transportationPricePerPerson }}
-                </p>
-              </div>
-            </v-row>
           </v-card-text>
         </v-card>
       </v-dialog>
-
-      <!-- hotels -->
-      <v-dialog v-model="hotelsDialog" max-width="700">
+      <v-dialog v-model="showHotelGtaDetails" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
         <v-card>
-          <v-card-title class="late white--text">
-            <v-row justify="space-between">
-              <span>Hotels</span>
-              <v-btn icon color="white" @click="hotelsDialog = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>
-            </v-row>
-          </v-card-title>
-          <v-card-text class="pa-3">
-            <div v-for="hotel in packageHotels" :key="hotel.hotelID" class="hotel-result-block">
-              <div class="hotel-result-pic">
-                <div class="result-img-holder">
-                  <v-img :src="hotel.hotelImage" class="hotel-result-img" />
-                </div>
-              </div>
-              <div class="hotel-result-info">
-                <div class="hoterl-result-name">
-                  {{ hotel.hotelName }}
-                </div>
-                <div :class="`stars-bar _${hotel.hotelStars}-star`" />
-              </div>
-              <div class="hotel-result-price">
-                <div class="_w-md-50-sm100">
-                  <div class="hotel-totlal-price">
-                    ${{ hotel.hotelPrice }}<sub class="caption">/person</sub>
-                  </div>
-                  <div
-                    class="select-hotel"
-                    @click="getHotelDetails(hotel.hotelID)"
-                  >
-                    Select
-                  </div>
-                </div>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="showHotelDetails" fullscreen>
-        <v-card tile>
-          <div style="position: sticky; top: 0; z-index: 2;" class="d-flex justify-space-between late align-center">
-            <v-card-title class="white--text">
-              <v-btn icon color="white" large @click="showHotelDetails = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>Hotel Details
-            </v-card-title>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Hotel
             <v-btn
-              tile
-              elevation="0"
-              class="mr-5"
-              :disabled="!selectedRooms.length"
+              text
               color="white"
-              large
-              @click="reserveRooms()"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showHotelGtaDetails = false"
             >
-              Reseve Rooms ({{ selectedRooms.length }})
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
             </v-btn>
-          </div>
-          <v-img :src="packageHotelDetails.hotelImage" max-height="200" />
-          <v-card-text class="pa-5">
-            <v-row justify="space-between" align="end">
-              <div>
-                <h3>{{ packageHotelDetails.hotelName }}</h3>
-                <p class="grey--text">
-                  <v-icon>mdi-map-marker</v-icon> {{ packageHotelDetails.hotelAddress }}
-                </p>
-                <p class="grey--text">
-                  <v-icon>mdi-phone</v-icon> {{ packageHotelDetails.hotelPhone }}
-                </p>
-              </div>
-              <div>
-                <v-rating
-                  v-model="packageHotelDetails.hotelStars"
-                  background-color="orange lighten-3"
-                  color="orange"
-                />
-                <v-btn text color="blue" @click="openMap(packageHotelDetails.hotelLatitude, packageHotelDetails.hotelLongitude)">
-                  <v-icon>mdi-map</v-icon> {{ showMap ? 'Hide map' : 'show on map' }}
-                </v-btn>
-              </div>
-            </v-row>
-            <v-expand-transition>
-              <gmap-map
-                v-show="showMap"
-                :center="center"
-                :zoom="24"
-                style="width:100%;  height: 500px;"
-                zoom-control
-                class="mt-1"
-              >
-                <gmap-marker
-                  v-for="(m, index) in markers"
-                  :key="index"
-                  :position="m.position"
-                  :clickable="true"
-                  :draggable="true"
-                  @click="center=m.position"
-                />
-              </gmap-map>
-            </v-expand-transition>
-            <p v-html="packageHotelDetails.hotelDescription" />
-            <v-expansion-panels>
-              <v-expansion-panel>
-                <v-expansion-panel-header>
-                  Facilities
-                </v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  <p v-for="item in packageHotelDetails.hotelFacilities" :key="item">
-                    <v-icon>mdi-check</v-icon> {{ item }}
-                  </p>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-              <v-expansion-panel>
-                <v-expansion-panel-header>
-                  Policies
-                </v-expansion-panel-header>
-                <v-expansion-panel-content>
-                  <p v-for="item in packageHotelDetails.hotelPolicies" :key="item">
-                    <v-icon>mdi-check</v-icon> {{ item }}
-                  </p>
-                </v-expansion-panel-content>
-              </v-expansion-panel>
-            </v-expansion-panels>
-            <v-card v-for="item in packageHotelDetails.hotelRooms" :key="item.roomID" class="my-3">
-              <v-card-title class="late white--text">
-                {{ item.roomType }}, {{ item.roomOccupancy }}
-              </v-card-title>
-              <v-card-text class="pa-3">
-                <p>{{ item.roomMaxNumberOfAdult }} Adult(s) Maximum, {{ item.roomMaxNumberOfChildren === 0 ? 'No children' : (item.roomMaxNumberOfChildren > 1 ? item.roomMaxNumberOfChildren + 'Children' : item.roomMaxNumberOfChildren + 'Child') }}</p>
-                <v-expansion-panels>
-                  <v-expansion-panel>
-                    <v-expansion-panel-header>
-                      Amenities
-                    </v-expansion-panel-header>
-                    <v-expansion-panel-content>
-                      <p v-for="amen in item.roomAmenities" :key="amen">
-                        <v-icon>mdi-check</v-icon> {{ amen }}
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <div v-if="gtaHotelDetails !== null">
+              <v-row class="" style="padding: 5px;margin: 10px 0">
+                <v-col cols="12" md="4" class="pt-4">
+                  <v-img
+                    max-height="400"
+                    :src="gtaHotelDetails.Images.Image[1].Type === 'THB' ? gtaHotelDetails.Images.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
+                    max-width="400"
+                    class="rounded-lg"
+                  />
+                </v-col>
+                <v-col cols="12" md="8">
+                  <div class="cruise-result-trip justify-space-between">
+                    <div>
+                      <h6 class="text-h6 font-weight-bold">
+                        {{ gtaHotelDetails.HotelName }}
+                      </h6>
+                    </div>
+                    <div class="black--text">
+                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <strong>Address:</strong> {{ gtaHotelDetails.Address.Address }}
                       </p>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                  <v-expansion-panel>
-                    <v-expansion-panel-header>
-                      Inclusions
-                    </v-expansion-panel-header>
-                    <v-expansion-panel-content>
-                      <p v-for="inc in item.roomInclusions" :key="inc">
-                        <v-icon>mdi-check</v-icon> {{ inc }}
+                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <strong>Postal Code:</strong> {{ gtaHotelDetails.Address.PostalCode }}
                       </p>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panels>
-                <v-row class="mx-5 mt-10" justify="space-between" align="center">
-                  <h3>${{ item.roomSeason ? item.roomSeason.roomSeasonPricePerDay : 0 }} / Person </h3>
-                  <div class="d-flex align-center">
-                    <v-text-field
-                      v-model="item.selectionNumber"
-                      min="1"
-                      type="number"
-                      hide-details
-                      class="mr-3"
-                      label="Number of Rooms"
-                      dense
-                      outlined
-                    />
-                    <v-btn tile :color="item.selected ? 'error' : 'late'" class="white--text" @click="manageRoom(item)">
-                      {{ selectedRooms.includes(item) || item.selected ? 'Unselect Room' : 'Select Room' }}
-                    </v-btn>
+                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <strong>Category:</strong> {{ gtaHotelDetails.HotelCategory._ }}
+                      </p>
+                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <strong>Hotel Chain:</strong> {{ gtaHotelDetails.HotelChain.Name }}
+                      </p>
+                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <strong>Descriptions:</strong>
+                        <span v-for="(description, d) in gtaHotelDetails.Descriptions.Description" :key="d">
+                          <span v-if="description.Type === 'LNG'">
+                            <span class="" style="font-size: 15px;margin: 2px 0;">{{ description._ }}</span>
+                          </span>
+                        </span>
+                      </p>
+                      <div class="trips-cityname" style="margin: 10px 0;">
+                        <v-expansion-panels>
+                          <v-expansion-panel v-if="gtaHotelDetails.Features.Feature.length">
+                            <v-expansion-panel-header>
+                              Features
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                              <span v-for="(feature, f) in gtaHotelDetails.Features.Feature" :key="f">
+                                <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ feature._ }}</v-chip>
+                              </span>
+                            </v-expansion-panel-content>
+                          </v-expansion-panel>
+                        </v-expansion-panels>
+                      </div>
+                    </div>
                   </div>
-                </v-row>
-              </v-card-text>
-            </v-card>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <!-- activities -->
-      <v-dialog v-model="activitiesDialog">
-        <client-only>
-          <v-card tile>
-            <v-card-title class="late white--text">
-              <v-btn icon color="white" large @click="activitiesDialog = false">
-                <v-icon>mdi-close</v-icon>
-              </v-btn>City activities
-            </v-card-title>
-            <v-card-text class="pa-5">
-              <v-card v-for="item in packageActivities" :key="item.activityID" class="mb-3">
-                <div v-if="item">
-                  <v-card-title class="late white--text">
-                    <v-row justify="space-between">
-                      <span>{{ item.activityTitle }}</span>
-                      <span>{{ item.activityType }}, {{ item.activityDuration_digits }} {{ item.activityDuration_type }}(s)</span>
-                    </v-row>
-                  </v-card-title>
-                  <v-card-text class="pa-3">
-                    <v-row v-if="item.activityImages.length" class="my-3">
-                      <v-img v-for="image in item.activityImages" :key="image[0]" max-width="150" class="rounder-lg ma-3" :src="image[0]" />
-                    </v-row>
-                    <p class="grey--text" v-html="item.activityOverview" />
-                    <v-row justify="space-around">
-                      <div>
-                        <h4>Includes</h4>
-                        <p v-for="inc in item.activityIncludes" :key="inc">
-                          <v-icon>mdi-check</v-icon> {{ inc }}
-                        </p>
-                      </div>
-                      <div>
-                        <h4>Exclusions</h4>
-                        <p v-for="exc in item.activityExcludes" :key="exc">
-                          <v-icon>mdi-check</v-icon> {{ exc }}
-                        </p>
-                      </div>
-                    </v-row>
-                    <v-simple-table v-if="item.activityType === 'camping' && item.sideActivity.length > 0" dense>
-                      <template #default>
-                        <thead>
-                          <tr>
-                            <th class="text-left">
-                              Title
-                            </th>
-                            <th class="text-left">
-                              Time
-                            </th>
-                            <th class="text-left">
-                              Day Number
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr
-                            v-for="(side, i) in item.sideActivity"
-                            :key="i"
-                          >
-                            <td>{{ side.activityName }}</td>
-                            <td>{{ side.activityTime }}</td>
-                            <td>Day {{ side.activityDayNumber }}</td>
-                          </tr>
-                        </tbody>
-                      </template>
-                    </v-simple-table>
-                    <v-divider />
-                    <v-row class="mx-5" justify="space-between" align="center">
-                      <div>
-                        <h3>Price per person<small class="caption">/minimum {{ item.activityPaxMinimum }} travellers</small> </h3>
-                        <h3>${{ item.activityPricePerPerson }}</h3>
-                      </div>
-                      <v-btn tile class="late white--text" @click="setActivity(item)">
-                        Select
-                      </v-btn>
-                    </v-row>
-                  </v-card-text>
-                </div>
-              </v-card>
-            </v-card-text>
-          </v-card>
-        </client-only>
-      </v-dialog>
-      <v-dialog v-model="activityDetailsDialog">
-        <v-card v-if="activityDetails">
-          <v-card-title class="pa-2 brown white--text d-flex justify-space-between">
-            {{ activityDetails.activityTitle }}
-            <v-btn color="white" icon @click="activityDetailsDialog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text class="pa-5">
-            <v-row v-if="activityDetails.activityImages.length" class="my-3">
-              <v-img v-for="image in activityDetails.activityImages" :key="image[0]" max-width="150" class="rounder-lg ma-3" :src="image[0]" />
-            </v-row>
-            <p class="headline black--text">
-              Over View
-            </p>
-            <p class="body-1" v-html="activityDetails.activityOverview" />
-            <p class="headline black--text">
-              Includes
-            </p>
-            <p v-for="(item, i) in activityDetails.activityIncludes" :key="i + item" class="body-1">
-              {{ item }}
-            </p>
-            <p class="headline black--text">
-              Excludes
-            </p>
-            <p v-for="(item, k) in activityDetails.activityExcludes" :key="k + item" class="body-1">
-              {{ item }}
-            </p>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <!-- email dialog -->
-      <v-dialog v-model="emailDilog">
-        <v-card>
-          <v-card-title class="pa-2 brown white--text d-flex justify-space-between">
-            Please enter your email.
-            <v-btn color="white" icon @click="emailDilog = false">
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text class="pa-5">
-            <v-text-field v-model="email" type="email" prepend-inner-icon="mdi-email" outlined />
-          </v-card-text>
-          <v-card-actions>
-            <v-btn text placeholder="Email ..." color="warning" @click="emailDilog = false">
-              Cancel
-            </v-btn>
-            <v-spacer />
-            <v-btn tile :disabled="!email" elevation="0" color="late white--text" @click="sendEmail">
-              Send
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <!-- price dialog -->
-      <v-dialog v-model="priceDialog" max-width="700">
-        <v-card>
-          <v-card-title class="late white--text">
-            Package Summary
-          </v-card-title>
-          <v-card-text>
-            <v-simple-table class="rounded-xl">
-              <template #default>
-                <thead>
-                  <tr>
-                    <th class="text-left">
-                      Adults Number
-                    </th>
-                    <th class="text-left">
-                      Children Number
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{{ EnteredAdults }}</td>
-                    <td>
-                      <span v-if="EnteredChildren">{{ EnteredChildren }}</span>
-                      <span v-else>No children</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </template>
-            </v-simple-table>
-
-            <v-divider class="my-3" />
-            <div class="d-flex justify-space-between late--text">
-              <div class="text-h5">
-                Grand Total
-              </div>
-              <div class="text-h5">
-                ${{ totalpricevalue }}
-              </div>
-            </div>
-          </v-card-text>
-
-          <v-divider class="my-3" />
-
-          <v-card-actions>
-            <v-btn text color="warning" @click="priceDialog = false">
-              Cancel
-            </v-btn>
-            <v-spacer />
-            <v-btn tile elevation="0" dark color="late" @click="saveTrip">
-              Proceed
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
-      <!-- cruises dialog -->
-      <v-dialog v-model="cruiseDialog" max-width="700">
-        <v-card v-if="packageDetails.cruise">
-          <v-card-title class="late white--text mb-5">
-            Package Cruise
-          </v-card-title>
-          <v-card-text>
-            <v-img max-height="200" :src="packageDetails.cruise.master_image" />
-            <div v-if="packageDetails.cruise.images" class="d-flex flex-wrap justify-center">
-              <v-img
-                v-for="(image, i) in packageDetails.cruise.images"
-                :key="i"
-                max-width="20%"
-                class="ma-1"
-                :src="image.image"
-                max-height="150"
-              />
-            </div>
-            <div class="d-flex justify-space-between align-center">
-              <h3 class="my-1">
-                {{ packageDetails.cruise.name }} <small class="body-2">/ {{ packageDetails.cruise.number_of_nights }} nights</small>
-              </h3>
-              <v-rating
-                background-color="gray"
-                color="warning"
-                dense
-                empty-icon="mdi-star-outline"
-                full-icon="mdi-star"
-                length="5"
-                readonly
-                size="15"
-                :value="packageDetails.cruise.stars"
-              />
-            </div>
-            <p v-html="packageDetails.cruise.description" />
-            <p>
-              <v-icon left color="primary">
-                mdi-map-marker
-              </v-icon> {{ packageDetails.cruise.cruise_line }}
-            </p>
-            <p>
-              <v-icon left color="primary">
-                mdi-ferry
-              </v-icon> {{ packageDetails.cruise.ship_name }}
-            </p>
-
-            <h5>Facilities</h5>
-            <template v-for="(item, i) in packageDetails.cruise.facilities">
-              <v-chip v-if="item" :key="i" class="ma-1">
-                {{ item }}
-              </v-chip>
-            </template>
-
-            <h5>Inclusions</h5>
-            <div v-for="(item, i) in packageDetails.cruise.includes" :key="i">
-              <v-chip v-if="item" :key="i" class="ma-1">
-                {{ item }}
-              </v-chip>
-            </div>
-
-            <h5>Exclusions</h5>
-            <div v-for="(item, i) in packageDetails.cruise.excludes" :key="i">
-              <v-chip v-if="item" :key="i" class="ma-1">
-                {{ item }}
-              </v-chip>
-            </div>
-
-            <h5>Policies</h5>
-            <div v-for="(item, i) in packageDetails.cruise.Policies" :key="i">
-              <v-chip v-if="item" :key="i" class="ma-1">
-                {{ item }}
-              </v-chip>
+                </v-col>
+              </v-row>
             </div>
           </v-card-text>
         </v-card>
       </v-dialog>
-
-      <v-dialog v-model="addCruiseDialog" max-width="700">
-        <v-card>
-          <v-card-title class="late white--text">
-            {{ packageDetails.cruise ? 'Change' : 'Add' }} Package Cruise
-          </v-card-title>
-          <v-card-text class="mt-5">
-            <v-select
-              v-model="cruiseCityID"
-              :items="packageDetails.packageCities"
-              item-value="cityID"
-              item-text="cityName"
-              color="blue"
-              outlined
-              label="Cruise Start City"
-              @input="getCruisesByCity()"
-            />
-
-            <v-select
-              v-model="selectedCruise"
-              :items="cruises"
-              item-value="id"
-              item-text="name"
-              color="blue"
-              outlined
-              label="Choose Crusie"
-              :disabled="!cruiseCityID"
-              clearable
-              return-object
-            />
-          </v-card-text>
-          <v-card-actions>
-            <v-btn text color="warning" @click="addCruiseDialog = false">
-              cancel
-            </v-btn>
-            <v-spacer />
-            <v-btn color="primary" :disabled="!selectedCruise" @click="packageDetails.cruise = selectedCruise; addCruiseDialog = false">
-              {{ packageDetails.cruise ? 'Change' : 'Add' }}
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-    </div>
+    </v-container>
   </div>
 </template>
 
 <script>
+import LoadingScreen from '~/components/LoadingScreen.vue'
 import tripsServices from '~/services/tripsServices'
-import cruisesServices from '~/services/cruisesServices'
+import adventureServices from '~/services/activitiesServies'
 
 export default {
+  components: {
+    LoadingScreen
+  },
   data () {
     return {
-      editingCity: null,
-      EnteredRooms: 0,
-      Occupancyvalue: 0,
-      initialpriceperperson: 0,
-      hoteltotal: 0,
-      activitiestotal: 0,
-      transportationtotal: 0,
-      totalpricevalue: 0,
-      checkicon: false,
-      solo: 0,
-      EnteredAdults: 0,
-      Childrenages: [],
-      childrenpercentage: 0,
-      AdultsCheckbox: false,
-      EnteredChildren: 0,
-      Occupancyentered: 0,
-      OccupancyRooms: 0,
-      OccupancyAdults: 0,
-      OccupancyChildren: 0,
-      Occupancy: 0,
+      isLoading: false,
       snackbar: false,
-      currentprice: 0,
-      newprice: 0,
       color: '',
       text: '',
-      packageDetails: null,
-      packagePrices: null,
-      transportation: null,
-      transDataDialog: false,
-      departFlight: null,
-      returnFlight: null,
-      departAirport: null,
-      returnAirport: null,
-      citiesAirports: [],
-      tripFlightType: 'package',
-      fligthDialog: false,
-      fligthShowDialog: false,
-      query: '',
-      departSearchId: '',
-      returnSearchId: '',
-      selectedFlight: null,
-      packageHotels: [],
-      hotelsDialog: false,
-      showHotelDetails: false,
-      packageHotelDetails: {},
-      showMap: false,
-      editingCityId: null,
-      editingCityIndex: null,
-      center: {
-        lat: 0,
-        lng: 0
-      },
-      markers: [],
-      daysMarker: 0,
-      packageActivities: [],
-      activitiesDialog: false,
-      editingActivityDay: '',
-      updatingActivities: false,
-      addFlightDialog: false,
-      openFlightContent: true,
-      startDate: '',
-      startDateText: '',
-      startDateMenu: false,
-      OccupancyMenu: false,
-      activityDetails: null,
-      activityDetailsDialog: false,
-      guestNationality: { code: 'US', name: 'United States' },
-      singleSupplement: false,
-      single_travellers_num: 0,
-      added_activities: [],
-      removed_activities: [],
-      email: '',
-      emailDilog: false,
-      loadSave: false,
-      removedRooms: [],
-      addedRooms: [],
-      selectedRooms: [],
-      citiesRooms: [],
-      roomsNum: 0,
-      priceDialog: false,
-      hotelPrices: [],
-      packagePriceSessionId: null,
-      guests: [
-        {
-          adults: 1,
-          children: 0,
-          childrenAges: []
-        }
+      loaded: '',
+      packageStartDayText: null,
+      packageStartDay: null,
+      menu: null,
+      travellers: 0,
+      children: 0,
+      ages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+      ageSelects: [],
+      showAgesSelects: false,
+      selectedAdventures: [],
+      activityPhase: false,
+      acomidationPhase: false,
+      tripSummaryPhase: false,
+      e1: 1,
+      // panelExpandedTraveller: 0,
+      panelExpandedPayNow: null,
+      showCheckout: false,
+      showHotelsDialog: false,
+      showRoomsDialog: false,
+      // rooms: 0,
+      room_count: 1,
+      rooms: [
+        { travelers: 0, children: 0, ageSelects: [], roomCategory: { _: 'All', Type: 'all' } }
       ],
-      days: [],
-      cruiseDialog: false,
-      addCruiseDialog: false,
-      cruiseCityID: null,
-      cruises: [],
-      selectedCruise: null,
-      loaded: true
+      roomCategories: [],
+      boards: [],
+      boardType: { _: 'All', Type: 'all' },
+      openProceed: false,
+      packageDetails: {
+        packageImage: 'test'
+      },
+      items: [
+        { title: 'Replace', action: 'replace' },
+        { title: 'View', action: 'view' },
+        { title: 'Remove', action: 'remove' }
+      ],
+      showAddNewAdventuresDialog: false,
+      adventures: [],
+      cities: [],
+      activityIndex: null,
+      dayIndex: null,
+      adventureIndex: null,
+      date: null,
+      tab: null,
+      selected: false,
+      loadingSelectedAdventure: false,
+      showAdventureDetailsDialog: false,
+      adventureDetails: null,
+      cruiseDetails: null,
+      showReplaceAdventureDialog: false,
+      showCruiseDetailsDialog: false,
+      initialPrice: 0,
+      priceSessionId: null,
+      startingDay: 0,
+      panelExpandedActivities: [],
+      showGallery: false,
+      galleries: [],
+      checkResponseCode: false,
+      listGtaHotelDetails: [],
+      showHotelGtaDetails: false,
+      gtaHotelDetails: null,
+      listGtaHotelJpds: [],
+      selectedCityHotelIndex: null,
+      hotelStartDateText: null,
+      hotelStartDate: null,
+      hotelEndDateText: null,
+      hotelEndDate: null,
+      menuStartDate: null,
+      menuEndDate: null,
+      hotelStartDatesText: [],
+      hotelStartDates: [],
+      hotelEndDatesText: [],
+      hotelEndDates: [],
+      menuStartDates: [],
+      menuEndDates: [],
+      selectedDateForAddNewAdventure: null,
+      showDaysArray: [],
+      isAvailable: false,
+      isAvailables: [],
+      hotelAvailsArray: [],
+      // hotelAvails: null,
+      hotelAvails: {
+        HotelOptions: {
+          HotelOption: {
+            Board: {
+              _: 'Room Only',
+              Type: 'SA'
+            },
+            Prices: {
+              Price: {
+                TotalFixAmounts: {
+                  Service: {
+                    Amount: 62.24
+                  },
+                  Gross: 62.24,
+                  Nett: 62.24
+                },
+                Type: 'S',
+                Currency: 'EUR'
+              }
+            },
+            CancellationPolicy: {
+              FirstDayCostCancellation: {
+                _: '2023-11-13',
+                Hour: '00:00'
+              },
+              Description: 'xxxx',
+              PolicyRules: {
+                Rule: [
+                  {
+                    From: 0,
+                    To: 3,
+                    DateFrom: '2023-11-17',
+                    DateFromHour: '00:00',
+                    DateTo: '2023-11-21',
+                    DateToHour: '00:00',
+                    Type: 'V',
+                    FixedPrice: 0,
+                    PercentPrice: 100,
+                    Nights: 0,
+                    ApplicationTypeNights: 'Average'
+                  }
+                ]
+              },
+              CurrencyCode: 'EUR',
+              Type: 'S'
+            },
+            HotelRooms: {
+              HotelRoom: {
+                Name: '1/3 pax',
+                RoomCategory: {
+                  _: '',
+                  Type: '187'
+                },
+                RoomOccupancy: {
+                  Occupancy: 2,
+                  MaxOccupancy: 5,
+                  Adults: 2,
+                  Children: 0
+                },
+                Units: 1,
+                Source: '1',
+                AvailRooms: 33
+              }
+            },
+            RatePlanCode: 'xxxx',
+            Status: 'OK',
+            NonRefundable: false,
+            PackageContract: false
+          }
+        },
+        Code: 'xxxx',
+        JPCode: 'xxxx',
+        JPDCode: 'xxxx',
+        BestDeal: true,
+        Type: 'HOTEL',
+        DestinationZone: 'xxxx'
+      },
+      hotelAvailsList: [],
+      selectedHotelIndex: null,
+      hotelPrices: 0,
+      hotelAvailPrices: [],
+      additionalPrice: 0,
+      discountPercentage: 0,
+      totalAllPrices: 0,
+      isInputValid: false,
+      selectedRoomGta: null,
+      getRatePlanCode: null,
+      selectedHotelStartDate: null,
+      selectedHotelEndDate: null,
+      selectedHotelCode: null,
+      selectedHotelJPCode: null,
+      selectedHotelJPDCode: null,
+      selectedHotelCodes: [],
+      selectedHotelJPCodes: [],
+      selectedHotelJPDCodes: [],
+      confirmedSelectedRoom: false,
+      getbookingRule: null,
+      selectedRoomGtas: [],
+      getRatePlanCodes: [],
+      getbookingRules: [],
+      selectedRoomGtaArray: [],
+      getRatePlanCodeArray: [],
+      hotelPricesArray: [],
+      selectedHotelStartDateArray: [],
+      selectedHotelEndDateArray: [],
+      selectedHotelCodeArray: [],
+      selectedHotelJPCodeArray: [],
+      selectedHotelJPDCodeArray: [],
+      confirmedSelectedRoomArray: [],
+      getbookingRuleArray: [],
+      isBooked: false,
+      name: '',
+      nameRules: [v => (!!v && v.length > 1) || 'Item is required at least 2 characters',
+        v => /^[A-Za-z][A-Za-z]*$/.test(v) || 'Name Must be letters only with no spaces'
+      ],
+      phone: '',
+      email: '',
+      emailRules: [
+        v => !!v || 'E-mail is required',
+        v => /^([A-Za-z0-9_\-.])+@([A-Za-z0-9_\-.])+\.([A-Za-z]{2,4})$/.test(v) || 'E-mail must be valid'
+      ],
+      title: null,
+      surname: null,
+      age: null,
+      issueCountry: null,
+      search: null,
+      requiredRule: [
+        v => !!v || 'Field is required'
+      ],
+      getBookingCode: null,
+      getBookingCodeArray: [],
+      otherTravellers: [],
+      otherChildren: [],
+      bNames: [],
+      bSurnames: [],
+      bAges: [],
+      bNamesChild: [],
+      bSurnamesChild: [],
+      bAgesChild: [],
+      checkHasCruise: false,
+      finalBookHotelFormData: null,
+      finalBookHotelsFormData: [],
+      identification_document_pax: '',
+      address_pax: '',
+      city_pax: '',
+      country_pax: '',
+      postal_code_pax: '',
+      dayActivities: []
     }
   },
+  // async created () {
+  //   await this.getPackage()
+  // },
   async fetch () {
     if (this.$route.params.slug) {
       await this.getPackage()
+      await this.getRoomCategories()
     } else if (this.$route.query.custom_package) {
-      await this.getSavedPackage()
+      // await this.getSavedPackage()
     } else { this.$router.go(-1) }
   },
-  head () {
-    return {
-      title: this.$route.params.slug
-    }
-  },
   computed: {
+    // isButtonEnabled () {
+    //   const getCountOfChildren = this.children
+    //   const ageSelects = this.ageSelects
+    //   let checkCountofAges = 0
+    //   let childrenValidate = false
+    //   let initialPriceValidate = false
+    //   if (ageSelects.length) {
+    //     for (const ageSelect of ageSelects) {
+    //       if (ageSelect && ageSelect.age !== null) {
+    //         checkCountofAges++
+    //       }
+    //     }
+    //   }
+    //   if (getCountOfChildren > 0) {
+    //     if (getCountOfChildren === checkCountofAges) {
+    //       childrenValidate = true
+    //     } else {
+    //       childrenValidate = false
+    //     }
+    //   } else {
+    //     childrenValidate = true
+    //   }
+    //   if (this.initialPrice > 0) {
+    //     initialPriceValidate = true
+    //   } else {
+    //     initialPriceValidate = false
+    //   }
+
+    //   return childrenValidate && initialPriceValidate
+    // },
+    isButtonEnabled () {
+      const getCountOfChildren = this.children
+      const rooms = this.rooms
+      let checkCountofAges = 0
+
+      // Check if all children have selected ages
+      // const childrenValidate = rooms.every((room) => {
+      //   const ageSelects = room.ageSelects || []
+      //   return getCountOfChildren === ageSelects.filter(ageSelect => ageSelect && ageSelect.age !== null).length
+      // })
+
+      if (rooms.length) {
+        for (const room of rooms) {
+          if (room.ageSelects.length) {
+            for (const ageSelect of room.ageSelects) {
+              if (ageSelect && ageSelect.age !== null) {
+                checkCountofAges++
+              }
+            }
+          }
+        }
+      }
+
+      // Check if all children have selected ages
+      const childrenValidate = checkCountofAges === getCountOfChildren
+
+      // Check if initialPrice is greater than 0
+      const initialPriceValidate = this.initialPrice > 0
+
+      // Return true if both conditions are met for all rooms
+      return childrenValidate && initialPriceValidate
+    },
     countries () {
       return this.$store.state.countries
-    }
-  },
-  watch: {
-    startDate (newVal) {
-      this.packageDetails.packageStartDate = newVal
-    }
-  },
-  created () {
-    this.setGuests([
-      {
-        adults: 1,
-        children: 0,
-        childrenAges: []
+    },
+    isButtonEnabledFormValidation () {
+      const getPhone = this.phone
+      const checkPhoneExist = getPhone !== null ? getPhone.formattedNumber : null
+      let checkValidate = false
+      if (this.title !== null && this.name !== null && this.surname !== null && checkPhoneExist !== null && this.email !== null && this.age !== null && this.issueCountry !== null) {
+        checkValidate = true
+      } else {
+        checkValidate = false
       }
-    ])
+      if (this.bNames.length === this.otherTravellers.length && this.bSurnames.length === this.otherTravellers.length && this.bAges.length === this.otherTravellers.length) {
+        checkValidate = true
+      } else {
+        checkValidate = false
+      }
+      if (this.bNamesChild.length === this.otherChildren.length && this.bSurnamesChild.length === this.otherChildren.length && this.bAgesChild.length === this.otherChildren.length) {
+        checkValidate = true
+      } else {
+        checkValidate = false
+      }
+      return checkValidate
+    },
+    totalTravelers () {
+      return this.rooms.reduce((sum, room) => sum + room.travelers, 0)
+    },
+    totalChildren () {
+      return this.rooms.reduce((sum, room) => sum + room.children, 0)
+    },
+    roomCategoriesWithAll () {
+      // Create a new array with an "All" option
+      return [{ _: 'All', Type: 'all' }, ...this.roomCategories]
+    },
+    boardsWithAll () {
+      // Create a new array with an "All" option
+      return [{ _: 'All', Type: 'all' }, ...this.boards]
+    }
   },
   methods: {
-    async getCruisesByCity () {
-      const promise = cruisesServices.getCityCruises(this.cruiseCityID, 1, 10)
-      const response = await promise
-      const results = response.data
-      this.cruises = results.data.cruiseList
+    formatDate (date, i, type, index) {
+      if (!date) { return null }
+      const [year, month, day] = date.split('-')
+      // const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      // const newDate = `${day} ${months[month - 1]} ${year}`
+      const newDate = `${day}-${month}-${year}`
+      if (type === 'packageStartDay') { this.packageStartDayText = newDate }
+      if (type === 'hotelStartDate') { this.hotelStartDatesText[index] = newDate }
+      if (type === 'hotelEndDate') { this.hotelEndDatesText[index] = newDate }
+      this.calcDaysFromDetails()
     },
-    setGuests (guests) {
-      this.EnteredRooms = guests.length
-      this.guests = guests
-      this.EnteredAdults = 0
-      this.EnteredChildren = 0
-      this.Childrenages = []
-      guests.forEach((item) => {
-        this.EnteredAdults += Number(item.adults)
-        this.EnteredChildren += Number(item.children)
-        this.Childrenages.concat(item.childrenAges)
-      })
-    },
-    showRoomUpdateAlert () {
-      this.snackbar = true
-      this.color = 'warning'
-      this.text = 'You have updated your criteria. Please update your rooms selection.'
-    },
-    manageRoom (room) {
-      if (this.selectedRooms.find(item => item.roomID === room.roomID)) {
-        this.selectedRooms.splice(this.selectedRooms.indexOf(room), 1)
-        room.selected = false
-        room.selectionNumber = 1
-      } else {
-        this.selectedRooms.push(room)
-        room.selected = true
-      }
-    },
-    reserveRooms () {
-      let roomsAdultsOccupancy = 0
-      let roomsChildrenOccupancy = 0
-      this.selectedRooms.forEach((room) => {
-        roomsAdultsOccupancy += parseInt(room.roomMaxNumberOfAdult) * room.selectionNumber
-        roomsChildrenOccupancy += parseInt(room.roomMaxNumberOfChildren) * room.selectionNumber
-      })
-      if (roomsAdultsOccupancy >= parseInt(this.EnteredAdults) && roomsChildrenOccupancy >= parseInt(this.EnteredChildren || 0)) {
-        this.editingCity.selectedRooms = this.selectedRooms
-        this.editingCity.selectedRooms.forEach((room) => {
-          this.citiesRooms.push(room)
-          this.roomsNum += parseInt(room.selectionNumber)
-        })
-        this.selectedRooms = []
-        this.showHotelDetails = false
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please select the correct number of rooms! your occupancy is ' + this.EnteredAdults + ' adults and ' + this.EnteredChildren || 0 + ' children and your rooms occupancies are ' + roomsAdultsOccupancy + ' adults and ' + roomsChildrenOccupancy + ' children'
-      }
-    },
-    allowedDates (val) {
-      const date = new Date(val.replaceAll('-', '/'))
-      const days = this.packageDetails.start_days.filter(item => !!item)
-      const seasons = this.packageDetails.seasons
-      let allowedDay = false
-      if (days.includes(date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()) || !days.length) { allowedDay = true }
-      let allowedSeason = false
-      if (seasons.length) {
-        for (let index = 0; index < seasons.length; index++) {
-          if (date.getTime() >= new Date(seasons[index].from.replaceAll('-', '/')).getTime() && date.getTime() <= new Date(seasons[index].to.replaceAll('-', '/')).getTime()) { allowedSeason = true }
-        }
-      } else { allowedSeason = true }
-      return allowedDay && allowedSeason
-    },
-    getDateHint () {
-      let text = 'You can choose from allowed dates :'
-      for (let index = 0; index < this.packageDetails.start_days.filter(item => !!item).length; index++) {
-        if (this.packageDetails.start_days[index]) { text += this.packageDetails.start_days[index] + ',' }
-      }
-      for (let index = 0; index < this.packageDetails.seasons.length; index++) {
-        text += 'from' + this.packageDetails.seasons[index].from + ' to ' + this.packageDetails.seasons[index].to + ' / '
-      }
-      if (!this.packageDetails.start_days.filter(item => !!item).length && !this.packageDetails.seasons.length) { text = '' }
-      return text
-    },
-    prevDaysNum (index) {
-      let count = 0
-      if (index) {
-        for (let i = 0; i < index; i++) {
-          count += Object.keys(this.packageDetails.packageCities[i].cityActivities).length
-        }
-      }
-      return count
-    },
-    setDaysMarker (index) {
-      this.daysMarker = index + 1
-    },
-    closeAllDialogs () {
-      this.transDataDialog = false
-      this.fligthDialog = false
-      this.fligthShowDialog = false
-      this.hotelsDialog = false
-      this.activitiesDialog = false
-      this.addFlightDialog = false
-    },
-    formatDate () {
-      if (!this.startDate) { return null }
-      const [year, month, day] = this.startDate.split('-')
+    formatDateAllDays (date, num, type = null) {
+      if (!date) { return null }
+      const [year, month, day] = date.split('-')
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      const newDate = `${day} ${months[month - 1]} ${year}`
-      this.startDateText = newDate
-    },
-    removeCity (i) {
-      if (this.startDate) {
-        Object.entries(this.packageDetails.packageCities[i].cityActivities).forEach(([key, value]) => {
-          value.forEach((item) => {
-            this.removed_activities.push(item.activity)
-            this.initialpriceperperson -= item.activity.activityPricePerPerson
-          })
-        })
-        delete this.packageDetails.packageCities.splice(i, 1)
+      if (type === 'default') {
+        const newDate = `${year}-${month}-${parseInt(day) + parseInt(num) - 1}`
+        // console.log(date, type, newDate)
+        return newDate
       } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
+        const newDate = `${parseInt(day) + parseInt(num) - 1} ${months[month - 1]} ${year}`
+        return newDate
       }
+      // const newDate = `${day}-${month}-${year}`
+      // if (type === 'packageStartDay') { this.packageStartDayText = newDate }
     },
-    async getHotels (id, i) {
-      if (this.startDate) {
-        this.editingCityIndex = i
-        const checkInDate = this.getDate(this.packageDetails.packageStartDate, this.getDaysNumber())
-        const checkOutDate = this.getDate(checkInDate, this.packageDetails.packageCities[i].cityDaysNumber)
-        const promise = tripsServices.getTripHotels(id, checkInDate, checkOutDate, this.OccupancyRooms, this.OccupancyAdults, this.OccupancyChildren)
-        const response = await promise
-        const results = response.data.data
-        if (results.hotelList.length > 0) {
-          this.packageHotels = results.hotelList
-          this.hotelsDialog = true
-        } else {
-          this.snackbar = true
-          this.color = 'error'
-          this.text = 'No hotels found'
-        }
+    formatDays (day, type) {
+      // let dayString = 0
+      // console.log('test day', day)
+      // if (!day) { return null }
+      // if (type === 'adventure') {
+      //   dayString++
+      //   this.startingDay = dayString
+      //   console.log(this.startingDay)
+      // } else {
+      //   // this.startingDay += 1
+      //   // return this.startingDay
+      //   console.log(type)
+      // }
+      return ' ' + day
+      // if (day === 1) {
+      // this.startingDay += +day
+      // return this.startingDay
+      // dayString = this.startingDay
+      // return dayString
+      // } else {
+      //   this.startingDay += +day
+      //   dayString = this.startingDay
+      //   // return (dayString - 1) + ' ' + dayString
+      // }
+    },
+    async changeCounterAdult (num) {
+      if (!this.packageStartDay) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select start date to custom your trip'
+        this.loaded = false
       } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
-      }
-    },
-    async getHotelDetails (id) {
-      if (this.startDate) {
-        this.hotelsDialog = false
-        // getTripHotelDetails
-        const promise = tripsServices.getTripHotelDetails(id, this.EnteredRooms, this.EnteredAdults, this.EnteredChildren || 0, this.Childrenages)
-        const response = await promise
-        const results = response.data.data
-        this.selectedRooms = this.editingCity.selectedRooms
-        this.packageHotelDetails = results
-        this.editingCity.cityHotels = [results]
-        this.packageHotelDetails.hotelRooms.forEach((item) => {
-          if (this.editingCity.selectedRooms.find(room => item.roomID === room.roomID)) { item.selected = true } else { item.selected = false }
-          if (this.editingCity.selectedRooms.find(room => item.roomID === room.roomID)) { item.selectionNumber = this.editingCity.selectedRooms.find(room => item.roomID === room.roomID).selectionNumber } else { item.selectionNumber = 1 }
-        })
-        this.showHotelDetails = true
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
-      }
-    },
-    async calculateprice () {
-      const body = {
-        numberOfRooms: this.guests.length,
-        roomGuests: this.guests,
-        package_id: this.packageDetails.packageID,
-        startDate: this.startDate,
-        added_activities: this.added_activities,
-        removed_activities: this.removed_activities,
-        added_rooms: this.addedRooms,
-        removed_rooms: this.removedRooms,
-        singleSupplement: this.singleSupplement,
-        single_travellers_num: this.single_travellers_num,
-        solo: this.AdultsCheckbox,
-        packageCities: []
-      }
-
-      if (this.packageDetails.cruise) { body.cruise_id = this.packageDetails.cruise.id }
-
-      this.packageDetails.packageCities.forEach((item) => {
-        if (typeof item.cityHotels[0] === 'undefined') {
-          body.packageCities.push({
-            cityID: item.cityID,
-            cityDaysNumber: item.cityDaysNumber,
-            cityDuration: item.cityDuration,
-            hotelRooms: item.selectedRooms
-          })
-        } else {
-          body.packageCities.push({
-            cityID: item.cityID,
-            cityDaysNumber: item.cityDaysNumber,
-            hotelRooms: item.selectedRooms,
-            cityDuration: item.cityDuration,
-            hotelID: item.cityHotels[0].hotelID
-          })
-        }
-      })
-      const promise = tripsServices.getTripTotalPrice(body)
-      const response = await promise
-      const results = response.data.data
-      this.totalpricevalue = results.totalPrice
-      this.hotelPrices = results.hotelPrices
-      this.packagePriceSessionId = results.sessionId
-      this.priceDialog = true
-    },
-    changeRoom (room) {
-      if (this.startDate) {
-        this.packageDetails.packageCities.forEach((item) => {
-          if (this.editingCityId === item.cityID) {
-            const days = this.packageDetails.packageCities.find(x => x.cityID === item.cityID)
-            if (item.cityHotels[0]) { this.initialpriceperperson = item.cityHotels[0].room.roomSeason ? this.initialpriceperperson - (Number(item.cityHotels[0].room.roomSeason.roomSeasonPricePerDay) * days.cityDaysNumber) : 0 }
-            item.cityHotels[0].room.numberOfNights = days.cityDaysNumber
-            room.numberOfNights = days.cityDaysNumber
-            this.removedRooms.push(item.cityHotels[0].room)
-            this.addedRooms.push(room)
-            item.cityHotels[0] = {
-              hotelID: this.packageHotelDetails.hotelID,
-              hotelImage: this.packageHotelDetails.hotelImage,
-              hotelName: this.packageHotelDetails.hotelName,
-              hotelStars: this.packageHotelDetails.hotelStars,
-              room,
-              tripCityHotelID: this.packageHotelDetails.hotelID
+        this.travellers += +num
+        if (!isNaN(this.travellers) && this.travellers > 0) {
+          await this.calculateAllPrice(this.packageStartDay)
+          if (this.travellers > 1) {
+            if (num > 0) {
+              this.otherTravellers.push({ id: this.travellers })
+            } else {
+              this.otherTravellers.splice(-1, 1)
             }
-            this.hoteltotal = room.roomSeason ? room.roomSeason.roomSeasonPricePerDay : 0
-            this.initialpriceperperson = Number(this.initialpriceperperson) + (Number(this.hoteltotal) * days.cityDaysNumber)
+            this.otherTravellers = this.onlyUniqueObjectsId(this.otherTravellers)
           }
-        })
-        this.showHotelDetails = false
-        this.hotelsDialog = false
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
+          return this.travellers
+        } else {
+          this.travellers = 0
+          this.otherTravellers = []
+        }
+        await this.calculateAllPrice(this.packageStartDay)
       }
     },
-    openMap (lat, lng) {
-      this.showMap = !this.showMap
-      this.center.lat = parseFloat(lat)
-      this.center.lng = parseFloat(lng)
-      this.markers.push({ position: this.center })
-    },
-    async getActivities (id) {
-      if (this.startDate) {
-        const promise = tripsServices.getTripActivities(id, 1)
-        const response = await promise
-        const results = response.data.data
-        this.packageActivities = results.ActivityList
-        this.activitiesDialog = true
-      } else {
+    async changeCounterChild (num) {
+      if (!this.packageStartDay) {
         this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
-      }
-    },
-    setActivity (activity) {
-      if (this.startDate) {
-        this.packageDetails.packageCities.forEach((item) => {
-          if (this.editingCityId === item.cityID) {
-            item.cityActivities[this.editingActivityDay].push({ activity, activityDayNumber: this.editingActivityDay.split('_')[1] })
-            this.added_activities.push(activity)
-            this.initialpriceperperson += Number(activity.activityPricePerPerson)
-            this.activitiestotal += (Number(activity.activityPricePerPerson) * this.OccupancyAdults)
+        this.color = 'error'
+        this.text = 'Please select start date to custom your trip'
+        this.loaded = false
+      } else {
+        this.children += +num
+        if (!isNaN(this.children) && this.children > 0) {
+          if (num > 0) {
+            this.ageSelects.push({ age: null })
+            this.showAgesSelects = true
+          } else {
+            this.ageSelects.splice(-1, 1)
           }
-          this.activitiesDialog = false
-        })
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
-      }
-    },
-    removeActivity (i, j, key) {
-      if (this.startDate) {
-        this.updatingActivities = true
-        this.initialpriceperperson -= this.packageDetails.packageCities[i].cityActivities[key][j].activity.activityPricePerPerson
-        this.removed_activities.push(this.packageDetails.packageCities[i].cityActivities[key][j].activity)
-        this.packageDetails.packageCities[i].cityActivities[key].splice(j, 1)
-        this.updatingActivities = false
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
-      }
-    },
-    showCheckIcon (cityIndex, index, type, price) {
-      if (this.startDate) {
-        document.getElementsByClassName(`w-form-formradioinput-${cityIndex}`).forEach((element) => {
-          element.style.display = 'none'
-        })
-        document.getElementsByClassName('transport-m').forEach((element) => {
-          element.style.color = 'rgb(148, 146, 146)'
-        })
-        document.getElementById(`trans-label-${cityIndex}-${index}`).style.color = '#333'
-        document.getElementById(`check-icon-${cityIndex}-${index}`).style.display = 'flex'
-        if (this.packageDetails.packageCities[cityIndex].cityTransportationPrice) { this.initialpriceperperson -= Number(this.packageDetails.packageCities[cityIndex].cityTransportationPrice) }
-        if (type !== 'flight') {
-          this.packageDetails.packageCities[cityIndex].cityTransportation = type
-          this.packageDetails.packageCities[cityIndex].cityTransportationPrice = price
-          this.initialpriceperperson += Number(price)
+          if (this.children > 0) {
+            if (num > 0) {
+              this.otherChildren.push({ id: this.children })
+            } else {
+              this.otherChildren.splice(-1, 1)
+            }
+            this.otherChildren = this.onlyUniqueObjectsId(this.otherChildren)
+          }
+          await this.calculateAllPrice(this.packageStartDay)
+          return this.children
+        } else {
+          this.ageSelects = []
+          this.children = 0
         }
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
+        await this.calculateAllPrice(this.packageStartDay)
       }
     },
-    getDate (date, nights) {
-      if (this.startDate) {
-        const editingDate = new Date(date)
-        editingDate.setDate(editingDate.getDate() + nights)
-        const dd = String(editingDate.getDate()).padStart(2, '0')
-        const mm = String(editingDate.getMonth() + 1).padStart(2, '0')
-        const yyyy = editingDate.getFullYear()
-        const dateFormatted = yyyy + '-' + mm + '-' + dd
-        return dateFormatted
-      } else {
+    getAgeSelectErrorMessages (index) {
+      if (!this.showAgesSelects) {
+        return [] // Skip error messages if age selects are hidden
+      }
+      const ageSelect = this.ageSelects[index]
+      if (ageSelect && ageSelect.age === null) {
+        return ['This field is required']
+      }
+      return []
+    },
+    checkPackageDateIsExist () {
+      if (!this.packageStartDay) {
         this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
+        this.color = 'error'
+        this.text = 'Please select start date to custom your trip'
+        this.loaded = false
+      } else {
+        this.e1 = 2
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     },
-    getDaysNumber () {
-      if (this.startDate) {
-        let days = 0
-        for (let index = 0; index < this.packageDetails.packageCities.length; index++) {
-          if (index < this.editingCityIndex) { days = days + Number(this.packageDetails.packageCities[index].cityDaysNumber) }
-        }
-        return days
+    checkTheStepCurrent () {
+      if (this.e1 === 2) {
+        this.loaded = true
+        this.openProceed = true
+        this.showCheckout = true
       } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
+        this.openProceed = false
+        this.showCheckout = false
       }
     },
-    minimisePrice (dayActivities) {
-      if (this.startDate) {
-        if (dayActivities !== null && dayActivities !== undefined) {
-          for (let index = 0; index < dayActivities.length; index++) {
-            this.initialpriceperperson -= Number(dayActivities[index].activity.activityPricePerPerson)
+    async showHotels (indexCity) {
+      this.listGtaHotelJpds = []
+      const getHotels = this.listGtaHotelDetails[indexCity]
+      if (getHotels.hotelJpds.length > 0) {
+        for (let index = 0; index < getHotels.hotelJpds.length; index++) {
+          if (getHotels.hotelJpds[index]) {
+            const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
+            const response2 = await promise2
+            const results2 = response2.data.ContentRS.Contents.HotelContent
+            results2.city_id = getHotels.city_id
+            results2.city_name = getHotels.city_name
+            results2.hotelIDs = getHotels.hotelIDs
+            results2.hotelJpds = getHotels.hotelJpds
+            results2.isAvailable = false
+            results2.isAvailableText = 'Not Checked with Dates'
+            this.listGtaHotelJpds.push(results2)
           }
         }
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-        this.closeAllDialogs()
       }
+      this.selectedCityHotelIndex = indexCity
+      this.showHotelsDialog = true
+    },
+    showRooms (HotelIndex) {
+      // if (this.listGtaHotelDetails.length > 1) {
+      //   this.hotelAvails = this.hotelAvailsArray[HotelIndex]
+      // }
+      // if (this.hotelAvails !== null) {
+      //   this.showRoomsDialog = true
+      // }
+      if (this.hotelAvailsList[HotelIndex] !== null) {
+        this.hotelAvails = this.hotelAvailsList[HotelIndex]
+        this.selectedHotelIndex = HotelIndex
+        this.showRoomsDialog = true
+      }
+    },
+    async changeCounterRoom (index, type, value) {
+      if (!this.packageStartDay) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select start date to custom your trip'
+        this.loaded = false
+      } else if (this.packageStartDay) {
+        if (type === 'rooms') {
+          this.room_count += +value
+          if (this.room_count > 0) {
+            if (value > 0) {
+              this.rooms.push({ travelers: 0, children: 0, ageSelects: [], roomCategory: { _: 'All', Type: 'all' } })
+            } else {
+              this.rooms.splice(-1, 1)
+            }
+          } else {
+            this.room_count = 0
+            this.rooms = []
+          }
+        } else {
+          // Ensure the value is not negative
+          const newValue = Math.max(0, this.rooms[index][type] + value)
+          // Update the value in the rooms array
+          this.$set(this.rooms, index, {
+            ...this.rooms[index],
+            [type]: newValue
+          })
+
+          // If the type is 'children' and the value is 1, add an age selection for the new child
+          if (type === 'children') {
+            this.addAgeSelection(index, value)
+            this.showAgesSelects = true
+          }
+        }
+        this.travellers = this.totalTravelers
+        this.children = this.totalChildren
+        await this.calculateAllPrice(this.packageStartDay)
+        this.otherTravellers = []
+        this.otherChildren = []
+        for (let x = 1; x <= this.totalTravelers - 1; x++) {
+          this.otherTravellers.push({ id: x })
+        }
+        this.otherTravellers = this.onlyUniqueObjectsId(this.otherTravellers)
+        for (let y = 1; y <= this.totalChildren; y++) {
+          this.otherChildren.push({ id: y })
+        }
+        this.otherChildren = this.onlyUniqueObjectsId(this.otherChildren)
+      }
+    },
+    addAgeSelection (index, value) {
+      // Add an initial age selection for the new child
+      // this.$set(this.rooms[index].ageSelects, this.rooms[index].children, { age: null })
+
+      // Initialize ageSelects as an empty array if it doesn't exist
+      if (!this.rooms[index].ageSelects) {
+        this.$set(this.rooms[index], 'ageSelects', [])
+      }
+
+      if (value === 1) {
+        // Add an initial age selection for the new child
+        this.rooms[index].ageSelects.push({ age: null })
+      } else {
+        this.rooms[index].ageSelects.splice(-1, 1)
+      }
+    },
+    getRoomAgeSelectErrorMessages (roomIndex, childIndex) {
+      // Implement this method to provide error messages if needed
+      // For example, you can check if the age selected for a child is valid
+      // and return an array of error messages
+      if (!this.showAgesSelects) {
+        return [] // Skip error messages if age selects are hidden
+      }
+      const ageSelect = this.rooms[roomIndex].ageSelects[childIndex]
+      if (ageSelect && ageSelect.age === null) {
+        return ['This field is required']
+      }
+      return []
     },
     async getPackage () {
       const promise = tripsServices.getTripDetails(this.$route.params.slug)
       const response = await promise
       const results = response.data
       this.packageDetails = results.data
-      this.packageDetails.packageCities.forEach(function (i) {
-        i.selectedRooms = []
-        i.days = []
-        for (let index = 0; index < Object.keys(i.cityActivities).length; index++) {
-          i.days[index] = 'open'
+      this.initialPrice = this.packageDetails.intialprice
+      this.additionalPrice = this.packageDetails.additionalprice
+      this.discountPercentage = this.packageDetails.discountprecentage
+      this.totalAllPrices = this.getFinalTotalPrices()
+      this.priceSessionId = this.packageDetails.sessionId
+      if (this.packageDetails.activities.length > 0) {
+        for (let x = 0; x < this.packageDetails.activities.length; x++) {
+          if (this.packageDetails.activities[x].type === 'cruise') {
+            this.checkHasCruise = true
+          }
         }
-        for (let index = 0; index < Object.keys(i.cityActivities).length; index++) {
-          const activity = i.cityActivities['day_' + (Number(index) + 1)].find(el => el.activity && el.activity.activityType === 'cruise')
-          if (activity) {
-            for (let j = 1; j < activity.activity.activityDuration_digits; j++) {
-              i.days[index + j] = 'closed'
+      }
+      if (this.packageDetails.packageImages.length > 0) {
+        this.galleries = this.packageDetails.packageImages.map((image, imageIndex) => ({
+          src: image.image
+        }))
+      }
+      if (this.packageDetails.package_hotel.length > 0) {
+        const packageHotel = this.packageDetails.package_hotel
+        for (let index = 0; index < packageHotel.length; index++) {
+          if (packageHotel[index].hotel.Jpd_code) {
+            const promise2 = tripsServices.getGtaHotelDetails(packageHotel[index].hotel.Jpd_code)
+            const response2 = await promise2
+            const results2 = response2.data.ContentRS.Contents.HotelContent
+            results2.city_id = packageHotel[index].city_id
+            results2.city_name = packageHotel[index].city_name
+            results2.hotelIDs = packageHotel[index].hotelIDs
+            results2.hotelJpds = packageHotel[index].hotelJpds
+            results2.isAvailable = false
+            results2.isAvailableText = 'Not Checked with Dates'
+            this.listGtaHotelDetails.push(results2)
+          }
+        }
+      }
+      if (this.packageDetails.availabilities.length > 0) {
+        const availabilities = this.packageDetails.availabilities
+        for (let indexA = 0; indexA < availabilities.length; indexA++) {
+          const getDays = availabilities[indexA].days
+          for (let indexB = 0; indexB < getDays.length; indexB++) {
+            this.showDaysArray.push(getDays[indexB])
+          }
+        }
+      }
+      this.calcDaysFromDetails()
+      // Initialize the 'panelExpandedActivities' array with all values set to 'true'
+      this.panelExpandedActivities = this.packageDetails.activities.map(() => 0)
+    },
+    getCityImage (name) {
+      let img = ''
+      switch (name) {
+        case 'Cairo':
+          img = 'cairo-city.jpg'
+          break
+        case 'Giza':
+          img = 'blog-img.jpg'
+          break
+        case 'Aswan':
+          img = 'aswan.jpg'
+          break
+        case 'Luxor':
+          img = '208568-p-800.png'
+          break
+        case 'Sharm El Sheikh':
+          img = 'dahab9-p-500.jpeg'
+          break
+        case 'Hurghada':
+          img = 'dahab7.jpg'
+          break
+        case 'Alexandria':
+          img = 'alex.jpg'
+          break
+        case 'Dahab':
+          img = 'dahab3.jpg'
+          break
+        default:
+          img = 'egypt.jpg'
+          break
+      }
+      return img
+    },
+    getAllTitles (objectList) {
+      const titles = []
+      const separator = ', ' // Specify the separator you want
+      // Loop through each object in the list
+      for (const obj of objectList) {
+        // Check if the object has a 'title' property
+        if (obj.adventrue.activityTitle != null) {
+          titles.push(obj.adventrue.activityTitle) // Push the title to the 'titles' array
+        }
+      }
+      const resultString = titles.join(separator)
+      return resultString
+    },
+    async changeDayNumber (index, num) {
+      if (!this.packageStartDay) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select start date to custom your trip'
+        this.loaded = false
+      } else {
+        this.panelExpandedActivities[index] = null
+        this.packageDetails.activities[index].days_number += +num
+        if (num === '1') {
+          this.packageDetails.activities[index].days.push({
+            day_number: this.packageDetails.activities[index].days_number,
+            start: this.packageDetails.activities[index].days_number,
+            days: []
+          })
+        } else {
+          this.packageDetails.activities[index].days.splice(-1, 1)
+        }
+        if (!isNaN(this.packageDetails.activities[index].days_number) && this.packageDetails.activities[index].days_number > 0) {
+          this.calcDaysFromDetails()
+          await this.calculateAllPrice()
+          return this.packageDetails.activities[index].days_number
+        } else {
+          this.packageDetails.activities[index].days_number = 1
+        }
+        this.calcDaysFromDetails()
+        await this.calculateAllPrice()
+      }
+    },
+    async addNewAdventureToActivity (activityIndex, dayIndex, cityId, day, dayActivities) {
+      // console.log('dayActivities: ' + dayActivities)
+      // console.log('addNewAdventureToActivity', day)
+      if (!this.packageStartDay) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select start date to custom your trip'
+        this.loaded = false
+      } else {
+        this.activityIndex = activityIndex
+        this.dayIndex = dayIndex
+        this.selectedDateForAddNewAdventure = day
+        this.dayActivities = []
+        // console.log(this.packageDetails.activities[activityIndex].days[dayIndex].days)
+        // console.log(activityIndex, dayIndex)
+        // for (let x = 0; x < dayActivities.length; x++) {
+        //   if (dayActivities[x].adventure_id > 0) {
+        //     this.dayActivities.push(dayActivities[x].adventure_id)
+        //   }
+        // }
+        const days = this.packageDetails.activities[activityIndex].days[dayIndex].days
+        // console.log(this.packageDetails.activities[activityIndex].days[dayIndex].days.length)
+        for (let x = 0; x < days.length; x++) {
+          // console.log(this.packageDetails.activities[activityIndex].days[dayIndex].days[x].adventure_id)
+          if (days[x].adventrue_id > 0) {
+            this.dayActivities.push(days[x].adventrue_id)
+          }
+        }
+        // console.log(this.dayActivities.join(','))
+        await this.getAdventures(cityId, day, this.dayActivities.join(','))
+        this.showAddNewAdventuresDialog = true
+      }
+    },
+    async getAdventures (cityId, day, activities) {
+      this.isLoading = true
+      // console.log(cityId)
+      try {
+      // let cityId
+      // this.$route.query.cityId ? cityId = this.$route.query.cityId : cityId = this.cities.find(city => city.CityName === this.$route.params.city).CityID
+        // const promise = adventureServices.getCityAdventures(cityId, 1, this.packageStartDay)
+        const promise = adventureServices.getCityAdventures(cityId, 1, day, activities)
+        const response = await promise
+        const results = response.data
+        this.adventures = []
+        if (results.data.ActivityList.length > 0) {
+          this.adventures = results.data.ActivityList
+          this.adventures.forEach((item) => {
+            item.selected = true
+            item.start_days = item.start_days.filter(data => !!data)
+          })
+        }
+        this.isLoading = false
+      } catch (error) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Something went wrong'
+        this.loaded = false
+        this.isLoading = false
+      }
+    },
+    getDateHint () {
+      let text = 'You can choose from allowed dates :'
+      for (let index = 0; index < this.adventure.start_days.filter(item => !!item).length; index++) {
+        if (this.adventure.start_days[index]) { text += this.adventure.start_days[index] + ',' }
+      }
+      if (!this.adventure.start_days.filter(item => !!item).length) { text = '' }
+      return text
+    },
+    async addAdventureToSelected (adventure) {
+      this.packageDetails.activities[this.activityIndex].days[this.dayIndex].days.push({ adventrue_id: adventure.activityID, adventrue: adventure })
+      this.calcDaysFromDetails()
+      await this.calculateAllPrice()
+      if (this.checkResponseCode === false) {
+        this.packageDetails.activities[this.activityIndex].days[this.dayIndex].days.splice(-1, 1)
+      } else {
+        this.showAddNewAdventuresDialog = false
+      }
+      this.calcDaysFromDetails()
+    },
+    allowedDates (val) {
+      const date = new Date(val.replaceAll('-', '/'))
+      let days = this.showDaysArray.filter(item => !!item)
+      days = days.map(v => v.toLowerCase())
+      const availabilities = this.packageDetails.availabilities
+      let allowedDay = false
+      let allowedDate = false
+
+      // Check if the date falls within any of the availabilities
+      for (const availability of availabilities) {
+        const fromDate = new Date(availability.from_date.replaceAll('-', '/'))
+        const toDate = new Date(availability.to_date.replaceAll('-', '/'))
+        // Get today's date and set the time to 00:00:00 to represent the start of the day
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+        // Adjust toDate to make it inclusive of the end of the day
+        toDate.setHours(23, 59, 59, 999)
+        if (date > today && date >= fromDate && date <= toDate) {
+          allowedDate = true
+          break
+        }
+      }
+      if (days.includes(date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()) || !days.length) { allowedDay = true }
+      return allowedDay && allowedDate
+    },
+    uniqueAndFilter (arr) {
+      // Remove duplicates using Set
+      let uniqueArr = [...new Set(arr)]
+      // Filter out empty arrays
+      uniqueArr = uniqueArr.filter(item => item.length > 0)
+      return uniqueArr
+    },
+    async itemAction (actionType, cityId, activityIndex, dayIndex, adventureIndex, adventureDetails) {
+      if (!this.packageStartDay) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select start date to custom your trip'
+        this.loaded = false
+      } else {
+        if (actionType === 'replace') {
+          this.activityIndex = activityIndex
+          this.dayIndex = dayIndex
+          this.adventureIndex = adventureIndex
+          await this.getAdventures(cityId)
+          this.showReplaceAdventureDialog = true
+          await this.calculateAllPrice()
+        }
+
+        if (actionType === 'view') {
+          this.adventureDetails = adventureDetails
+          this.showAdventureDetailsDialog = true
+          await this.calculateAllPrice()
+        }
+
+        if (actionType === 'remove') {
+          this.packageDetails.activities[activityIndex].days[dayIndex].days.splice(adventureIndex, 1)
+          this.calcDaysFromDetails()
+          await this.calculateAllPrice()
+        }
+      }
+    },
+    async replaceAdventureSelected (adventure) {
+      this.packageDetails.activities[this.activityIndex].days[this.dayIndex].days[this.adventureIndex] = { adventrue_id: adventure.activityID, adventrue: adventure }
+      this.calcDaysFromDetails()
+      await this.calculateAllPrice()
+      this.showReplaceAdventureDialog = false
+    },
+    viewCruiseDetails (cruise) {
+      this.cruiseDetails = cruise
+      this.showCruiseDetailsDialog = true
+    },
+    async calculateAllPrice () {
+      const formData = new FormData()
+      formData.append('package_id', this.packageDetails.packageID)
+      formData.append('adults', this.travellers)
+      formData.append('children', this.children)
+      formData.append('date', this.packageStartDay)
+      // formData.append('date', this.selectedDateForAddNewAdventure)
+      if (this.ageSelects.length > 0) {
+        for (let x = 0; x < this.ageSelects.length; x++) {
+          formData.append('ages[' + x + ']', this.ageSelects[x].age)
+        }
+      }
+      if (this.rooms.length > 0) {
+        for (let r = 0; r < this.rooms.length; r++) {
+          formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+          formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+          if (this.rooms[r].ageSelects.length > 0) {
+            for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+              formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
             }
           }
         }
-        for (let index = 0; index < i.days.length; index++) {
-          if (i.days[index] === 'closed') {
-            i.cityActivities['day_' + (Number(index) + 1)] = []
+      }
+      let indexCount = 0
+      const activities = this.packageDetails.activities
+      // console.log(activities)
+      // for (let i = 0; i < activities.length; i++) {
+      //   const activity = activities[i].days
+      //   for (let x = 0; x < activity.length; x++) {
+      //     const days = activity[x].days
+      //     for (let y = 0; y < days.length; y++) {
+      //       const adventures = days[y]
+      //       formData.append('adventures[' + indexCount + ']', adventures.adventrue_id)
+      //       indexCount++
+      //     }
+      //   }
+      // }
+      for (let i = 0; i < activities.length; i++) {
+        const activity = activities[i].days
+        for (let x = 0; x < activity.length; x++) {
+          const days = activity[x].days
+          const startFormatDay = activity[x].start_format_day
+          formData.append('activities[' + indexCount + '][startFormatDay]', startFormatDay)
+          for (let y = 0; y < days.length; y++) {
+            const adventures = days[y]
+            formData.append('activities[' + indexCount + '][adventures][' + y + ']', adventures.adventrue_id)
           }
+          indexCount++
+          // for (let y = 0; y < days.length; y++) {
+          //   const adventures = days[y]
+          //   formData.append('adventures[' + indexCount + ']', adventures.adventrue_id)
+          //   indexCount++
+          // }
         }
-        if (Object.keys(i.cityActivities).length < i.cityDaysNumber && Object.keys(i.cityActivities).length !== 0) {
-          for (let j = Object.keys(i.cityActivities).length + 1; j < i.cityDaysNumber + 1; j++) {
-            i.cityActivities['day_' + (Object.keys(i.cityActivities).length + 1)] = []
-          }
-        }
-      })
-
-      this.Occupancyvalue = Number(this.packageDetails.package_occupancy)
-      this.packagePrices = results.prices
-      this.EnteredChildren = 0
-      this.EnteredRooms = 1
-      this.OccupancyChildren = this.EnteredChildren
-      this.OccupancyAdults = this.EnteredAdults
-      this.OccupancyRooms = this.EnteredRooms
-      if (this.EnteredAdults === 1 && this.solo === 1) {
-        this.solo = 1
-        this.OccupancyAdults = 1
-        this.newprice = Number(this.packagePrices.solo)
-        this.initialpriceperperson = Number(this.packagePrices.solo)
-        this.currentprice = Number(this.packagePrices.solo)
-      } else if (this.EnteredAdults >= 1 && this.EnteredAdults <= 2) {
-        this.solo = 0
-        this.AdultsCheckbox = false
-        this.OccupancyAdults = this.EnteredAdults
-        this.OccupancyChildren = this.EnteredChildren
-        this.newprice = Number(this.packagePrices.limo)
-        this.initialpriceperperson = Number(this.packagePrices.limo)
-        this.currentprice = Number(this.packagePrices.limo)
-      } else if (this.EnteredAdults >= 3 && this.EnteredAdults <= 8) {
-        this.solo = 0
-        this.AdultsCheckbox = false
-        this.OccupancyAdults = this.EnteredAdults
-        this.newprice = Number(this.packagePrices.hiac)
-        this.initialpriceperperson = Number(this.packagePrices.hiac)
-        this.currentprice = Number(this.packagePrices.hiac)
-      } else if (this.EnteredAdults >= 9 && this.EnteredAdults <= 18) {
-        this.solo = 0
-        this.AdultsCheckbox = false
-        this.OccupancyAdults = this.EnteredAdults
-        this.newprice = Number(this.packagePrices.caster)
-        this.initialpriceperperson = (this.packagePrices.caster)
-        this.currentprice = (this.packagePrices.caster)
-      } else if (this.EnteredAdults >= 18 && this.EnteredAdults <= 50) {
-        this.solo = 0
-        this.AdultsCheckbox = false
-        this.OccupancyAdults = this.EnteredAdults
-        this.newprice = Number(this.packagePrices.bus)
-        this.initialpriceperperson = Number(this.packagePrices.bus)
-        this.currentprice = Number(this.packagePrices.bus)
-      }
-      if (this.packageDetails.packageStartDate) { this.startDate = this.packageDetails.packageStartDate } else {
-        this.packageDetails.packageStartDate = new Date().toISOString().substr(0, 10)
-        this.startDate = this.packageDetails.packageStartDate
-      }
-      for (let index = 0; index < this.packageDetails.packageCities.length; index++) {
-        this.citiesAirports[0] = null
-      }
-
-      // this.addMetaData(results.seo_data, { title: this.packageDetails.packageMetaTitle, description: this.packageDetails.packageMetaDesc })
-    },
-    async getSavedPackage () {
-      const promise = tripsServices.getSavedTripDetails(this.$route.query.custom_package)
-      const response = await promise
-      const results = response.data
-      this.packageDetails = results.package
-      this.EnteredAdults = results.adults
-      this.EnteredChildren = results.children
-      this.prices = results.prices
-      this.totalpricevalue = results.totalPrice
-      this.AdultsCheckbox = results.solo
-      this.singleSupplement = results.singleSupplement
-      this.EnteredRooms = results.rooms
-      this.startDate = results.package.packageStartDate
-    },
-    // addMetaData (main, special) {
-    //   document.title = 'TaNefer' + ' | ' + main.title + ' | ' + special.title
-    //   document.getElementsByTagName('title')[0].innerText = document.title
-    //   const meta = document.createElement('meta')
-    //   meta.name = 'description'
-    //   meta.content = main.meta_description + ' ' + special.description
-    //   document.getElementsByTagName('head')[0].prepend(meta)
-    // },
-    change_rooms () {
-      this.OccupancyRooms = this.EnteredRooms
-    },
-    change_adults () {
-      if (this.EnteredAdults > 0) {
-        if (Number(this.EnteredAdults) === 1 && this.solo === 1) {
-          this.solo = 1
-          this.OccupancyAdults = 1
-          this.newprice = Number(this.packagePrices.solo)
-        } else if (Number(this.EnteredAdults) === 1 && this.solo === 0) {
-          this.solo = 0
-          this.AdultsCheckbox = false
-          this.OccupancyAdults = this.EnteredAdults
-          this.OccupancyChildren = this.EnteredChildren
-          this.newprice = Number(this.packageDetails.packagePricePerPerson)
-        } else if (Number(this.EnteredAdults) === 2) {
-          this.solo = 0
-          this.AdultsCheckbox = false
-          this.OccupancyAdults = this.EnteredAdults
-          this.OccupancyChildren = this.EnteredChildren
-          this.newprice = Number(this.packagePrices.limo)
-        } else if (this.EnteredAdults >= 3 && this.EnteredAdults <= 8) {
-          this.solo = 0
-          this.AdultsCheckbox = false
-          this.OccupancyAdults = this.EnteredAdults
-          this.newprice = Number(this.packagePrices.hiac)
-        } else if (this.EnteredAdults >= 9 && this.EnteredAdults <= 18) {
-          this.solo = 0
-          this.AdultsCheckbox = false
-          this.OccupancyAdults = this.EnteredAdults
-          this.newprice = Number(this.packagePrices.caster)
-        } else if (this.EnteredAdults > 18 && this.EnteredAdults <= 50) {
-          this.solo = 0
-          this.AdultsCheckbox = false
-          this.OccupancyAdults = this.EnteredAdults
-          this.newprice = Number(this.packagePrices.bus)
-        } else if (this.EnteredAdults > 50) {
-          this.EnteredAdults = 0
-          this.OccupancyAdults = 0
-          this.solo = 0
-          this.snackbar = true
-          this.color = 'warning'
-          this.text = 'You cant enter more than 50 Adults'
-          this.closeAllDialogs()
-        }
-        const val = Number(this.newprice) - Number(this.currentprice)
-        this.initialpriceperperson += val
-        this.currentprice = this.newprice
-      } else {
-        this.solo = 0
-        this.EnteredAdults = 0
-        this.OccupancyAdults = 0
-        this.EnteredChildren = 0
-      }
-      this.packageDetails.packageCities.forEach((city) => {
-        city.selectedRooms = []
-      })
-    },
-    async saveTrip () {
-      if (this.startDate) {
-        const body = {
-          numberOfRooms: this.guests.length,
-          roomGuests: this.guests,
-          package_id: this.packageDetails.packageID,
-          city_start: this.getCity('first'),
-          city_end: this.getCity('last'),
-          start_date: this.startDate,
-          total_price: { accommodation: null, transport: null, itineraries: null, total: this.totalpricevalue },
-          sessionId: this.packagePriceSessionId,
-          booking_cities: this.getCity('all'),
-          adults: this.EnteredAdults,
-          children: this.EnteredChildren,
-          added_activities: this.added_activities,
-          removed_activities: this.removed_activities,
-          added_rooms: this.addedRooms,
-          removed_rooms: this.removedRooms
-        }
-        if (this.OccupancyAdults > 1) { body.singleSupplement = this.singleSupplement } else { body.solo = this.AdultsCheckbox }
-        const promise = tripsServices.saveTrip(body)
-        const response = await promise
-        const result = response.data.data
-        const bookingId = result.booking_id
-        localStorage.setItem('bookFor', 'package')
-        localStorage.setItem('bookingId', bookingId)
-        localStorage.setItem('packagePrice', this.totalpricevalue)
-        localStorage.setItem('priceSessionId', this.packagePriceSessionId)
-        localStorage.setItem('packageID', this.packageDetails.packageID)
-        localStorage.setItem('adults', this.OccupancyAdults)
-        localStorage.setItem('children', this.OccupancyChildren)
-        localStorage.setItem('package', JSON.stringify({
-          id: this.packageDetails.packageID,
-          night_numbers: this.packageDetails.packageNightsNumber,
-          name: this.packageDetails.packageTitle,
-          start_date: this.startDate,
-          cities: this.packageDetails.packageCities
-        }))
-        this.$store.dispatch('setPassengersData', {
-          adults: this.OccupancyAdults,
-          children: this.OccupancyChildren,
-          infants: 0,
-          classType: { text: 'Economy', value: 'Y' }
-        })
-        const routeData = this.$router.resolve({ name: 'booking-module', params: { module: 'trip' } })
-        window.open(routeData.href, '_blank')
-      } else {
-        this.snackbar = true
-        this.color = 'warning'
-        this.text = 'Please choose start date'
-      }
-    },
-    sendEmail () {
-      const body = {
-        url: window.location.href,
-        email: this.email,
-        package: this.packageDetails,
-        prices: this.packagePrices,
-        totalPrice: this.totalpricevalue,
-        adults: this.EnteredAdults,
-        children: this.EnteredChildren,
-        rooms: this.EnteredRooms,
-        solo: this.AdultsCheckbox,
-        singleSupplement: this.singleSupplement
       }
       try {
-        tripsServices.saveToMail(body)
-        this.snackbar = true
-        this.color = 'success'
-        this.text = 'Saved Successfully, You will recieve an email'
+        const promise = adventureServices.calculatePackagePrice(formData)
+        const response = await promise
+        const results = response.data
+        if (results.status === 200) {
+          this.initialPrice = results.totalPrice
+          this.totalAllPrices = this.getFinalTotalPrices()
+          this.priceSessionId = results.sessionId
+          this.checkResponseCode = true
+        } else {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = results.errors
+          this.loaded = false
+          this.checkResponseCode = false
+        }
       } catch (error) {
-        this.snackbar = false
+        this.snackbar = true
         this.color = 'error'
-        this.text = 'Couldnot save package!'
-      } finally {
-        this.emailDilog = false
+        this.text = 'Something went wrong'
+        this.loaded = false
+        this.checkResponseCode = false
       }
     },
-    getCity (type) {
-      if (type === 'first') {
-        const city = {}
-        city.id = this.packageDetails.packageCities[0].cityID
-        city.with_flight = this.packageDetails.packageCities[0].cityTransportation === 'flight' ? 1 : 0
-        return city
-      } else if (type === 'last') {
-        const city = {}
-        city.id = this.packageDetails.packageCities[this.packageDetails.packageCities.length - 1].cityID
-        city.with_flight = this.packageDetails.packageCities[this.packageDetails.packageCities.length - 1].returnFlight ? 1 : 0
-        return city
-      } else {
-        const cities = []
-        this.packageDetails.packageCities.forEach((item) => {
-          const city = {}
-          if (item.returnFlight) { city.returnFlight = item.returnFlight }
-          city.city_id = item.cityID
-          city.nights_number = item.cityDaysNumber
-          if (item.cityTransportation) {
-            city.transportation_type = item.cityTransportation
-            city.transportation_amount = item.cityTransportationPrice
-            item.cityTransportations.forEach((trans) => {
-              trans.transportationType === 'flight' && trans.flight ? city.transportation_flight_id = trans.flight.id : city.transportation_flight_id = null
-            })
-          } else {
-            city.transportation_type = null
+    calcDaysFromDetails () {
+      this.startingDay = 0
+      const activities = this.packageDetails.activities
+      for (let i = 0; i < activities.length; i++) {
+        if (activities[i].type === 'adventure') {
+          const activity = activities[i].days
+          for (let x = 0; x < activity.length; x++) {
+            activity[x].start_day = ++this.startingDay
+            activity[x].start_format_day = this.formatDateAllDays(this.packageStartDay, activity[x].start_day, 'default')
+            activity[x].start_text_day = this.formatDateAllDays(this.packageStartDay, activity[x].start_day)
           }
-          if (Object.keys(item.cityActivities).length > 0) {
-            city.activity = []
-            for (const [, value] of Object.entries(item.cityActivities)) {
-              value.forEach((element) => {
-                element.activity.day_number = element.activityDayNumber
-                city.activity.push(element.activity)
-              })
-            }
-          } else { city.activity = [] }
-          if (item.cityHotels.length) { city.hotelRooms = item.selectedRooms } else { city.hotelRooms = [] }
-          cities.push(city)
-        })
-        return cities
+        } else {
+          const startDay = this.startingDay + 1
+          this.startingDay += activities[i].days_number
+          const endDay = this.startingDay
+          activities[i].package_day = startDay + '-' + endDay
+          activities[i].package_text_day = this.packageStartDay != null ? (this.formatDateAllDays(this.packageStartDay, startDay) + ' - ' + this.formatDateAllDays(this.packageStartDay, endDay)) : null
+          activities[i].start_day = startDay
+          activities[i].end_day = endDay
+        }
       }
+    },
+    bookAdventures () {
+      // const formData = new FormData()
+      // formData.append('RatePlanCode', this.getRatePlanCode)
+      // // formData.append('StartDate', this.selectedHotelStartDate)
+      // formData.append('StartDate', this.hotelStartDate)
+      // // formData.append('EndDate', this.selectedHotelEndDate)
+      // formData.append('EndDate', this.hotelEndDate)
+      // formData.append('HotelCode', this.selectedHotelJPCode)
+      // try {
+      //   const promise = tripsServices.getBookingRules(formData)
+      //   const response = await promise
+      //   console.log(response)
+      //   const results = response.data.BookingRulesRS
+      //   if (results.Errors !== undefined) {
+      //     this.snackbar = true
+      //     this.color = 'error'
+      //     this.text = this.errorMessage(results.Errors.Error.Text)
+      //     this.loaded = false
+      //     this.checkResponseCode = false
+      //   } else {
+      //     this.getbookingRule = results.Results.HotelResult
+      //   }
+      // } catch (error) {
+      //   this.snackbar = true
+      //   this.color = 'error'
+      //   this.text = 'Something went wrong'
+      //   this.loaded = false
+      //   this.checkResponseCode = false
+      // }
+
+      this.$store.dispatch('setTravellersNumber', {
+        adults: this.travellers,
+        children: this.children,
+        totalPrice: this.initialPrice,
+        totalAllPrices: this.totalAllPrices,
+        packageStartDay: this.packageStartDay,
+        packageDetails: this.packageDetails,
+        priceSessionId: this.priceSessionId,
+        ratePlanCode: this.RatePlanCode,
+        bookingRule: this.getbookingRule,
+        bookingInfo: this.getBookingCode,
+        hotelStartDate: this.hotelStartDate,
+        hotelEndDate: this.hotelEndDate,
+        ratePlanCodes: this.RatePlanCodes,
+        bookingRules: this.getbookingRules,
+        bookingInfos: this.getBookingCodes,
+        hotelStartDates: this.hotelStartDates,
+        hotelEndDates: this.hotelEndDates,
+        finalBookHotelFormData: this.finalBookHotelFormData,
+        finalBookHotelsFormData: this.finalBookHotelsFormData,
+        hotelJPCode: this.selectedHotelJPCode,
+        hotelJPCodes: this.selectedHotelCodes,
+        checkHasCruise: this.checkHasCruise
+      })
+      this.$router.push({ name: 'booking-module', params: { module: 'trip' } })
+    },
+    openGallery () {
+      this.showGallery = true
+    },
+    showHotelDetails (hotelIndex) {
+      this.gtaHotelDetails = this.listGtaHotelDetails[hotelIndex]
+      this.showHotelGtaDetails = true
+    },
+    selectHotelGta (getHotelIndex) {
+      this.listGtaHotelDetails[this.selectedCityHotelIndex] = this.listGtaHotelJpds[getHotelIndex]
+      this.showHotelsDialog = false
+    },
+    async checkHotelAvailability () {
+      if (this.travellers === 0) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select Number of Adult'
+        this.loaded = false
+      } else if (this.hotelStartDate === null || this.hotelEndDate === null) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select Start Date and End Date'
+        this.loaded = false
+      } else {
+        this.isLoading = true
+        this.hotelAvailsArray = []
+        const formData = new FormData()
+        formData.append('start_date', this.hotelStartDate)
+        formData.append('end_date', this.hotelEndDate)
+        formData.append('board', this.boardType.Type)
+        const hotels = this.listGtaHotelDetails
+        for (let i = 0; i < hotels.length; i++) {
+          formData.append('hotels[' + i + ']', hotels[i].JPCode)
+        }
+        // if (hotels.length > 1) {
+        //   formData.append('hotels[' + 0 + ']', 'JP046300')
+        //   formData.append('hotels[' + 1 + ']', 'JP077424')
+        // } else {
+        //   formData.append('hotels[' + 0 + ']', 'JP046300')
+        // }
+        formData.append('adults', this.travellers)
+        formData.append('children', this.children)
+        if (this.ageSelects.length > 0) {
+          for (let x = 0; x < this.ageSelects.length; x++) {
+            formData.append('ages[' + x + ']', this.ageSelects[x].age)
+          }
+        }
+        if (this.rooms.length > 0) {
+          for (let r = 0; r < this.rooms.length; r++) {
+            formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+            formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+            if (this.rooms[r].ageSelects.length > 0) {
+              for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+                formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+              }
+            }
+            formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+          }
+        }
+        try {
+          const promise = tripsServices.checkHotelAvailabilities(formData)
+          // const promise = tripsServices.checkHotelAvailabilitiesTest(formData)
+          const response = await promise
+          console.log(response)
+          const results = response.data.AvailabilityRS
+          if (results.Errors !== undefined) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = this.errorMessage(results.Errors.Error.Text)
+            this.loaded = false
+            this.checkResponseCode = false
+            this.isLoading = false
+          } else {
+            this.isAvailable = true
+            const hotelResults = results.Results.HotelResult
+            console.log(hotelResults)
+            if (hotels.length > 1) {
+              for (let index = 0; index < hotelResults.length; index++) {
+                // this.hotelAvails = hotelResults[index]
+                this.hotelAvailsArray.push(hotelResults[index])
+                // this.selectedHotelStartDateArray.push(hotelResults[index])
+                this.selectedHotelStartDate = this.hotelStartDate
+                this.selectedHotelEndDate = this.hotelEndDate
+              }
+              this.hotelAvails = hotelResults[0]
+            } else {
+              this.hotelAvails = hotelResults
+            }
+            this.checkResponseCode = true
+            this.isLoading = false
+          }
+        } catch (error) {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = 'Something went wrong'
+          this.loaded = false
+          this.checkResponseCode = false
+          this.isLoading = false
+        }
+      }
+    },
+    async checkHotelAvailabilityByHotel (hotelDetail, hotelIndex) {
+      if (this.travellers === 0) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select Number of Adult'
+        this.loaded = false
+      } else if (this.hotelStartDates[hotelIndex] === null || this.hotelEndDates[hotelIndex] === null) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Please select Start Date and End Date'
+        this.loaded = false
+      } else {
+        this.isLoading = true
+        this.hotelAvailsArray = []
+        const formData = new FormData()
+        formData.append('start_date', this.hotelStartDates[hotelIndex])
+        formData.append('end_date', this.hotelEndDates[hotelIndex])
+        formData.append('board', this.boardType.Type)
+        formData.append('hotels[' + 0 + ']', hotelDetail.Code)
+        // formData.append('hotels[' + 0 + ']', 'JP046300')
+        formData.append('adults', this.travellers)
+        formData.append('children', this.children)
+        if (this.ageSelects.length > 0) {
+          for (let x = 0; x < this.ageSelects.length; x++) {
+            formData.append('ages[' + x + ']', this.ageSelects[x].age)
+          }
+        }
+        if (this.rooms.length > 0) {
+          for (let r = 0; r < this.rooms.length; r++) {
+            formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+            formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+            if (this.rooms[r].ageSelects.length > 0) {
+              for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+                formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+              }
+            }
+            formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+          }
+        }
+        try {
+          const promise = tripsServices.checkHotelAvailabilities(formData)
+          // const promise = tripsServices.checkHotelAvailabilitiesTest(formData)
+          const response = await promise
+          console.log(response)
+          const results = response.data.AvailabilityRS
+          if (results.Errors !== undefined) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = this.errorMessage(results.Errors.Error.Text)
+            this.loaded = false
+            this.checkResponseCode = false
+            this.isLoading = false
+          } else {
+            this.isAvailable = true
+            this.isAvailables[hotelIndex] = true
+            const hotelResults = results.Results.HotelResult
+            this.hotelAvails = hotelResults
+            this.hotelAvailsList[hotelIndex] = hotelResults
+            this.checkResponseCode = true
+            this.isLoading = false
+          }
+        } catch (error) {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = 'Something went wrong'
+          this.loaded = false
+          this.checkResponseCode = false
+          this.isLoading = false
+        }
+      }
+    },
+    openBookFlight () {
+      window.open('https://flights.tanefer.com', '_blank')
+    },
+    getTotalHotelPrices () {
+      const hotelAvailPricesList = this.hotelAvailPrices
+      let hotelAvailPrices = 0
+      for (let x = 0; x < hotelAvailPricesList.length; x++) {
+        hotelAvailPrices += hotelAvailPricesList[x]
+      }
+      return hotelAvailPrices
+    },
+    getFinalTotalPrices () {
+      const initalPrice = this.initialPrice
+      const hotelPrice = this.hotelPrices
+      const hotelAvailPricesList = this.hotelAvailPrices
+      let hotelAvailPrices = 0
+      for (let x = 0; x < hotelAvailPricesList.length; x++) {
+        hotelAvailPrices += hotelAvailPricesList[x]
+      }
+      const additionalPrice = this.additionalPrice
+      const percentagePrice = this.discountPercentage
+      const getAllPositivePrices = initalPrice + hotelPrice + hotelAvailPrices + additionalPrice
+      const getDiscountPercentagePrice = percentagePrice === 0 ? 0 : (getAllPositivePrices * percentagePrice / 100)
+      const totalAllPrices = getAllPositivePrices - getDiscountPercentagePrice
+      return totalAllPrices
+    },
+    selectRoomHotelGta (AvailIndex, hotelAvailListIndex) {
+      // if (Array.isArray(this.hotelAvails.HotelOptions.HotelOption)) {
+      if (this.hotelAvailsArray.length > 0) {
+        // this.selectedRoomGta = this.hotelAvails.HotelOptions.HotelOption[AvailIndex]
+        // this.getRatePlanCode = this.hotelAvails.HotelOptions.HotelOption[AvailIndex].RatePlanCode
+        // this.hotelPrices = this.hotelAvails.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
+        // this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption[AvailIndex])
+        // this.getRatePlanCodeArray.push(this.hotelAvails.HotelOptions.HotelOption[AvailIndex].RatePlanCode)
+        // this.hotelPrices += this.hotelAvails.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
+        // // this.hotelPricesArray.push(this.hotelAvails.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett)
+        // this.selectedHotelCodeArray.push(this.hotelAvails.Code)
+        // this.selectedHotelJPCodeArray.push(this.hotelAvails.JPCode)
+        // this.selectedHotelJPDCodeArray.push(this.hotelAvails.JPDCode)
+
+        // this.selectedRoomGtaArray.push(this.hotelAvailsArray[AvailIndex].HotelOptions.HotelOption)
+        // this.getRatePlanCodeArray.push(this.hotelAvailsArray[AvailIndex].HotelOptions.HotelOption.RatePlanCode)
+        // this.hotelPrices += this.hotelAvailsArray[AvailIndex].HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
+
+        this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption)
+        this.getRatePlanCodeArray.push(this.hotelAvails.HotelOptions.HotelOption.RatePlanCode)
+        this.hotelPrices += this.hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
+        this.selectedHotelCodeArray.push(this.hotelAvails.Code)
+        this.selectedHotelJPCodeArray.push(this.hotelAvails.JPCode)
+        this.selectedHotelJPDCodeArray.push(this.hotelAvails.JPDCode)
+      } else {
+        const getHotelAvailInfo = this.hotelAvailsList[hotelAvailListIndex]
+        if (Array.isArray(getHotelAvailInfo.HotelOptions.HotelOption)) {
+          this.selectedRoomGtas[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex]
+          // this.selectedRoomGtaArray.push(getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex])
+          this.selectedRoomGtaArray[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex]
+          this.getRatePlanCodes[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex].RatePlanCode
+          this.hotelPrices = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
+          this.hotelAvailPrices[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
+        } else {
+          this.selectedRoomGtas[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption
+          // this.selectedRoomGtaArray.push(getHotelAvailInfo.HotelOptions.HotelOption)
+          this.selectedRoomGtaArray[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption
+          this.getRatePlanCodes[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption.RatePlanCode
+          this.hotelPrices = getHotelAvailInfo.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
+          this.hotelAvailPrices[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
+        }
+        this.selectedHotelCodes[hotelAvailListIndex] = getHotelAvailInfo.Code
+        this.selectedHotelJPCodes[hotelAvailListIndex] = getHotelAvailInfo.JPCode
+        this.selectedHotelJPDCodes[hotelAvailListIndex] = getHotelAvailInfo.JPDCode
+      }
+      this.totalAllPrices = this.getFinalTotalPrices()
+      this.showRoomsDialog = false
+    },
+    async confirmSelectedRoom () {
+      this.isLoading = true
+      if (this.getRatePlanCodes.length > 0) {
+        for (let x = 0; x < this.getRatePlanCodes.length; x++) {
+          const formData = new FormData()
+          formData.append('RatePlanCode', this.getRatePlanCodes[x])
+          formData.append('StartDate', this.hotelStartDates[x])
+          formData.append('EndDate', this.hotelEndDates[x])
+          formData.append('HotelCode', this.selectedHotelCodes[x])
+          try {
+            const promise = tripsServices.getBookingRules(formData)
+            const response = await promise
+            console.log(response)
+            const results = response.data.BookingRulesRS
+            if (results.Errors !== undefined) {
+              this.snackbar = true
+              this.color = 'error'
+              this.text = this.errorMessage(results.Errors.Error.Text)
+              this.loaded = false
+              this.checkResponseCode = false
+              this.isLoading = false
+            } else {
+              this.getbookingRules[x] = results.Results.HotelResult
+              this.getbookingRuleArray.push(results.Results.HotelResult)
+              this.confirmedSelectedRoom = true
+              this.isLoading = false
+            }
+          } catch (error) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = 'Something went wrong'
+            this.loaded = false
+            this.checkResponseCode = false
+            this.isLoading = false
+          }
+        }
+      }
+      if (this.getRatePlanCodes.length === 0 && this.getRatePlanCode) {
+        const formData = new FormData()
+        formData.append('RatePlanCode', this.getRatePlanCode)
+        // formData.append('StartDate', this.selectedHotelStartDate)
+        formData.append('StartDate', this.hotelStartDate)
+        // formData.append('EndDate', this.selectedHotelEndDate)
+        formData.append('EndDate', this.hotelEndDate)
+        formData.append('HotelCode', this.selectedHotelJPCode)
+        try {
+          const promise = tripsServices.getBookingRules(formData)
+          const response = await promise
+          console.log(response)
+          const results = response.data.BookingRulesRS
+          if (results.Errors !== undefined) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = this.errorMessage(results.Errors.Error.Text)
+            this.loaded = false
+            this.checkResponseCode = false
+            this.isLoading = false
+          } else {
+            this.getbookingRule = results.Results.HotelResult
+            this.confirmedSelectedRoom = true
+            this.isLoading = false
+          }
+        } catch (error) {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = 'Something went wrong'
+          this.loaded = false
+          this.checkResponseCode = false
+          this.isLoading = false
+        }
+      }
+    },
+    assignPhone (phone) {
+      this.phone = phone
+    },
+    async finalBookHotel () {
+      this.isLoading = true
+      if (this.getbookingRules.length > 0) {
+        for (let x = 0; x < this.getbookingRules.length; x++) {
+          const formData = new FormData()
+          const bookingCode = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
+          const startDate = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
+          const endDate = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
+          const HotelCode = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
+          const minimumPrice = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
+          const maximumPrice = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
+          const currency = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
+          formData.append('bookingCode', bookingCode)
+          formData.append('startDate', startDate)
+          formData.append('endDate', endDate)
+          formData.append('HotelCode', HotelCode)
+          formData.append('minimumPrice', minimumPrice)
+          formData.append('maximumPrice', maximumPrice)
+          formData.append('currency', currency)
+          formData.append('phone_number', this.phone.formattedNumber)
+          formData.append('title', this.title)
+          formData.append('name', this.name)
+          formData.append('surname', this.surname)
+          formData.append('age', this.age)
+          formData.append('email', this.email)
+          formData.append('nationality', this.issueCountry)
+          formData.append('board', this.boardType.Type)
+          formData.append('identification_document_pax', this.identification_document_pax)
+          formData.append('address_pax', this.address_pax)
+          formData.append('city_pax', this.city_pax)
+          formData.append('country_pax', this.country_pax)
+          formData.append('postal_code_pax', this.postal_code_pax)
+          formData.append('book_after_payment', '1')
+          if (this.rooms.length > 0) {
+            for (let r = 0; r < this.rooms.length; r++) {
+              formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+              formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+              if (this.rooms[r].ageSelects.length > 0) {
+                for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+                  formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+                }
+              }
+              formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+            }
+          }
+          if (this.bNames.length > 0) {
+            for (let x = 0; x < this.bNames.length; x++) {
+              formData.append('names[' + x + ']', this.bNames[x])
+            }
+          }
+          if (this.bSurnames.length > 0) {
+            for (let y = 0; y < this.bSurnames.length; y++) {
+              formData.append('surnames[' + y + ']', this.bSurnames[y])
+            }
+          }
+          if (this.bAges.length > 0) {
+            for (let z = 0; z < this.bAges.length; z++) {
+              formData.append('ages[' + z + ']', this.bAges[z])
+            }
+          }
+          if (this.bNamesChild.length > 0) {
+            for (let xx = 0; xx < this.bNamesChild.length; xx++) {
+              formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
+            }
+          }
+          if (this.bSurnamesChild.length > 0) {
+            for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
+              formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
+            }
+          }
+          if (this.bAgesChild.length > 0) {
+            for (let zz = 0; zz < this.bAgesChild.length; zz++) {
+              formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
+            }
+          }
+
+          try {
+            const promise = tripsServices.finalBookHotel(formData)
+            const response = await promise
+            console.log(response)
+            // const results = response.data.BookingRS
+            const resultFormData = response.data.formDataId
+            this.finalBookHotelFormData = resultFormData
+            this.finalBookHotelsFormData[x] = resultFormData
+            this.isBooked = true
+            this.isLoading = false
+            // if (results.Errors !== undefined) {
+            //   this.snackbar = true
+            //   this.color = 'error'
+            //   this.text = this.errorMessage(results.Errors.Error.Text)
+            //   this.loaded = false
+            //   this.checkResponseCode = false
+            //   this.isBooked = true
+            //   this.isLoading = false
+            // } else {
+            //   this.getBookingCodeArray.push(results)
+            //   this.isBooked = true
+            //   this.isLoading = false
+            // }
+          } catch (error) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = 'Something went wrong'
+            this.loaded = false
+            this.checkResponseCode = false
+            this.isLoading = false
+          }
+        }
+      }
+      if (this.getbookingRules.length === 0 && this.getbookingRule) {
+        const formData = new FormData()
+        const bookingCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
+        const startDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
+        const endDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
+        const HotelCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
+        const minimumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
+        const maximumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
+        const currency = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
+        formData.append('bookingCode', bookingCode)
+        formData.append('startDate', startDate)
+        formData.append('endDate', endDate)
+        formData.append('HotelCode', HotelCode)
+        formData.append('minimumPrice', minimumPrice)
+        formData.append('maximumPrice', maximumPrice)
+        formData.append('currency', currency)
+        formData.append('phone_number', this.phone.formattedNumber)
+        formData.append('title', this.title)
+        formData.append('name', this.name)
+        formData.append('surname', this.surname)
+        formData.append('age', this.age)
+        formData.append('email', this.email)
+        formData.append('nationality', this.issueCountry)
+        formData.append('board', this.boardType.Type)
+        formData.append('book_after_payment', '1')
+        if (this.rooms.length > 0) {
+          for (let r = 0; r < this.rooms.length; r++) {
+            formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+            formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+            if (this.rooms[r].ageSelects.length > 0) {
+              for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+                formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+              }
+            }
+            formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+          }
+        }
+        if (this.bNames.length > 0) {
+          for (let x = 0; x < this.bNames.length; x++) {
+            formData.append('names[' + x + ']', this.bNames[x])
+          }
+        }
+        if (this.bSurnames.length > 0) {
+          for (let y = 0; y < this.bSurnames.length; y++) {
+            formData.append('surnames[' + y + ']', this.bSurnames[y])
+          }
+        }
+        if (this.bAges.length > 0) {
+          for (let z = 0; z < this.bAges.length; z++) {
+            formData.append('ages[' + z + ']', this.bAges[z])
+          }
+        }
+        if (this.bNamesChild.length > 0) {
+          for (let xx = 0; xx < this.bNamesChild.length; xx++) {
+            formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
+          }
+        }
+        if (this.bSurnamesChild.length > 0) {
+          for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
+            formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
+          }
+        }
+        if (this.bAgesChild.length > 0) {
+          for (let zz = 0; zz < this.bAgesChild.length; zz++) {
+            formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
+          }
+        }
+
+        try {
+          const promise = tripsServices.finalBookHotel(formData)
+          const response = await promise
+          console.log(response)
+          // const results = response.data.BookingRS
+          const resultFormData = response.data.formDataId
+          this.finalBookHotelFormData = resultFormData
+          this.isBooked = true
+          this.isLoading = false
+          // if (results.Errors !== undefined) {
+          //   this.snackbar = true
+          //   this.color = 'error'
+          //   this.text = this.errorMessage(results.Errors.Error.Text)
+          //   this.loaded = false
+          //   this.checkResponseCode = false
+          //   this.isBooked = true
+          //   this.isLoading = false
+          // } else {
+          //   this.getBookingCode = results
+          //   this.isBooked = true
+          //   this.isLoading = false
+          // }
+        } catch (error) {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = 'Something went wrong'
+          this.loaded = false
+          this.checkResponseCode = false
+          this.isLoading = false
+        }
+      }
+    },
+    onlyUniqueArray (value, index, array) {
+      return array.indexOf(value) === index
+    },
+    onlyUniqueObjectsId (array) {
+      const key = 'id'
+      const arrayUniqueByKey = [...new Map(array.map(item => [item[key], item])).values()]
+      return arrayUniqueByKey
+    },
+    async getRoomCategories () {
+      // this.isLoading = true
+      this.roomCategories = []
+      this.boards = []
+      try {
+        const promise = tripsServices.getHotelCatalogueData()
+        const response = await promise
+        // console.log(response)
+        const results = response.data.CatalogueDataRS
+        if (results.Errors !== undefined) {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = this.errorMessage(results.Errors.Error.Text)
+          this.loaded = false
+          // this.isLoading = false
+        } else {
+          this.roomCategories = results.HotelStaticData.RoomCategoryList.RoomCategory
+          this.boards = results.HotelStaticData.BoardList.Board
+          // this.isLoading = false
+        }
+      } catch (error) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Something went wrong'
+        this.loaded = false
+        // this.isLoading = false
+      }
+    },
+    async onChangeSelectAge (event) {
+      await this.calculateAllPrice()
+    },
+    errorMessage (message) {
+      // Find the index of the last occurrence of ". "
+      const lastIndex = message.lastIndexOf('. ')
+      // Extract the substring after the last occurrence of ". "
+      return message.substring(lastIndex + 2)
     }
   }
 }
@@ -1739,5 +4497,13 @@ export default {
   position: sticky;
   bottom: 2px;
   background-color: white;
+}
+.my-chip {
+  max-width: 100%; /* Set a maximum width if needed */
+}
+.text-truncate {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
 }
 </style>

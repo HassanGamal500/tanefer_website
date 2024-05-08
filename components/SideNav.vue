@@ -38,6 +38,12 @@
         <NuxtLink to="/adventures" exact active-class="w--current" class="nav-link w-nav-link">
           Adventures
         </NuxtLink>
+        <a
+          href="https://tanefer.com/blog/"
+          rel="noopener noreferrer"
+          active-class="w--current"
+          class="nav-link w-nav-link"
+        >Blogs</a>
       </div>
     </nav>
   </div>

@@ -4950,10 +4950,10 @@ label {
 }
 
 .cruise-result-block {
-  display: -webkit-box;
+  /* display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
-  display: flex;
+  display: flex; */
   overflow: hidden;
   margin-bottom: 30px;
   -webkit-flex-wrap: wrap;

@@ -67,14 +67,14 @@ export default {
     }
   },
   async fetch () {
-    if (!this.$store.state.cities.length) {
-      const res = tripsServices.getCities()
-      const data = await res
-      this.cities = data.data.cities
-      this.$store.dispatch('setCities', this.cities)
-    } else {
-      this.cities = this.$store.state.cities
-    }
+    // if (!this.$store.state.cities.length) {
+    const res = tripsServices.getCities()
+    const data = await res
+    this.cities = data.data.cities
+    this.$store.dispatch('setCities', this.cities)
+    // } else {
+    //   this.cities = this.$store.state.cities
+    // }
   },
   methods: {
     getCityImage (name) {
@@ -113,13 +113,17 @@ export default {
     submit (city) {
       this.$store.dispatch('setTripCity', city)
       if (this.module === 'adventures') {
-        this.$router.push({ name: 'adventures-city', params: { city: city.CityName }, query: { cityId: city.CityID } })
+        // this.$router.push({ name: 'adventures-city', params: { city: city.CityName.toLowerCase().trim() }, query: { cityId: city.CityID } })
+        this.$router.push({ name: 'adventures-city', params: { city: city.citySlug } })
+      } else if (this.module === 'hotels') {
+        this.$router.push({ name: 'hotel-city', params: { city: city.citySlug } })
       } else if (this.module === 'cruises') {
-        this.$router.push({ name: 'cruises-city', params: { city: city.CityName }, query: { cityId: city.CityID } })
+        // this.$router.push({ name: 'cruises-city', params: { city: city.CityName }, query: { cityId: city.CityID } })
+        this.$router.push({ name: 'cruises-city', params: { city: city.citySlug } })
       } else if (module === 'tripsResults') {
         this.$emit('getTrips', city)
       } else {
-        this.$router.push({ name: 'trips-city', params: { city: city.CityName } })
+        this.$router.push({ name: 'trips-city', params: { city: city.citySlug } })
       }
     }
   }

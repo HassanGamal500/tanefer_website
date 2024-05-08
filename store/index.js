@@ -566,7 +566,8 @@ export const mutations = {
 export const actions = {
   async nuxtServerInit ({ commit, state }) {
     if (!state.cities.length) {
-      const data = await this.$axios.$get('https://be.tanefer.com/api/v2/tours/list-city', { headers: { clientSecret: process.env.clientSecret } })
+      // const data = await this.$axios.$get('https://tanefer.nahrdev.com/api/v2/tours/list-city', { headers: { clientSecret: process.env.clientSecret } })
+      const data = await this.$axios.$get('https://api.tanefer.com/api/v2/tours/list-city', { headers: { clientSecret: process.env.clientSecret } })
       commit('setCities', data.cities)
     }
   },

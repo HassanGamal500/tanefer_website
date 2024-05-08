@@ -46,6 +46,7 @@
                 Nile cruises
               </NuxtLink>
               <NuxtLink to="/trips" exact active-class="w--current" class="nav-link w-inline-block">
+                <!-- <a href="/trips" exact active-class="w--current" class="nav-link w-inline-block"> -->
                 <div class="hot">
                   <div>Pick & Custom your trip</div>
                   <div class="hot-pointer" />
@@ -53,10 +54,17 @@
                     HOT
                   </div>
                 </div>
+              <!-- </a> -->
               </NuxtLink>
               <NuxtLink to="/adventures" exact active-class="w--current" class="nav-link w-nav-link">
                 Adventures
               </NuxtLink>
+              <a
+                href="https://tanefer.com/blog/"
+                rel="noopener noreferrer"
+                active-class="w--current"
+                class="nav-link w-nav-link"
+              >Blogs</a>
             </div>
           </nav>
           <div class="menu-button w-nav-button" @click="toggleSidebar = !toggleSidebar">
@@ -154,6 +162,9 @@ export default {
         case 'cars':
           bgClass = 'cars-bg'
           break
+        case 'hotel':
+          bgClass = 'hotels-bg'
+          break
         case 'hotels':
           bgClass = 'hotels-bg'
           break
@@ -181,6 +192,9 @@ export default {
         case 'flightBook':
           navCalss = 'head-bg-hotel'
           break
+        // case 'hotel':
+        //   navCalss = 'page-head hotel-bg'
+        //   break
         case 'hotels':
           navCalss = 'page-head hotel-bg'
           break

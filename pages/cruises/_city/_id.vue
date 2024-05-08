@@ -65,6 +65,10 @@
 
                 <rooms-and-guests @save="setGuests" />
 
+                <!-- <h6 class="body-1 font-weight-bold">
+                  Price: $ {{ initialPrice }}
+                </h6> -->
+
                 <v-btn class="mb-5 lightBrown white--text" block :loading="selectLoading" @click="getCruiseRooms">
                   Check Availablity
                 </v-btn>
@@ -108,12 +112,12 @@
                 </v-card-subtitle>
                 <!-- eslint-disable-next-line vue/no-v-text-v-html-on-component -->
                 <v-card-text class="px-0" v-html="cruise.description" />
-                <div v-if="cruise.available_dates.length">
+                <!-- <div v-if="cruise.available_dates.length">
                   <h6>This Crusise is available to book during the following dates:</h6>
                   <div v-for="(season, k) in cruise.available_dates" :key="k">
                     <p><strong>From</strong> {{ new Date(season.start_date.replaceAll('-', '/')).toDateString() }} <strong>To</strong> {{ new Date(season.end_date.replaceAll('-', '/')).toDateString() }} </p>
                   </div>
-                </div>
+                </div> -->
                 <div v-if="cruise.includes.length">
                   <p class="text-h6">
                     Includes
@@ -214,7 +218,7 @@
                       </v-card-text>
                       <v-card-actions>
                         <h6 class="body-1 font-weight-bold">
-                          USD {{ room.price_per_day }}<small>/day</small>
+                          USD {{ room.price_per_day }}<small>/Night</small>
                         </h6>
                         <v-spacer />
                         <v-btn v-if="!isRoomSelected(room.id, i)" color="lightBrown white--text px-5" elevation="0" @click="selectRoom(i, room)">
@@ -243,6 +247,7 @@
       </p>
 
       <v-dialog v-if="(confirmData && reservationData)" v-model="showPricingDialog" width="500">
+        <!-- <v-dialog v-if="(initialPrice && reservationData)" v-model="showPricingDialog" width="500"> -->
         <v-card max-width="500">
           <v-card-title class="px-3 lightBrown white--text">
             Cruise Total price
@@ -255,7 +260,7 @@
               </thead>
               <tbody>
                 <tr v-for="(room, i) in reservationData.rooms" :key="i">
-                  <td>{{ room.type }}</td>
+                  <td>{{ room.type }} ({{ room.occupancy }})</td>
                   <td>{{ room.quantity }}</td>
                 </tr>
               </tbody>
@@ -266,6 +271,9 @@
             <h6 class="body-1 font-weight-bold">
               USD {{ confirmData.totalPrice }}
             </h6>
+            <!-- <h6 class="body-1 font-weight-bold">
+              USD {{ initialPrice }}
+            </h6> -->
             <v-spacer />
             <v-btn color="lightBrown white--text px-5" @click="proceedToBook">
               Proceed
@@ -282,6 +290,29 @@ import { mapState } from 'vuex'
 import cruisesServices from '~/services/cruisesServices'
 
 export default {
+  // asyncData ({ params }) {
+  //   // Clear the component's data when entering the page
+  //   return {
+  //     rooms: 1,
+  //     guests: [
+  //       {
+  //         adults: 1,
+  //         children: 0
+  //       }
+  //     ]
+  //   }
+  // },
+  // beforeRouteEnter (to, from, next) {
+  //   // Clear the component's data when entering the route
+  //   next((vm) => {
+  //     vm.clearData()
+  //   })
+  // },
+  // beforeRouteUpdate (to, from, next) {
+  //   // Clear the component's data when the route is updated
+  //   this.clearData()
+  //   next()
+  // },
   data () {
     return {
       cruiseLoading: true,
@@ -311,9 +342,13 @@ export default {
       text: '',
       color: '',
       showAlertBar: false,
-      alertText: ''
+      alertText: '',
+      initialPrice: 0
     }
   },
+  // watch: {
+  //   startDate: 'calculateAllPrice'
+  // },
   async fetch () {
     try {
       // eslint-disable-next-line no-console
@@ -338,17 +373,38 @@ export default {
     ...mapState(['cruiseRoomsResults', 'cruiseChosenDate'])
   },
   methods: {
+    clearData () {
+      this.rooms = 1
+      this.guests = [
+        {
+          adults: 1,
+          children: 0
+        }
+      ]
+    },
     setGuests (guests) {
+      console.log(guests)
       this.rooms = guests.length
       this.guests = guests
+      // await this.calculateAllPrice()
       this.$store.dispatch('setCruiseGuests', guests)
     },
     async getCruiseRooms () {
       if (this.startDate && this.guests[0].adults) {
         let searchTerms = `start_date=${this.startDate}`
+        searchTerms += `&cruise_id=${this.$route.params.id}`
         this.guests.forEach((element, i) => {
           searchTerms += `&roomGuests[${i}][adults]=${element.adults}`
           searchTerms += `&roomGuests[${i}][children]=${element.children}`
+
+          if (element.childrenAges) {
+            if (element.childrenAges.length > 0) {
+              element.childrenAges.forEach((getAge, index) => {
+                searchTerms += `&roomGuests[${i}][child_ages][${index}][child_count]=1`
+                searchTerms += `&roomGuests[${i}][child_ages][${index}][age]=${getAge}`
+              })
+            }
+          }
         })
         this.selectLoading = true
         try {
@@ -375,6 +431,7 @@ export default {
             }, 3500)
           }
         } catch (err) {
+          console.log(err)
           this.showAlertBar = true
           this.alertText = err.response.data.error
           setTimeout(() => {
@@ -390,6 +447,7 @@ export default {
       }
     },
     selectRoom (index, room) {
+      console.log(index, room)
       this.selectedRooms[index] = room
       this.selectedRoom = room
     },
@@ -400,14 +458,29 @@ export default {
     },
     allowedDates (val) {
       const date = new Date(val.replaceAll('-', '/'))
-      const days = this.cruise.start_days.filter(item => !!item)
+      let days = this.cruise.start_days.filter(item => !!item)
+      days = days.map(v => v.toLowerCase())
       const seasons = this.cruise.available_dates
       let allowedDay = false
       if (days.includes(date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()) || !days.length) { allowedDay = true }
       let allowedSeason = false
       if (seasons.length) {
-        for (let index = 0; index < seasons.length; index++) {
-          if (date.getTime() >= new Date(seasons[index].start_date.replaceAll('-', '/')).getTime() && date.getTime() <= new Date(seasons[index].end_date.replaceAll('-', '/')).getTime()) { allowedSeason = true }
+        // for (let index = 0; index < seasons.length; index++) {
+        //   if (date.getTime() >= new Date(seasons[index].start_date.replaceAll('-', '/')).getTime() && date.getTime() <= new Date(seasons[index].end_date.replaceAll('-', '/')).getTime()) { allowedSeason = true }
+        // }
+        // Check if the date falls within any of the availabilities
+        for (const season of seasons) {
+          const startDate = new Date(season.start_date.replaceAll('-', '/'))
+          const endDate = new Date(season.end_date.replaceAll('-', '/'))
+          // Get today's date and set the time to 00:00:00 to represent the start of the day
+          const today = new Date()
+          today.setHours(0, 0, 0, 0)
+          // Adjust endDate to make it inclusive of the end of the day
+          endDate.setHours(23, 59, 59, 999)
+          if (date > today && date >= startDate && date <= endDate) {
+            allowedSeason = true
+            break
+          }
         }
       } else { allowedSeason = true }
       return allowedDay && allowedSeason
@@ -417,20 +490,23 @@ export default {
         const rooms = []
         this.selectedRooms.forEach((el) => {
           el.quantity = 1
-          if (rooms.length) {
-            if (rooms.find(item => item.id === el.id)) {
-              rooms.find(item => item.id === el.id).quantity++
-            }
-          } else {
-            el.room_id = el.id
-            rooms.push(el)
-          }
+          // if (rooms.length) {
+          //   if (rooms.find(item => item.id === el.id)) {
+          //     rooms.find(item => item.id === el.id).quantity++
+          //   }
+          // } else {
+          //   el.room_id = el.id
+          //   rooms.push(el)
+          // }
+          el.room_id = el.id
+          rooms.push(el)
         })
         const payload = {
           start_date: this.cruiseChosenDate,
           // end_date: this.cruiseChosenDates[1],
           adults: this.$store.state.cruiseGuests.adults,
           children: this.$store.state.cruiseGuests.children,
+          price: this.initialPrice,
           rooms
         }
         this.reserveLoading = true
@@ -440,6 +516,7 @@ export default {
           this.confirmData = response.data
           this.reservationData = payload
           this.reservationData.totalPrice = response.data.totalPrice
+          // this.reservationData.totalPrice = this.initialPrice
           this.reservationData.cruiseId = this.$route.params.id
           this.reservationData.session = response.data.session_id
           this.showPricingDialog = true
@@ -460,6 +537,46 @@ export default {
       this.snackbar = true
       this.color = color
       this.text = text
+    },
+    async calculateAllPrice () {
+      const formData = new FormData()
+      formData.append('date', this.startDate)
+
+      // Update formData with new guest array
+      this.guests.forEach((guest, guestIndex) => {
+        formData.append(`sesson[${guestIndex}][adult]`, guest.adults)
+        formData.append(`sesson[${guestIndex}][child]`, guest.children)
+
+        if (guest.childrenAges) {
+          if (guest.childrenAges.length > 0) {
+            guest.childrenAges.forEach((getAge, index) => {
+              formData.append(`sesson[${guestIndex}][child_ages][${index}][child_count]`, 1)
+              formData.append(`sesson[${guestIndex}][child_ages][${index}][age]`, getAge)
+            })
+          }
+        }
+      })
+
+      try {
+        const promise = cruisesServices.calculateCruiseAllPrice(this.$route.params.id, formData)
+        const response = await promise
+        const results = response.data
+        console.log(results)
+        if (results.status === 200) {
+          this.initialPrice = results.total_price
+        } else {
+          this.initialPrice = 0
+          this.snackbar = true
+          this.color = 'error'
+          this.text = results.errors
+          this.loaded = false
+        }
+      } catch (error) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Something went wrong'
+        this.loaded = false
+      }
     }
   }
 }

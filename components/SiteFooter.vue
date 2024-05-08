@@ -50,21 +50,27 @@
             <NuxtLink to="/" class="foter-link">
               Home
             </NuxtLink>
-            <a href="https://blog.tanefer.com/about-tanefer/" target="_blank" class="foter-link">About</a>
-            <a href="https://blog.tanefer.com/" target="_blank" class="foter-link">Blog</a>
-            <a href="https://blog.tanefer.com/about-tanefer/" target="_blank" class="foter-link">
+            <a href="https://tanefer.com/blog/about-tanefer/" target="_blank" class="foter-link">About</a>
+            <a href="https://tanefer.com/blog/" target="_blank" class="foter-link">Blog</a>
+            <!-- <a href="https://tanefer.com/blog/about-tanefer/" target="_blank" class="foter-link">
               Services
-            </a>
-            <NuxtLink to="/comingSoon" class="foter-link">
+            </a> -->
+            <NuxtLink to="/faq" class="foter-link">
               FAQ
             </NuxtLink>
-            <a href="https://blog.tanefer.com/privacy-policy/" target="_blank" class="foter-link">Privacy Policy</a>
+            <NuxtLink to="/policyAndPrivacy" class="foter-link">
+              Privacy Policy
+            </NuxtLink>
+            <!-- <a href="https://tanefer.com/blog/privacy-policy/" target="_blank" class="foter-link">Privacy Policy</a> -->
             <NuxtLink to="/termsAndConditions" class="foter-link">
               Terms of Use
             </NuxtLink>
             <NuxtLink to="/contact" class="foter-link">
               Contact us
             </NuxtLink>
+            <!-- <NuxtLink to="/connect" class="foter-link">
+              Social Media
+            </NuxtLink> -->
           </div>
           <div class="footer-col">
             <div class="foter-title">
@@ -81,24 +87,24 @@
             <NuxtLink to="/hotels" class="foter-link">
               Hotels
             </NuxtLink>
-            <NuxtLink to="/comingSoon" class="foter-link">
+            <!-- <NuxtLink to="/comingSoon" class="foter-link">
               Car rentals
-            </NuxtLink>
+            </NuxtLink> -->
             <NuxtLink to="/cruises" class="foter-link">
               Nile cruises
             </NuxtLink>
-            <NuxtLink to="/trips" class="foter-link">
+            <!-- <NuxtLink to="/trips" class="foter-link">
               Trips
-            </NuxtLink>
+            </NuxtLink> -->
             <NuxtLink to="/trips" class="foter-link">
               Build your trip
             </NuxtLink>
             <NuxtLink to="/adventures" class="foter-link">
-              Activities
+              Adventures
             </NuxtLink>
-            <NuxtLink to="/trips" class="foter-link">
+            <!-- <NuxtLink to="/trips" class="foter-link">
               Experience Egypt
-            </NuxtLink>
+            </NuxtLink> -->
           </div>
           <div class="footer-col">
             <div class="foter-title">
@@ -167,7 +173,8 @@ export default {
         { text: 'FAQ', value: 'faq' },
         { text: 'Privacy policy', value: 'privacy' },
         { text: 'Terms of use', value: 'Terms' },
-        { text: 'Contact us', value: 'contact' }
+        { text: 'Contact us', value: 'contact' },
+        { text: 'Social Media', value: 'connect' }
       ],
       links: [
         { text: 'Flights', value: 'flights' },
