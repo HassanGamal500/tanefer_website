@@ -403,7 +403,7 @@
                           <v-col cols="12" md="4" class="pt-4">
                             <v-img
                               max-height="400"
-                              :src="hotel.Images && hotel.Images.Image[1].Type === 'THB' ? hotel.Images.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
+                              :src="hotel.Images && hotel.Images.Image[0] ? hotel.Images.Image[0].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
                               max-width="400"
                               class="rounded-lg"
                             />
@@ -1962,7 +1962,7 @@
                     </h5>
                   </v-col>
                   <v-col cols="4">
-                    <p>$ {{ totalAllPrices }}</p>
+                    <p>$ {{ totalAllPrices.toFixed(2) }}</p>
                   </v-col>
                 </v-row>
               </v-col>
@@ -2094,6 +2094,7 @@
                                   <div v-for="(room, r) in hotelOption.HotelRooms.HotelRoom" :key="r">
                                     <strong>Room Name:</strong> {{ room.Name }} <br>
                                     <strong>Room Category:</strong> {{ room.RoomCategory._ }} <br>
+                                    <strong v-if="hotelOption.Board">Board:</strong> {{ hotelOption.Board._ }} <br>
                                     <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
                                     <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
                                     <hr>
@@ -2102,6 +2103,7 @@
                                 <span v-else>
                                   <strong>Room Name:</strong> {{ hotelOption.HotelRooms.HotelRoom.Name }} <br>
                                   <strong>Room Category:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br>
+                                  <strong v-if="hotelOption.Board">Board:</strong> {{ hotelOption.Board._ }} <br>
                                   <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
                                   <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
                                 </span>
@@ -2113,6 +2115,13 @@
                               <p v-if="hotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">
                                 <strong>Hotel Offer:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
                                 <strong>Hotel Offer Description:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
+                              </p>
+                              <v-divider class="mb-4" />
+                              <p v-if="hotelOption.CancellationPolicy" class="" style="font-size: 18px;margin: 2px 0;">
+                                <strong>Cancellation Policy</strong>
+                                <strong>Description:</strong> {{ hotelOption.CancellationPolicy.Description }} <br>
+                                <strong>First Day Cost Cancellation (Hour):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation.Hour }} <br>
+                                <strong>First Day Cost Cancellation (Date):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation._ }} <br>
                               </p>
                               <v-divider class="mb-4" />
                               <p v-if="hotelOption.Prices && hotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
@@ -2802,7 +2811,7 @@
                 <v-col cols="12" md="4" class="pt-4">
                   <v-img
                     max-height="400"
-                    :src="gtaHotelDetails.Images.Image[1].Type === 'THB' ? gtaHotelDetails.Images.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
+                    :src="gtaHotelDetails.Images.Image[0] ? gtaHotelDetails.Images.Image[0].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
                     max-width="400"
                     class="rounded-lg"
                   />
@@ -2813,6 +2822,15 @@
                       <h6 class="text-h6 font-weight-bold">
                         {{ gtaHotelDetails.HotelName }}
                       </h6>
+                    </div>
+                    <div v-if="gtaHotelDetails.Images && gtaHotelDetails.Images.Image.length > 0" >
+                      <v-carousel hide-delimiters height="300">
+                        <v-carousel-item
+                          v-for="(image,i) in gtaHotelDetails.Images.Image"
+                          :key="i"
+                          :src="image.FileName"
+                        />
+                      </v-carousel>
                     </div>
                     <div class="black--text">
                       <p class="" style="font-size: 15px;margin: 2px 0;">

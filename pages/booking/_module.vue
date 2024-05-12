@@ -1,8 +1,15 @@
 <template>
   <div>
-    <v-snackbar v-model="snackbar" :color="color" top :timeout="5000">
+    <v-snackbar
+      v-model="snackbar"
+      :color="color"
+      top
+      :timeout="5000"
+      auto-height
+      vertical
+      >
       <v-row>
-        {{ text }}
+        <h4>{{ text }}</h4>
         <v-spacer />
         <v-btn
           dark
@@ -114,7 +121,7 @@
                       </div>
                       <div class="late--text text-h6 font-weight-bold ml-3">
                         <!-- ${{ packageTotalPrice }}<br> -->
-                        ${{ packageTotalAllPrice }}<br>
+                        ${{ packageTotalAllPrice.toFixed(2) }}<br>
                       </div>
                     </div>
                   </v-card-text>

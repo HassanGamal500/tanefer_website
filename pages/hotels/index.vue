@@ -196,10 +196,22 @@
                             <strong>Hotel Name:</strong> {{ hotel.HotelInfo.Name }}
                           </p>
                           <p class="" style="font-size: 15px;margin: 2px 0;">
-                            <strong>Address:</strong> {{ hotel.HotelInfo.Address.Address }}
+                            <strong>Address:</strong> {{ hotel.HotelInfo.Address }}
                           </p>
                           <p class="" style="font-size: 15px;margin: 2px 0;">
                             <strong>Category:</strong> {{ hotel.HotelInfo.HotelCategory._ }}
+                          </p>
+                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                            <strong>Type:</strong> {{ hotel.HotelInfo.HotelType._ }}
+                          </p>
+                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                            <strong>Board:</strong> {{ hotel.HotelOptions.HotelOption.Board._ }}
+                          </p>
+                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                            <strong>Description:</strong> {{ hotel.HotelInfo.Description }}
+                          </p>
+                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                            <strong>Price:</strong> {{ hotel.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotel.HotelOptions.HotelOption.Prices.Price.Currency }}
                           </p>
                           <!-- <a class="" style="font-size: 15px;margin: 2px 0;" @click="showHotels(h)">Change Hotel</a> <v-icon class="mx-2" style="color: black;">
                             mdi-swap-horizontal
@@ -967,7 +979,7 @@
                   <div v-if="gtaHotelDetails.Images">
                     <v-img
                       max-height="400"
-                      :src="gtaHotelDetails.Images && gtaHotelDetails.Images.Image[1].Type === 'THB' ? gtaHotelDetails.Images.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
+                      :src="gtaHotelDetails.Images && gtaHotelDetails.Images.Image[0] ? gtaHotelDetails.Images.Image[0].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
                       max-width="400"
                       class="rounded-lg"
                     />
@@ -979,6 +991,15 @@
                       <h6 class="text-h6 font-weight-bold">
                         {{ gtaHotelDetails.HotelName }}
                       </h6>
+                    </div>
+                    <div v-if="gtaHotelDetails.Images && gtaHotelDetails.Images.Image.length > 0" >
+                      <v-carousel hide-delimiters height="300">
+                        <v-carousel-item
+                          v-for="(image,i) in gtaHotelDetails.Images.Image"
+                          :key="i"
+                          :src="image.FileName"
+                        />
+                      </v-carousel>
                     </div>
                     <div class="black--text">
                       <p class="" style="font-size: 15px;margin: 2px 0;">
