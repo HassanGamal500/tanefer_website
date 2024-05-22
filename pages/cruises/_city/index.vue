@@ -38,6 +38,7 @@
                 />
               </v-card-title>
               <v-card-subtitle class="py-0 px-0 my-1">
+                sort: {{ item.sort_cruise }}
                 Cruise Line: {{ item.cruise_line }} / Ship: {{ item.ship_name }} / Nights: {{ item.number_of_nights }}
               </v-card-subtitle>
               <div class="more-text">
@@ -132,7 +133,7 @@
             />
           </v-card-title>
           <v-card-subtitle class="py-0 px-0 my-1">
-            Cruise Line: {{ cruise.cruise_line }} / Ship: {{ cruise.ship_name }} / Nights: {{ cruise.number_of_nights }} / Cities:
+           sort:  {{ cruise.sort_cruise }} /Cruise Line: {{ cruise.cruise_line }} / Ship: {{ cruise.ship_name }} / Nights: {{ cruise.number_of_nights }} / Cities:
             <span v-for="(item, i) in cruise.cities" :key="i">{{ item.name + ', ' }}</span>
           </v-card-subtitle>
           <v-card-text class="px-0">
@@ -234,6 +235,7 @@ export default {
       showCruiseDialog: false,
       showDetailsLoading: false,
       image: '',
+      // sort: '',
       color: '',
       snackbar: false,
       text: '',
@@ -322,6 +324,7 @@ export default {
         const results = response.data
         this.cruise = results.data
         this.image = results.data.master_image
+        // this.sort_cruise = results.data.sort_cruise
         this.showCruiseDialog = true
       } catch (error) {
         this.snackbar = true
