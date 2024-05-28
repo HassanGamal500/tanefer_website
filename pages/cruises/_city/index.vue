@@ -104,7 +104,7 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-img :src="image" height="200" width="100%" class="rounded" />
+              <v-img :src="image" height="400" width="100%" class="rounded" />
             </v-col>
             <v-col cols="12" class="d-flex flex-wrap">
               <v-img

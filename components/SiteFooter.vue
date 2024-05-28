@@ -118,33 +118,44 @@
               </div>
             </div>
             <div class="foter-subtitle">
-              TaNefer - Egypt
+              Head Quarter - Egypt
             </div>
-            <div class="contact-row pb-10">
+            <div class="contact-row pb-4">
               <img src="~/assets/images/location-icon.png" loading="lazy" alt="" class="contact-icon">
               <div>
-                <div>75 Mosadaq St #5,<br>Giza, Egypt</div>
+                <div>29 Refaa St. Dokki, Giza <br> (G) Floor, Suite #B1, </div>
+              </div>
+            </div>
+            <div class="contact-row pb-4">
+              <div>
+                <div>IATA # 90214176 </div>
+              </div>
+            </div>
+            <div class="contact-row pb-4">
+              <img src="~/assets/images/phobe-icon.png" loading="lazy" alt="" class="contact-icon">
+              <div>
+                <a href="tel:+2 333 84000/06" class="foter-link line-normal">+2 333 84000/06 </a>
               </div>
             </div>
             <div class="contact-row">
               <img src="~/assets/images/phobe-icon.png" loading="lazy" alt="" class="contact-icon">
               <div>
-                <a href="tel:+2033384000" class="foter-link line-normal">+20 3 3384000</a>
+                <a href="tel:+201001705555" class="foter-link line-normal">+20 1001705555 </a>
+                <a href="tel:+201224806531 " class="foter-link line-normal">+20 1224806531</a>
               </div>
             </div>
             <div class="foter-subtitle">
-              TaNefer - USA
+              TaNefer Tours Inc - USA
             </div>
-            <div class="contact-row pb-10">
+            <div class="contact-row pb-4">
               <img src="~/assets/images/location-icon.png" loading="lazy" alt="" class="contact-icon">
               <div>
-                <div>6066 Leesburg Pike Suite #430 Falls Church, VA 20141</div>
+                <div>6066 Leesburg Pike Suite #430 <br> Falls Church, VA 20141</div>
               </div>
             </div>
-            <div class="contact-row">
-              <img src="~/assets/images/phobe-icon.png" loading="lazy" alt="" class="contact-icon">
+            <div class="contact-row pb-4">
               <div>
-                <a href="tel:+1-571-406-3055" class="foter-link line-normal">+1-571-406-3055</a>
+                <div>IATA # 90214176 </div>
               </div>
             </div>
           </div>
