@@ -4143,6 +4143,7 @@ export default {
 
         this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption)
         this.getRatePlanCodeArray.push(this.hotelAvails.HotelOptions.HotelOption.RatePlanCode)
+        this.getRatePlanCodes.push(this.hotelAvails.HotelOptions.HotelOption.RatePlanCode)
         this.hotelPrices += this.hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
         this.selectedHotelCodeArray.push(this.hotelAvails.Code)
         this.selectedHotelJPCodeArray.push(this.hotelAvails.JPCode)

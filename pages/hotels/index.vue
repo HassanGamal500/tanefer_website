@@ -290,7 +290,6 @@
                 <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
                   <v-col cols="12" md="12">
                     <v-btn
-                      v-if="e1 === 2"
                       class="white--text"
                       color="#4f3316"
                       elevation="6"
