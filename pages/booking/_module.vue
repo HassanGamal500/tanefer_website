@@ -345,7 +345,7 @@
                 </v-expansion-panel>
               </v-expansion-panels>
             </div>
-            <div v-if="numberOfPassenger.hotelJPCode !== NULL">
+            <div v-if="numberOfPassenger.hotelJPCode !== NULL && numberOfPassenger.bookingRule">
               <v-expansion-panels v-model="numberOfPassenger.hotelJPCode" focusable class="mb-5">
                 <v-expansion-panel style="border-radius: 18px;">
                   <v-expansion-panel-header class="font-weight-bold text-h6 change-icon-style" style="border-radius: 8px;">
@@ -358,7 +358,7 @@
                   <v-expansion-panel-content class="my-8">
                     <v-card class="my-2">
                       <v-card-title class="white--text" style="background-color: #4f3316;">
-                        <span> {{ numberOfPassenger.bookingRule.HotelOptions.HotelOption.PriceInformation.HotelContent.HotelName }} </span>
+                        <span v-if="numberOfPassenger.bookingRule"> {{ numberOfPassenger.bookingRule.HotelOptions.HotelOption.PriceInformation.HotelContent.HotelName }} </span>
                       </v-card-title>
                       <v-card-text class="pt-4">
                         <v-row>

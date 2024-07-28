@@ -50,8 +50,14 @@ export default {
   getGtaCatalogues () {
     return clientAPI(baseURL).get('/packages/gta-get-hotel-catalogues')
   },
+  getGtaHotelCategories () {
+    return clientAPI(baseURL).get('/packages/gta-get-hotel-categories')
+  },
+  getGtaHotelTypeCategories () {
+    return clientAPI(baseURL).get('/packages/gta-get-hotel-type-categories')
+  },
   getGtaCategories () {
-    return clientAPI(baseURL).get('/packages/gta-get-categories')
+    return clientAPI(baseURL).get('/packages/gta-get-room-categories')
   },
   getGtaBoards () {
     return clientAPI(baseURL).get('/packages/gta-get-boards')

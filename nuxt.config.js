@@ -70,8 +70,14 @@ export default {
         libraries: ['places']
       }
     ],
-    'vue-social-sharing/nuxt'
+    'vue-social-sharing/nuxt',
+    '@nuxtjs/gtm'
   ],
+
+  // Configure the module
+  gtm: {
+    id: 'GTM-NW2KVR7', // Your GTM ID
+  },
 
   // baseURL = 'https://be.tanefer.com/api/v2'
   // Axios module configuration: https://go.nuxtjs.dev/config-axios

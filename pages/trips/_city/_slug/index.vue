@@ -792,12 +792,12 @@
                                         <span v-if="Array.isArray(gta.HotelRooms.HotelRoom)">
                                           <div v-for="(room, r) in gta.HotelRooms.HotelRoom" :key="r">
                                             <div>
-                                              {{ room.Name }} - Adults: {{ room.RoomOccupancy.Adults }} - Children: {{ room.RoomOccupancy.Children }}
+                                              {{ room.Name }} - <span v-if="room.RoomOccupancy">Adults: {{ room.RoomOccupancy.Adults }} - Children: {{ room.RoomOccupancy.Children }}</span>
                                             </div>
                                           </div>
                                         </span>
                                         <span v-else>
-                                          {{ gta.HotelRooms.HotelRoom.Name }} - Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
+                                          {{ gta.HotelRooms.HotelRoom.Name }} - <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy">Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}</span>
                                         </span>
                                       </div>
                                       <p class="" style="font-size: 15px;margin: 2px 0;">
@@ -1121,10 +1121,9 @@
                         </v-row>
                       </div>
                     </v-card>
-
+                    <!-- :disabled="!isBooked" -->
                     <v-btn
                       color="primary"
-                      :disabled="!isBooked"
                       @click="checkTheStepCurrent"
                     >
                       Next
@@ -1384,7 +1383,7 @@
                         <span class="quantity px-2 font-weight-bold">$ {{ initialPrice }}</span>
                       </span>
                     </p>
-                    <v-btn
+                    <!-- <v-btn
                       v-if="e1 === 2"
                       class="white--text"
                       color="#4f3316"
@@ -1394,7 +1393,7 @@
                       raised
                     >
                       Save Trip
-                    </v-btn>
+                    </v-btn> -->
                     <!-- <v-divider class="my-2" />
                     <v-btn
                       v-if="e1 === 2"
@@ -1779,7 +1778,7 @@
                       <span class="quantity px-2 font-weight-bold">$ {{ initialPrice }}</span>
                     </span>
                   </p>
-                  <v-btn
+                  <!-- <v-btn
                     v-if="e1 === 2"
                     class="white--text"
                     color="#4f3316"
@@ -1789,7 +1788,7 @@
                     raised
                   >
                     Save Trip
-                  </v-btn>
+                  </v-btn> -->
                   <!-- <v-divider class="my-2" />
                   <v-btn
                     v-if="e1 === 2"
@@ -2095,8 +2094,12 @@
                                     <strong>Room Name:</strong> {{ room.Name }} <br>
                                     <strong>Room Category:</strong> {{ room.RoomCategory._ }} <br>
                                     <strong v-if="hotelOption.Board">Board:</strong> {{ hotelOption.Board._ }} <br>
-                                    <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
-                                    <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
+                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults">
+                                      <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
+                                    </span>
+                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children">
+                                      <strong v-if="room.RoomOccupancy && room.RoomOccupancy.Children">Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
+                                    </span>
                                     <hr>
                                   </div>
                                 </span>
@@ -2104,8 +2107,12 @@
                                   <strong>Room Name:</strong> {{ hotelOption.HotelRooms.HotelRoom.Name }} <br>
                                   <strong>Room Category:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br>
                                   <strong v-if="hotelOption.Board">Board:</strong> {{ hotelOption.Board._ }} <br>
-                                  <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                  <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults">
+                                    <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
+                                  </span>
+                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children">
+                                    <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                  </span>
                                 </span>
                               </p>
                               <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">
@@ -2162,14 +2169,22 @@
                             <p v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
                               <span v-if="Array.isArray(hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom)">
                                 <div v-for="(room, r) in hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" :key="r">
-                                  <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
-                                  <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
+                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults">
+                                    <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
+                                  </span>
+                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children">
+                                    <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
+                                  </span>
                                   <hr>
                                 </div>
                               </span>
                               <span v-else>
-                                <strong>Number of Adults:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                <strong>Number of Children:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults">
+                                  <strong>Number of Adults:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
+                                </span>
+                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children">
+                                  <strong>Number of Children:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                </span>
                               </span>
                             </p>
                             <p v-if="hotelAvails.HotelOptions.HotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">

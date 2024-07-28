@@ -111,10 +111,22 @@
                 </v-menu>
               </v-col>
               <v-col cols="12" md="4">
+                <v-text-field
+                  v-model="selectedHotelName"
+                  class=""
+                  auto-select-first
+                  clearable
+                  outlined
+                  label="Hotel Name"
+                  hide-details
+                  prepend-inner-icon="mdi-magnify-expand"
+                />
+              </v-col>
+              <v-col cols="12" md="4">
                 <v-select
-                  v-model="selectedCategory"
-                  :items="gtaCatgories"
-                  label="All Categories"
+                  v-model="selectedHotelCategory"
+                  :items="gtaHotelCatgories"
+                  label="All Hotel Categories"
                   outlined
                   clearable
                   item-text="name"
@@ -123,7 +135,33 @@
                   prepend-inner-icon="mdi-cash-multiple"
                 />
               </v-col>
-              <v-col cols="12" md="4">
+              <!-- <v-col cols="12" md="4">
+                <v-select
+                  v-model="selectedHotelTypeCategory"
+                  :items="gtaHotelTypeCatgories"
+                  label="All Hotel Type Categories"
+                  outlined
+                  clearable
+                  item-text="name"
+                  item-value="type"
+                  hide-details
+                  prepend-inner-icon="mdi-cash-multiple"
+                />
+              </v-col> -->
+              <!-- <v-col cols="12" md="4">
+                <v-select
+                  v-model="selectedCategory"
+                  :items="gtaCatgories"
+                  label="All Room Categories"
+                  outlined
+                  clearable
+                  item-text="name"
+                  item-value="type"
+                  hide-details
+                  prepend-inner-icon="mdi-cash-multiple"
+                />
+              </v-col> -->
+              <!-- <v-col cols="12" md="4">
                 <v-select
                   v-model="selectedBoard"
                   :items="gtaBoards"
@@ -135,7 +173,7 @@
                   hide-details
                   prepend-inner-icon="mdi-cash-multiple"
                 />
-              </v-col>
+              </v-col> -->
               <v-col cols="12" md="4">
                 <rooms-and-guests @save="setGuests" />
               </v-col>
@@ -167,7 +205,7 @@
                 <div v-for="(hotel, h) in listGtaHotelDetails" :key="h">
                   <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
                     <v-col cols="12" md="4" class="pt-4">
-                      <div v-if="hotel.Images">
+                      <div v-if="hotel.Images && hotel.Images.length > 0">
                         <v-img
                           max-height="400"
                           :src="hotel.Images && hotel.Images.Image[1].Type === 'THB' ? hotel.Images.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
@@ -175,7 +213,7 @@
                           class="rounded-lg"
                         />
                       </div>
-                      <div v-else-if="hotel.HotelInfo">
+                      <div v-else-if="hotel.HotelInfo.Images">
                         <v-img
                           max-height="400"
                           :src="hotel.HotelInfo && hotel.HotelInfo.Images.Image ? hotel.HotelInfo.Images.Image : 'https://source.unsplash.com/user/c_v_r/1900x800'"
@@ -192,25 +230,25 @@
                           </h6>
                         </div>
                         <div class="black--text">
-                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.Name">
                             <strong>Hotel Name:</strong> {{ hotel.HotelInfo.Name }}
                           </p>
-                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.Address">
                             <strong>Address:</strong> {{ hotel.HotelInfo.Address }}
                           </p>
-                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.HotelCategory">
                             <strong>Category:</strong> {{ hotel.HotelInfo.HotelCategory._ }}
                           </p>
-                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.HotelType">
                             <strong>Type:</strong> {{ hotel.HotelInfo.HotelType._ }}
                           </p>
-                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelOptions.HotelOption.Board">
                             <strong>Board:</strong> {{ hotel.HotelOptions.HotelOption.Board._ }}
                           </p>
-                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.Description">
                             <strong>Description:</strong> {{ hotel.HotelInfo.Description }}
                           </p>
-                          <p class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelOptions.HotelOption.Prices">
                             <strong>Price:</strong> {{ hotel.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotel.HotelOptions.HotelOption.Prices.Price.Currency }}
                           </p>
                           <!-- <a class="" style="font-size: 15px;margin: 2px 0;" @click="showHotels(h)">Change Hotel</a> <v-icon class="mx-2" style="color: black;">
@@ -241,6 +279,7 @@
               <v-card
                 class="mb-12"
               >
+                <div id="selectedRoomtargetDiv"></div>
                 <div v-for="(gta, g) in selectedRoomGtaArray" :key="g">
                   <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
                     <v-col cols="12" md="12" class="pt-4">
@@ -248,7 +287,7 @@
                         <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
                           <v-col cols="12" md="12">
                             <div class="cruise-result-trip justify-space-between">
-                              <div>
+                              <div v-if="gta.Board">
                                 <h6 class="text-h6 font-weight-bold">
                                   Board: {{ gta.Board._ }}
                                 </h6>
@@ -261,18 +300,18 @@
                                   <strong>Hotel Rooms:</strong>
                                 </p>
                                 <div style="font-size: 15px;margin: 2px 0;">
-                                  <span v-if="Array.isArray(gta.HotelRooms.HotelRoom)">
+                                  <span v-if="gta.HotelRooms && Array.isArray(gta.HotelRooms.HotelRoom)">
                                     <div v-for="(room, r) in gta.HotelRooms.HotelRoom" :key="r">
                                       <div>
-                                        {{ room.Name }} - Adults: {{ room.RoomOccupancy.Adults }} - Children: {{ room.RoomOccupancy.Children }}
+                                        {{ room.Name }} <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults">- Adults: {{ room.RoomOccupancy.Adults }}</span> <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children">- Children: {{ room.RoomOccupancy.Children }}</span>
                                       </div>
                                     </div>
                                   </span>
                                   <span v-else>
-                                    {{ gta.HotelRooms.HotelRoom.Name }} - Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
+                                    <span v-if="gta.HotelRooms && gta.HotelRooms.HotelRoom">{{ gta.HotelRooms.HotelRoom.Name }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Adults">- Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Children">- Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}</span>
                                   </span>
                                 </div>
-                                <p class="" style="font-size: 15px;margin: 2px 0;">
+                                <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gta.Prices.Price">
                                   <strong>Prices:</strong> {{ gta.Prices.Price.TotalFixAmounts.Nett }} {{ gta.Prices.Price.Currency }}
                                 </p>
                               </div>
@@ -524,6 +563,28 @@
                   </v-row>
                 </div>
               </v-card>
+              <v-card
+                class="mb-12"
+              >
+                <div v-if="isBooked">
+                  <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                    <v-col>
+                      <v-btn
+                        class="white--text"
+                        color="#4f3316"
+                        elevation="6"
+                        large
+                        block
+                        raised
+                        :disabled="!isBooked"
+                        @click="checkoutPayment"
+                      >
+                        <span>Checkout Now</span>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </div>
+              </v-card>
             </div>
             <div v-else-if="hotelAvails" class="results ma-1">
               <v-card
@@ -546,13 +607,13 @@
                         </h6>
                       </div>
                       <div class="black--text">
-                        <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelAvails.HotelInfo.Description">
                           <strong>Hotel Description:</strong> {{ hotelAvails.HotelInfo.Description }}
                         </p>
-                        <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelAvails.HotelInfo.Address">
                           <strong>Address:</strong> {{ hotelAvails.HotelInfo.Address }}
                         </p>
-                        <p class="" style="font-size: 15px;margin: 2px 0;">
+                        <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelAvails.HotelInfo.HotelCategory">
                           <strong>Category:</strong> {{ hotelAvails.HotelInfo.HotelCategory._ }}
                         </p>
                         <v-btn
@@ -594,7 +655,7 @@
                         <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
                           <v-col cols="12" md="12">
                             <div class="cruise-result-trip justify-space-between">
-                              <div>
+                              <div v-if="gta.Board">
                                 <h6 class="text-h6 font-weight-bold">
                                   Board: {{ gta.Board._ }}
                                 </h6>
@@ -607,18 +668,18 @@
                                   <strong>Hotel Rooms:</strong>
                                 </p>
                                 <div style="font-size: 15px;margin: 2px 0;">
-                                  <span v-if="Array.isArray(gta.HotelRooms.HotelRoom)">
+                                  <span v-if="gta.HotelRooms && Array.isArray(gta.HotelRooms.HotelRoom)">
                                     <div v-for="(room, r) in gta.HotelRooms.HotelRoom" :key="r">
                                       <div>
-                                        {{ room.Name }} - Adults: {{ room.RoomOccupancy.Adults }} - Children: {{ room.RoomOccupancy.Children }}
+                                        {{ room.Name }} <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults">- Adults: {{ room.RoomOccupancy.Adults }}</span> <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children">- Children: {{ room.RoomOccupancy.Children }}</span>
                                       </div>
                                     </div>
                                   </span>
                                   <span v-else>
-                                    {{ gta.HotelRooms.HotelRoom.Name }} - Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
+                                    <span v-if="gta.HotelRooms && gta.HotelRooms.HotelRoom">{{ gta.HotelRooms.HotelRoom.Name }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Adults">- Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Children">- Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}</span>
                                   </span>
                                 </div>
-                                <p class="" style="font-size: 15px;margin: 2px 0;">
+                                <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gta.Prices.Price">
                                   <strong>Prices:</strong> {{ gta.Prices.Price.TotalFixAmounts.Nett }} {{ gta.Prices.Price.Currency }}
                                 </p>
                               </div>
@@ -926,25 +987,26 @@
                 </div>
               </v-card>
               <v-card
-                v-if="isBooked"
                 class="mb-12"
               >
-                <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
-                  <v-col>
-                    <v-btn
-                      class="white--text"
-                      color="#4f3316"
-                      elevation="6"
-                      large
-                      block
-                      raised
-                      :disabled="!isBooked"
-                      @click="checkoutPayment"
-                    >
-                      <span>Checkout Now</span>
-                    </v-btn>
-                  </v-col>
-                </v-row>
+                <div v-if="isBooked">
+                  <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
+                    <v-col>
+                      <v-btn
+                        class="white--text"
+                        color="#4f3316"
+                        elevation="6"
+                        large
+                        block
+                        raised
+                        :disabled="!isBooked"
+                        @click="checkoutPayment"
+                      >
+                        <span>Checkout Now</span>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </div>
               </v-card>
             </div>
           </v-col>
@@ -992,25 +1054,29 @@
                       </h6>
                     </div>
                     <div v-if="gtaHotelDetails.Images && gtaHotelDetails.Images.Image.length > 0" >
-                      <v-carousel hide-delimiters height="300">
-                        <v-carousel-item
-                          v-for="(image,i) in gtaHotelDetails.Images.Image"
-                          :key="i"
-                          :src="image.FileName"
-                        />
-                      </v-carousel>
+                      <v-row>
+                        <v-col cols="12" md="7">
+                          <v-carousel hide-delimiters height="200">
+                            <v-carousel-item
+                              v-for="(image,i) in gtaHotelDetails.Images.Image"
+                              :key="i"
+                              :src="image.FileName"
+                            />
+                          </v-carousel>
+                        </v-col>
+                      </v-row>
                     </div>
                     <div class="black--text">
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.Address.Address">
                         <strong>Address:</strong> {{ gtaHotelDetails.Address.Address }}
                       </p>
                       <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.Address && gtaHotelDetails.Address.PostalCode">
                         <strong>Postal Code:</strong> {{ gtaHotelDetails.Address.PostalCode }}
                       </p>
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.HotelCategory">
                         <strong>Category:</strong> {{ gtaHotelDetails.HotelCategory._ }}
                       </p>
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.HotelType">
                         <strong>Type:</strong> {{ gtaHotelDetails.HotelType._ }}
                       </p>
                       <!-- <p class="" style="font-size: 15px;margin: 2px 0;">
@@ -1043,10 +1109,10 @@
                           </v-expansion-panel>
                         </v-expansion-panels>
                       </div>
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                      <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelAvailDetails.HotelOptions && gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price">
                         <strong>Price:</strong> {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }}  {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.Currency }}
-                      </p>
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
+                      </p> -->
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelAvailDetails.HotelOptions.HotelOption.CancellationPolicy">
                         <strong>Cancellation Policy:</strong> {{ gtaHotelAvailDetails.HotelOptions.HotelOption.CancellationPolicy.Description }}
                       </p>
                     </div>
@@ -1094,27 +1160,33 @@
                               <p v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
                                 <span v-if="Array.isArray(hotelOption.HotelRooms.HotelRoom)">
                                   <div v-for="(room, r) in hotelOption.HotelRooms.HotelRoom" :key="r">
-                                    <strong>Room Name:</strong> {{ room.Name }} <br>
-                                    <strong>Room Category:</strong> {{ room.RoomCategory._ }} <br>
-                                    <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
-                                    <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
-                                    <hr>
+                                    <span v-if="room.Name"><strong>Room Name:</strong> {{ room.Name }} <br></span>
+                                    <span v-if="room.RoomCategory._"><strong>Room Category:</strong> {{ room.RoomCategory._ }} <br></span>
+                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br></span>
+                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br></span>                                    <hr>
                                   </div>
                                 </span>
                                 <span v-else>
-                                  <strong>Room Name:</strong> {{ hotelOption.HotelRooms.HotelRoom.Name }} <br>
-                                  <strong>Room Category:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br>
-                                  <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                  <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                  <span v-if="hotelOption.HotelRooms.HotelRoom.Name"><strong>Room Name:</strong> {{ hotelOption.HotelRooms.HotelRoom.Name }} <br></span>
+                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomCategory._"><strong>Room Category:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br></span>
+                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br></span>
+                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br></span>
                                 </span>
                               </p>
                               <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">
                                 <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
                                 <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
                               </p> -->
-                              <p v-if="hotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">
+                              <p v-if="hotelOption.AdditionalElements && hotelOption.AdditionalElements.HotelOffers" class="" style="font-size: 18px;margin: 2px 0;">
                                 <strong>Hotel Offer:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
                                 <strong>Hotel Offer Description:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
+                              </p>
+                              <v-divider class="mb-4" />
+                              <p v-if="hotelOption.CancellationPolicy" class="" style="font-size: 18px;margin: 2px 0;">
+                                <strong>Cancellation Policy</strong>
+                                <strong>Description:</strong> {{ hotelOption.CancellationPolicy.Description }} <br>
+                                <strong>First Day Cost Cancellation (Hour):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation.Hour }} <br>
+                                <strong>First Day Cost Cancellation (Date):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation._ }} <br>
                               </p>
                               <v-divider class="mb-4" />
                               <p v-if="hotelOption.Prices && hotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
@@ -1155,23 +1227,30 @@
                             <p v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
                               <span v-if="Array.isArray(hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom)">
                                 <div v-for="(room, r) in hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" :key="r">
-                                  <strong>Room Name:</strong> {{ room.Name }} <br>
-                                  <strong>Room Category:</strong> {{ room.RoomCategory._ }} <br>
-                                  <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
-                                  <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
+                                  <span v-if="room.Name"><strong>Room Name:</strong> {{ room.Name }} <br></span>
+                                  <span v-if="room.RoomCategory._"><strong>Room Category:</strong> {{ room.RoomCategory._ }} <br></span>
+                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br></span>
+                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br></span>
                                   <hr>
                                 </div>
                               </span>
                               <span v-else>
-                                <strong>Room Name1:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name }} <br>
-                                <strong>Room Category:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br>
-                                <strong>Number of Adults:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                <strong>Number of Children:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name"><strong>Room Name:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name }} <br></span>
+                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomCategory._"><strong>Room Category:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br></span>
+                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br></span>
+                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br></span>
                               </span>
                             </p>
-                            <p v-if="hotelAvails.HotelOptions.HotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">
+                            <p v-if="hotelAvails.HotelOptions.HotelOption.AdditionalElements && hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers" class="" style="font-size: 18px;margin: 2px 0;">
                               <strong>Hotel Offer:</strong> {{ hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
                               <strong>Hotel Offer Description:</strong> {{ hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
+                            </p>
+                            <v-divider class="mb-4" />
+                            <p v-if="hotelAvails.HotelOptions.HotelOption.CancellationPolicy" class="" style="font-size: 18px;margin: 2px 0;">
+                              <strong>Cancellation Policy</strong>
+                              <strong>Description:</strong> {{ hotelAvails.HotelOptions.HotelOption.CancellationPolicy.Description }} <br>
+                              <strong>First Day Cost Cancellation (Hour):</strong> {{ hotelAvails.HotelOptions.HotelOption.CancellationPolicy.FirstDayCostCancellation.Hour }} <br>
+                              <strong>First Day Cost Cancellation (Date):</strong> {{ hotelAvails.HotelOptions.HotelOption.CancellationPolicy.FirstDayCostCancellation._ }} <br>
                             </p>
                             <v-divider class="mb-4" />
                             <p v-if="hotelAvails.HotelOptions.HotelOption.Prices && hotelAvails.HotelOptions.HotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
@@ -1339,10 +1418,16 @@ export default {
       gtaHotels: [],
       gtaZones: [],
       selectedZone: null,
+      gtaHotelName: '',
+      gtaHotelCatgories: [],
+      gtaHotelTypeCatgories: [],
       gtaCatgories: [],
-      selectedCategory: null,
+      selectedHotelName: '',
+      selectedHotelCategory: 'all',
+      selectedHotelTypeCategory: 'all',
+      selectedCategory: 'all',
       gtaBoards: [],
-      selectedBoard: null,
+      selectedBoard: 'all',
       menuStartDate: null,
       menuEndDate: null,
       hotelStartDateText: null,
@@ -1487,6 +1572,8 @@ export default {
     await this.getMetaData()
     await this.getGtaCountries()
     await this.getGtaCities()
+    await this.getGtaHotelCategories()
+    await this.getGtaHotelTypeCategories()
     await this.getGtaCategories()
     await this.getGtaBoards()
   },
@@ -1561,6 +1648,30 @@ export default {
         this.loaded = false
       }
     },
+    async getGtaHotelCategories () {
+      try {
+        const promise = hotelsServices.getGtaHotelCategories()
+        const response = await promise
+        const results = response.data
+        if (results.status === 200) {
+          this.gtaHotelCatgories = results.data
+        }
+      } catch (error) {
+        this.loaded = false
+      }
+    },
+    async getGtaHotelTypeCategories () {
+      try {
+        const promise = hotelsServices.getGtaHotelTypeCategories()
+        const response = await promise
+        const results = response.data
+        if (results.status === 200) {
+          this.gtaHotelTypeCatgories = results.data
+        }
+      } catch (error) {
+        this.loaded = false
+      }
+    },
     async getGtaCategories () {
       try {
         const promise = hotelsServices.getGtaCategories()
@@ -1603,6 +1714,7 @@ export default {
     async showHotelDetailsObject (hotelIndex) {
       const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
       try {
+        this.isLoading = true
         const promise = hotelsServices.getGtaHotelDetails(getHotelGtaDetails.Code)
         const response = await promise
         const results = response.data
@@ -1610,9 +1722,11 @@ export default {
           this.gtaHotelDetails = results.ContentRS.Contents.HotelContent
           this.gtaHotelAvailDetails = getHotelGtaDetails
           this.showHotelGtaDetails = true
+          this.isLoading = false
         }
       } catch (error) {
         this.loaded = false
+        this.isLoading = false
       }
     },
     async checkHotelAvailability () {
@@ -1629,10 +1743,28 @@ export default {
       } else {
         this.isLoading = true
         this.hotelAvailsArray = []
+        this.hotelAvails = null
+        this.selectedRoomGtaArray = []
+        this.getRatePlanCodeArray = []
+        this.selectedHotelCodeArray = []
+        this.selectedHotelJPCodeArray = []
+        this.selectedHotelJPDCodeArray = []
+        this.selectedRoomGta = null
+        this.getRatePlanCode = null
+        this.hotelPrices = null
+        this.selectedHotelCode = null
+        this.selectedHotelJPCode = null
+        this.selectedHotelJPDCode = null
+        this.getbookingRuleArray = []
+        this.confirmedSelectedRoom = false
+
         const formData = new FormData()
         formData.append('start_date', this.hotelStartDate)
         formData.append('end_date', this.hotelEndDate)
         formData.append('board', this.selectedBoard)
+        formData.append('hotel_name', this.selectedHotelName)
+        formData.append('hotel_category', this.selectedHotelCategory)
+        formData.append('hotel_type_category', this.selectedHotelTypeCategory)
         const hotels = this.gtaHotels
         for (let i = 0; i < hotels.length; i++) {
           formData.append('hotels[' + i + ']', hotels[i].Jpd_code)
@@ -1710,12 +1842,107 @@ export default {
       this.gtaHotelDetails = this.listGtaHotelDetails[hotelIndex]
       this.showHotelGtaDetails = true
     },
-    showRooms (HotelIndex) {
+    async showRooms (HotelIndex) {
       if (this.listGtaHotelDetails.length > 1) {
         this.hotelAvails = this.hotelAvailsArray[HotelIndex]
-      }
-      if (this.hotelAvails !== null) {
-        this.showRoomsDialog = true
+        const hotelJPCode = this.hotelAvails.JPCode
+        console.log(hotelJPCode)
+        if (hotelJPCode) {
+          if (this.travellers === 0) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = 'Please select Number of Adult'
+            this.loaded = false
+          } else if (this.hotelStartDate === null || this.hotelEndDate === null) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = 'Please select Start Date and End Date'
+            this.loaded = false
+          } else {
+            this.isLoading = true
+            this.hotelAvails = null
+            this.selectedRoomGtaArray = []
+            this.getRatePlanCodeArray = []
+            this.selectedHotelCodeArray = []
+            this.selectedHotelJPCodeArray = []
+            this.selectedHotelJPDCodeArray = []
+            this.selectedRoomGta = null
+            this.getRatePlanCode = null
+            this.hotelPrices = null
+            this.selectedHotelCode = null
+            this.selectedHotelJPCode = null
+            this.selectedHotelJPDCode = null
+            this.getbookingRuleArray = []
+            this.confirmedSelectedRoom = false
+
+            const formData = new FormData()
+            formData.append('start_date', this.hotelStartDate)
+            formData.append('end_date', this.hotelEndDate)
+            formData.append('board', this.selectedBoard)
+            formData.append('hotel_name', this.selectedHotelName)
+            formData.append('hotel_category', this.selectedHotelCategory)
+            formData.append('hotel_type_category', this.selectedHotelTypeCategory)
+            formData.append('hotels[' + 0 + ']', hotelJPCode)
+            formData.append('adults', this.travellers)
+            formData.append('children', this.children)
+            if (this.ageSelects.length > 0) {
+              for (let x = 0; x < this.ageSelects.length; x++) {
+                formData.append('ages[' + x + ']', this.ageSelects[x].age)
+              }
+            }
+            if (this.rooms.length > 0) {
+              for (let r = 0; r < this.rooms.length; r++) {
+                formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+                formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+                if (this.rooms[r].ageSelects.length > 0) {
+                  for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+                    formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx])
+                  }
+                }
+                formData.append('rooms[' + r + '][category]', this.selectedCategory)
+              }
+            }
+            try {
+              const promise = hotelsServices.checkHotelAvailabilities(formData)
+              const response = await promise
+              const results = response.data.AvailabilityRS
+              if (results.Errors !== undefined) {
+                this.snackbar = true
+                this.color = 'error'
+                this.text = results.Errors.Error.Text
+                this.loaded = false
+                this.checkResponseCode = false
+                this.isLoading = false
+              } else {
+                this.isAvailable = true
+                const hotelResults = results.Results.HotelResult
+                if (hotelResults.length > 1) {
+                  for (let index = 0; index < hotelResults.length; index++) {
+                    this.hotelAvailsArray.push(hotelResults[index])
+                    this.selectedHotelStartDate = this.hotelStartDate
+                    this.selectedHotelEndDate = this.hotelEndDate
+                  }
+                  this.listGtaHotelDetails = hotelResults
+                  this.hotelAvails = hotelResults[0]
+                } else {
+                  this.hotelAvails = hotelResults
+                }
+                this.checkResponseCode = true
+                this.isLoading = false
+                if (this.hotelAvails !== null) {
+                  this.showRoomsDialog = true
+                }
+              }
+            } catch (error) {
+              this.snackbar = true
+              this.color = 'error'
+              this.text = 'Something went wrong'
+              this.loaded = false
+              this.checkResponseCode = false
+              this.isLoading = false
+            }
+          }
+        }
       }
     },
     showRoomsObject (code) {
@@ -1724,30 +1951,37 @@ export default {
       }
     },
     selectRoomHotelGta (AvailIndex) {
-      if (this.hotelAvailsArray.length > 0) {
-        this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption)
-        this.getRatePlanCodeArray.push(this.hotelAvails.HotelOptions.HotelOption.RatePlanCode)
-        this.hotelPrices += this.hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
-        this.selectedHotelCodeArray.push(this.hotelAvails.Code)
-        this.selectedHotelJPCodeArray.push(this.hotelAvails.JPCode)
-        this.selectedHotelJPDCodeArray.push(this.hotelAvails.JPDCode)
+      console.log('AvailIndex = ' + AvailIndex)
+      // if (this.hotelAvailsArray.length > 0) {
+      //   this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption)
+      //   this.getRatePlanCodeArray.push(this.hotelAvails.HotelOptions.HotelOption.RatePlanCode)
+      //   this.hotelPrices += this.hotelAvails.HotelOptions.HotelOption.Prices ? this.hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett : 0
+      //   this.selectedHotelCodeArray.push(this.hotelAvails.Code)
+      //   this.selectedHotelJPCodeArray.push(this.hotelAvails.JPCode)
+      //   this.selectedHotelJPDCodeArray.push(this.hotelAvails.JPDCode)
+      // } else {
+      if (Array.isArray(this.hotelAvails.HotelOptions.HotelOption)) {
+        this.selectedRoomGta = this.hotelAvails.HotelOptions.HotelOption[AvailIndex]
+        this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption[AvailIndex])
+        this.getRatePlanCode = this.hotelAvails.HotelOptions.HotelOption[AvailIndex].RatePlanCode
+        this.hotelPrices = this.hotelAvails.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
       } else {
-        if (Array.isArray(this.hotelAvails.HotelOptions.HotelOption)) {
-          this.selectedRoomGta = this.hotelAvails.HotelOptions.HotelOption[AvailIndex]
-          this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption[AvailIndex])
-          this.getRatePlanCode = this.hotelAvails.HotelOptions.HotelOption[AvailIndex].RatePlanCode
-          this.hotelPrices = this.hotelAvails.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
-        } else {
-          this.selectedRoomGta = this.hotelAvails.HotelOptions.HotelOption
-          this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption)
-          this.getRatePlanCode = this.hotelAvails.HotelOptions.HotelOption.RatePlanCode
-          this.hotelPrices = this.hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
-        }
-        this.selectedHotelCode = this.hotelAvails.Code
-        this.selectedHotelJPCode = this.hotelAvails.JPCode
-        this.selectedHotelJPDCode = this.hotelAvails.JPDCode
+        this.selectedRoomGta = this.hotelAvails.HotelOptions.HotelOption
+        this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption)
+        this.getRatePlanCode = this.hotelAvails.HotelOptions.HotelOption.RatePlanCode
+        this.hotelPrices = this.hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
       }
+      this.selectedHotelCode = this.hotelAvails.Code
+      this.selectedHotelJPCode = this.hotelAvails.JPCode
+      this.selectedHotelJPDCode = this.hotelAvails.JPDCode
+      // }
       this.showRoomsDialog = false
+      // const targetElement = this.$refs.selectedRoomtargetDiv
+      // console.log(targetElement)
+      // if (targetElement) {
+      //   targetElement.scrollIntoView({ behavior: 'smooth' })
+      // }
+      document.getElementById('selectedRoomtargetDiv').scrollIntoView()
     },
     async confirmSelectedRoom () {
       this.isLoading = true
@@ -1848,11 +2082,15 @@ export default {
           formData.append('email', this.email)
           formData.append('nationality', this.issueCountry)
           formData.append('board', this.selectedBoard)
+          formData.append('hotel_name', this.selectedHotelName)
+          formData.append('hotel_category', this.selectedHotelCategory)
+          formData.append('hotel_type_category', this.selectedHotelTypeCategory)
           formData.append('identification_document_pax', this.identification_document_pax)
           formData.append('address_pax', this.address_pax)
           formData.append('city_pax', this.city_pax)
           formData.append('country_pax', this.country_pax)
           formData.append('postal_code_pax', this.postal_code_pax)
+          formData.append('book_after_payment', '1')
           if (this.rooms.length > 0) {
             for (let r = 0; r < this.rooms.length; r++) {
               formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
@@ -1901,20 +2139,25 @@ export default {
             const promise = hotelsServices.finalBookHotel(formData)
             const response = await promise
             console.log(response)
-            const results = response.data.BookingRS
-            if (results.Errors !== undefined) {
-              this.snackbar = true
-              this.color = 'error'
-              this.text = results.Errors.Error.Text
-              this.loaded = false
-              this.checkResponseCode = false
-              this.isBooked = true
-              this.isLoading = false
-            } else {
-              this.getBookingCodeArray.push(results)
-              this.isBooked = true
-              this.isLoading = false
-            }
+            // const results = response.data.BookingRS
+            const resultFormData = response.data.formDataId
+            this.finalBookHotelFormData = resultFormData
+            this.finalBookHotelsFormData[x] = resultFormData
+            this.isBooked = true
+            this.isLoading = false
+            // if (results.Errors !== undefined) {
+            //   this.snackbar = true
+            //   this.color = 'error'
+            //   this.text = results.Errors.Error.Text
+            //   this.loaded = false
+            //   this.checkResponseCode = false
+            //   this.isBooked = true
+            //   this.isLoading = false
+            // } else {
+            //   this.getBookingCodeArray.push(results)
+            //   this.isBooked = true
+            //   this.isLoading = false
+            // }
           } catch (error) {
             this.snackbar = true
             this.color = 'error'
@@ -1949,6 +2192,9 @@ export default {
         formData.append('email', this.email)
         formData.append('nationality', this.issueCountry)
         formData.append('board', this.selectedBoard)
+        formData.append('hotel_name', this.selectedHotelName)
+        formData.append('hotel_category', this.selectedHotelCategory)
+        formData.append('hotel_type_category', this.selectedHotelTypeCategory)
         formData.append('identification_document_pax', this.identification_document_pax)
         formData.append('address_pax', this.address_pax)
         formData.append('city_pax', this.city_pax)
