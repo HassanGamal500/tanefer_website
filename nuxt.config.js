@@ -23,7 +23,8 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/icon.png' },
-      { rel: 'stylesheet', type: 'text/css', href: 'https://unpkg.com/@mdi/font@7.2.96/css/materialdesignicons.min.css' }
+      { rel: 'stylesheet', type: 'text/css', href: 'https://unpkg.com/@mdi/font@7.2.96/css/materialdesignicons.min.css' },
+      { rel: 'stylesheet', type: 'text/css', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css' }
     ],
     script: [
       { src: 'https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js', body: true }
@@ -76,7 +77,7 @@ export default {
 
   // Configure the module
   gtm: {
-    id: 'GTM-NW2KVR7', // Your GTM ID
+    id: 'GTM-NW2KVR7' // Your GTM ID
   },
 
   // baseURL = 'https://be.tanefer.com/api/v2'

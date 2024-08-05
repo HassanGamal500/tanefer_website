@@ -31,40 +31,51 @@
       <div data-collapse="medium" data-animation="over-left" data-duration="400" role="banner" class="nav-bar w-nav">
         <div class="t-container w-container">
           <nav role="navigation" class="nav-bar-flex w-nav-menu justify-space-between">
-            <div>
-              <a
-                href="https://flights.tanefer.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                active-class="w--current"
-                class="nav-link w-nav-link"
-              >Flights</a>
-              <NuxtLink to="/hotels" exact active-class="w--current" class="nav-link w-nav-link">
-                Hotels
-              </NuxtLink>
-              <NuxtLink to="/cruises" exact active-class="w--current" class="nav-link w-nav-link">
-                Nile cruises
-              </NuxtLink>
-              <NuxtLink to="/trips" exact active-class="w--current" class="nav-link w-inline-block">
-                <!-- <a href="/trips" exact active-class="w--current" class="nav-link w-inline-block"> -->
-                <div class="hot">
-                  <div>Pick & Custom your trip</div>
-                  <div class="hot-pointer" />
-                  <div class="hot-lable">
-                    HOT
+            <div class="row">
+              <div class="col-10">
+                <a
+                  href="https://flights.tanefer.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  active-class="w--current"
+                  class="nav-link w-nav-link"
+                >Flights</a>
+                <NuxtLink to="/hotels" exact active-class="w--current" class="nav-link w-nav-link">
+                  Hotels
+                </NuxtLink>
+                <NuxtLink to="/cruises" exact active-class="w--current" class="nav-link w-nav-link">
+                  Nile cruises
+                </NuxtLink>
+                <NuxtLink to="/trips" exact active-class="w--current" class="nav-link w-inline-block">
+                  <!-- <a href="/trips" exact active-class="w--current" class="nav-link w-inline-block"> -->
+                  <div class="hot">
+                    <div>Pick & Custom your trip</div>
+                    <div class="hot-pointer" />
+                    <div class="hot-lable">
+                      HOT
+                    </div>
                   </div>
-                </div>
-              <!-- </a> -->
-              </NuxtLink>
-              <NuxtLink to="/adventures" exact active-class="w--current" class="nav-link w-nav-link">
-                Adventures
-              </NuxtLink>
-              <a
-                href="https://tanefer.com/blog/"
-                rel="noopener noreferrer"
-                active-class="w--current"
-                class="nav-link w-nav-link"
-              >Blogs</a>
+                <!-- </a> -->
+                </NuxtLink>
+                <NuxtLink to="/adventures" exact active-class="w--current" class="nav-link w-nav-link">
+                  Adventures
+                </NuxtLink>
+                <a
+                  href="https://tanefer.com/blog/"
+                  rel="noopener noreferrer"
+                  active-class="w--current"
+                  class="nav-link w-nav-link"
+                >
+                  Blogs</a>
+              </div>
+              <div class="col-2 ">
+                <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
+                  Login
+                </NuxtLink>
+                <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
+                  Register
+                </NuxtLink>
+              </div>
             </div>
           </nav>
           <div class="menu-button w-nav-button" @click="toggleSidebar = !toggleSidebar">
@@ -260,5 +271,6 @@ export default {
   right: auto;
   z-index: 1000;
   top: 0;
+  background-color: red;
 }
 </style>
