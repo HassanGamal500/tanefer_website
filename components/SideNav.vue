@@ -44,6 +44,12 @@
           active-class="w--current"
           class="nav-link w-nav-link"
         >Blogs</a>
+        <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
+          Login
+        </NuxtLink>
+        <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
+          Register
+        </NuxtLink>
       </div>
     </nav>
   </div>
