@@ -39,7 +39,9 @@
                   rel="noopener noreferrer"
                   active-class="w--current"
                   class="nav-link w-nav-link"
-                >Flights</a>
+                >
+                  Flights
+                </a>
                 <NuxtLink to="/hotels" exact active-class="w--current" class="nav-link w-nav-link">
                   Hotels
                 </NuxtLink>
@@ -47,7 +49,6 @@
                   Nile cruises
                 </NuxtLink>
                 <NuxtLink to="/trips" exact active-class="w--current" class="nav-link w-inline-block">
-                  <!-- <a href="/trips" exact active-class="w--current" class="nav-link w-inline-block"> -->
                   <div class="hot">
                     <div>Pick & Custom your trip</div>
                     <div class="hot-pointer" />
@@ -55,7 +56,6 @@
                       HOT
                     </div>
                   </div>
-                <!-- </a> -->
                 </NuxtLink>
                 <NuxtLink to="/adventures" exact active-class="w--current" class="nav-link w-nav-link">
                   Adventures
@@ -66,18 +66,30 @@
                   active-class="w--current"
                   class="nav-link w-nav-link"
                 >
-                  Blogs</a>
+                  Blogs
+                </a>
               </div>
-              <div class="col-2 ">
-                <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
-                  Login
-                </NuxtLink>
-                <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
-                  Register
-                </NuxtLink>
+              <div class="col-2">
+                <div v-if="isAuthenticated">
+                  <NuxtLink to="/profile" exact active-class="w--current" class="nav-link w-nav-link">
+                    Profile
+                  </NuxtLink>
+                  <a class="nav-link w-nav-link" @click="logout">
+                    Logout
+                  </a>
+                </div>
+                <div v-else>
+                  <NuxtLink to="/login" exact active-class="w--current" class="nav-link w-nav-link">
+                    Login
+                  </NuxtLink>
+                  <NuxtLink to="/register" exact active-class="w--current" class="nav-link w-nav-link">
+                    Register
+                  </NuxtLink>
+                </div>
               </div>
             </div>
           </nav>
+
           <div class="menu-button w-nav-button" @click="toggleSidebar = !toggleSidebar">
             <div class="icon-menu w-icon-nav-menu" />
           </div>
@@ -135,6 +147,8 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: 'SiteNavBar',
   data () {
@@ -148,17 +162,24 @@ export default {
         { text: 'Nile cruises', value: 'nile' },
         { text: 'Trips', value: 'trips' },
         { text: 'Build your trip', value: 'build' },
-        { text: 'Activties', value: 'activities' },
+        { text: 'Activities', value: 'activities' },
         { text: 'Experience Egypt', value: 'exEgypt' },
         { text: 'Experience world', value: 'exWorld' },
         { text: 'Hage & Omra', value: 'islamic' }
       ]
     }
   },
+  computed: {
+    ...mapGetters(['isAuthenticated', 'user'])
+  },
   created () {
     this.sizes = this.$vuetify.breakpoint
   },
+
   methods: {
+    ...mapActions({
+      logoutAction: 'logout'
+    }),
     goTo (route) {
       if (this.$route.name !== route) {
         this.$router.push({ name: route })
@@ -189,77 +210,82 @@ export default {
       return bgClass
     },
     getClass () {
-      let navCalss = ''
+      let navClass = ''
       switch (this.$route.name) {
         case 'index':
-          navCalss = 'home-heder'
+          navClass = 'home-header'
           break
         case 'flights':
-          navCalss = 'page-head flights'
+          navClass = 'page-head flights'
           break
         case 'flightResults':
-          navCalss = 'head-bg-color'
+          navClass = 'head-bg-color'
           break
         case 'flightBook':
-          navCalss = 'head-bg-hotel'
+          navClass = 'head-bg-hotel'
           break
         // case 'hotel':
-        //   navCalss = 'page-head hotel-bg'
+        //   navClass = 'page-head hotel-bg'
         //   break
         case 'hotels':
-          navCalss = 'page-head hotel-bg'
+          navClass = 'page-head hotel-bg'
           break
         case 'hotelsResults':
-          navCalss = 'head-bg-hotel'
+          navClass = 'head-bg-hotel'
           break
         case 'hotelDetails':
-          navCalss = 'head-bg-hotel'
+          navClass = 'head-bg-hotel'
           break
         case 'hotelBook':
-          navCalss = 'head-bg-hotel'
+          navClass = 'head-bg-hotel'
           break
         case 'confirmHotelBooking':
-          navCalss = 'head-bg-hotel'
+          navClass = 'head-bg-hotel'
           break
         case 'cars':
-          navCalss = 'page-head car-bg'
+          navClass = 'page-head car-bg'
           break
         case 'carsResults':
-          navCalss = 'head-bg-car'
+          navClass = 'head-bg-car'
           break
         case 'carBook':
-          navCalss = 'head-bg-car'
+          navClass = 'head-bg-car'
           break
         case 'carConfirm':
-          navCalss = 'head-bg-car'
+          navClass = 'head-bg-car'
           break
         case 'trips':
-          navCalss = 'page-head trip-bg'
+          navClass = 'page-head trip-bg'
           break
         case 'trips-city':
-          navCalss = 'head-bg-cruise'
+          navClass = 'head-bg-cruise'
           break
         case 'tripPackage':
-          navCalss = 'head-bg-trip'
+          navClass = 'head-bg-trip'
           break
         case 'tripBook':
-          navCalss = 'head-bg-cruise'
+          navClass = 'head-bg-cruise'
           break
         case 'tripConfirm':
-          navCalss = 'head-bg-cruise'
+          navClass = 'head-bg-cruise'
           break
         case 'adventures':
-          navCalss = 'page-head trip-bg'
+          navClass = 'page-head trip-bg'
           break
         case 'cruises':
           // eslint-disable-next-line no-console
           console.log('here')
-          navCalss = 'page-head cruise-bg'
+          navClass = 'page-head cruise-bg'
           break
         default:
           break
       }
-      return navCalss
+      return navClass
+    },
+    logout () {
+      this.logoutAction()
+      localStorage.removeItem('authToken')
+      this.$router.push('/') // Redirect to home or login page after logout
     }
   }
 }

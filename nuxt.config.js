@@ -5,6 +5,7 @@ export default {
   router: {
     base: ''
   },
+  store: true,
   // serverMiddleware: [
   //   { path: '/', handler: '~/server-middleware/redirects.js' }
   // ],
@@ -85,9 +86,31 @@ export default {
   axios: {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
     // baseURL: 'https://tanefer.nahrdev.com/api/v2'
-    baseURL: 'https://api.tanefer.com/api/v2'
-  },
+    // baseURL: 'https://api.tanefer.com/api/v2'
 
+    baseURL: 'http://localhost:8000/api/v2'
+  },
+  auth: {
+    strategies: {
+      local: {
+        token: {
+          property: 'token',
+          global: true,
+          required: true,
+          type: 'Bearer'
+        },
+        user: {
+          property: 'data',
+          autoFetch: true
+        },
+        endpoints: {
+          login: { url: '/auth/login', method: 'post' },
+          logout: { url: '/auth/logout', method: 'post' },
+          user: { url: '/auth/profile', method: 'get' }
+        }
+      }
+    }
+  },
   // private API secret
   env: {
     clientSecret: 'GshMa0/o/hOZlR79Ns6hkg==',

@@ -32,6 +32,8 @@
 </template>
 
 <script>
+import clientAPI from '../services/axiosConfig'
+
 export default {
   data () {
     return {
@@ -40,9 +42,31 @@ export default {
     }
   },
   methods: {
-    login () {
-      // Handle login logic
-      alert('Logged in successfully!')
+    async login () {
+      try {
+        const response = await clientAPI('http://localhost:8000/api/v2/auth/login').post('', {
+          email: this.email,
+          password: this.password
+        })
+
+        // const token = response.data.token
+        // localStorage.setItem('authToken', token) // Store the token
+        // alert(token)
+        // alert('logged in successfully!')
+
+        const token = response.data.data.token
+        localStorage.setItem('authToken', token) // Store the token
+        alert('Logged in successfully!')
+
+      // Redirect or perform other actions here
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+        // Extract and store validation error messages
+          this.validationErrors = error.response.data.errors
+        } else {
+          alert('Login failed. Please try again.' + error)
+        }
+      }
     }
   }
 }

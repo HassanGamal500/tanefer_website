@@ -10,13 +10,19 @@
             <input v-model="email" type="email" placeholder="Email" required>
           </div>
           <div class="input-row">
-            <input v-model="password" type="password" placeholder="Password" required>
             <input v-model="phone" type="tel" placeholder="Phone Number" required>
+            <input v-model="password" type="password" placeholder="Password" required>
+            <input v-model="password_confirmation" type="password" placeholder="Confirm Password" required>
           </div>
           <button type="submit">
             Register
           </button>
         </form>
+        <p v-if="Object.keys(validationErrors).length">
+          <span v-for="(messages, field) in validationErrors" :key="field">
+            <strong>{{ field }}:</strong> {{ messages.join(', ') }}
+          </span>
+        </p>
         <p>
           Already have an account? <router-link to="/login">
             Login
@@ -36,19 +42,53 @@
 </template>
 
 <script>
+
+import clientAPI from '../services/axiosConfig'
+
 export default {
   data () {
     return {
       username: '',
       email: '',
       password: '',
-      phone: ''
+      phone: '',
+      password_confirmation: '',
+      validationErrors: {}
+    }
+  },
+
+  head () {
+    return {
+      title: 'Register Page',
+      meta: [
+        { hid: 'description', name: 'description', content: 'Register a new account' }
+      ]
     }
   },
   methods: {
-    register () {
-      // Handle registration logic
-      alert('Registered successfully!')
+    async register () {
+      try {
+        await clientAPI('http://localhost:8000/api/v2/auth/register').post('', {
+          username: this.username,
+          email: this.email,
+          phone: this.phone,
+          password: this.password,
+          password_confirmation: this.password_confirmation
+        })
+
+        // const token = response.data.token
+        // localStorage.setItem('authToken', token) // Store the token
+
+        alert('Registered successfully!')
+      // Redirect or perform other actions here
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+        // Extract and store validation error messages
+          this.validationErrors = error.response.data.errors
+        } else {
+          alert('Registration failed. Please try again.')
+        }
+      }
     }
   }
 }

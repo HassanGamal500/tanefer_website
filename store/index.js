@@ -1,6 +1,8 @@
 // import axios from 'axios'
 
 export const state = () => ({
+  user: null,
+  token: null,
   airports: {
     departureAirports: [null, null, null],
     arrivalAirports: [null, null, null]
@@ -329,6 +331,11 @@ export const state = () => ({
 })
 
 export const mutations = {
+  setAuth (state, { token, user }) {
+    state.token = token
+    state.user = user
+    state.isAuthenticated = !!token
+  },
   setAirports (state, payload) {
     switch (payload.type) {
       case 'departure1':
@@ -563,12 +570,56 @@ export const mutations = {
   }
 }
 
+export const getters = {
+  isAuthenticated (state) {
+    return !!state.token
+  },
+  user (state) {
+    return state.user
+  }
+}
+
 export const actions = {
-  async nuxtServerInit ({ commit, state }) {
+  async nuxtServerInit ({ commit, state, dispatch }) {
     if (!state.cities.length) {
       // const data = await this.$axios.$get('https://tanefer.nahrdev.com/api/v2/tours/list-city', { headers: { clientSecret: process.env.clientSecret } })
       const data = await this.$axios.$get('https://api.tanefer.com/api/v2/tours/list-city', { headers: { clientSecret: process.env.clientSecret } })
       commit('setCities', data.cities)
+    }
+  },
+  // chage later to real api ****** dont forget *********
+  async login ({ commit }, credentials) {
+    try {
+      const response = await this.$axios.$post('http://localhost.com/api/v2/auth/login', credentials)
+      if (response.status) {
+        const { token } = response.data
+        // Store token and user data in the Vuex store
+        commit('setAuth', { token, user: { /* user data */ } })
+        localStorage.setItem('authToken', token) // Optionally store token in localStorage
+      }
+    } catch (error) {
+      // console.error('Login error:', error)
+    }
+  },
+  logout ({ commit }) {
+    commit('CLEAR_AUTH')
+    localStorage.removeItem('authToken')
+  },
+  async fetchUser ({ commit }) {
+    const token = localStorage.getItem('authToken')
+    if (token) {
+      commit('SET_TOKEN', token)
+      try {
+        const response = await this.$axios.get('/api/v2/auth/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        const user = response.data.data
+        commit('SET_USER', user)
+      } catch (error) {
+        commit('CLEAR_AUTH')
+      }
     }
   },
   setAirports (context, payload) {
