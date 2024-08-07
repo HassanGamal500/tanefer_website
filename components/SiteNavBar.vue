@@ -150,7 +150,6 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'SiteNavBar',
@@ -173,16 +172,19 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['isAuthenticated', 'user'])
+    isAuthenticated () {
+      return this.$store.getters['auth/isAuthenticated']
+    },
+    user () {
+      return this.$store.getters['auth/user']
+    }
   },
   created () {
     this.sizes = this.$vuetify.breakpoint
   },
 
   methods: {
-    ...mapActions({
-      logoutAction: 'logout'
-    }),
+
     goTo (route) {
       if (this.$route.name !== route) {
         this.$router.push({ name: route })

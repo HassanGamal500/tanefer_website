@@ -55,11 +55,12 @@ export default {
         })
 
         const token = response.data.data.token
+        alert(token)
         localStorage.setItem('authToken', token)
         this.message = 'Logged in successfully!'
         this.isSuccess = true
 
-        this.$router.push('/')
+        // this.$router.push('/')
       } catch (error) {
         if (error.response && error.response.status === 422) {
           this.message = 'Validation error: ' + Object.values(error.response.data.errors).flat().join(', ')
