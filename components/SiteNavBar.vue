@@ -32,7 +32,7 @@
         <div class="t-container w-container">
           <nav role="navigation" class="nav-bar-flex w-nav-menu justify-space-between">
             <div class="row">
-              <div class="col-10">
+              <div class="col-8">
                 <a
                   href="https://flights.tanefer.com/"
                   target="_blank"
@@ -69,7 +69,7 @@
                   Blogs
                 </a>
               </div>
-              <div class="col-2">
+              <div class="col-4">
                 <div v-if="isAuthenticated">
                   <NuxtLink to="/profile" exact active-class="w--current" class="nav-link w-nav-link">
                     Profile
@@ -84,6 +84,9 @@
                   </NuxtLink>
                   <NuxtLink to="/register" exact active-class="w--current" class="nav-link w-nav-link">
                     Register
+                  </NuxtLink>
+                  <NuxtLink to="/userProfile" exact active-class="w--current" class="nav-link w-nav-link">
+                    Profile
                   </NuxtLink>
                 </div>
               </div>

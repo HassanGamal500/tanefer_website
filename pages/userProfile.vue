@@ -155,7 +155,7 @@ export default {
   async mounted () {
     try {
       const token = localStorage.getItem('authToken')
-      const response = await clientAPI('http://localhost:8000/api/v2/auth').get('/profile', {
+      const response = await clientAPI('https://api.tanefer.com/api/v2/auth').get('/profile', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -179,7 +179,7 @@ export default {
           ...this.profileData,
           ...this.additionalData
         }
-        const response = await clientAPI('http://localhost:8000/api/v2/auth').post('/profile', payload, {
+        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/profile', payload, {
           headers: {
             Authorization: `Bearer ${token}`
           }

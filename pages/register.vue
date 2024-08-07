@@ -17,6 +17,9 @@
           <button type="submit">
             Register
           </button>
+          <div v-if="message" :class="{'success-message': isSuccess, 'error-message': !isSuccess}" class="message-box">
+            {{ message }}
+          </div>
         </form>
         <p v-if="Object.keys(validationErrors).length">
           <span v-for="(messages, field) in validationErrors" :key="field">
@@ -42,7 +45,6 @@
 </template>
 
 <script>
-
 import clientAPI from '../services/axiosConfig'
 
 export default {
@@ -53,7 +55,9 @@ export default {
       password: '',
       phone: '',
       password_confirmation: '',
-      validationErrors: {}
+      validationErrors: {},
+      message: '',
+      isSuccess: true
     }
   },
 
@@ -65,10 +69,11 @@ export default {
       ]
     }
   },
+
   methods: {
     async register () {
       try {
-        await clientAPI('http://localhost:8000/api/v2/auth/register').post('', {
+        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/register', {
           username: this.username,
           email: this.email,
           phone: this.phone,
@@ -76,21 +81,33 @@ export default {
           password_confirmation: this.password_confirmation
         })
 
-        // const token = response.data.token
-        // localStorage.setItem('authToken', token) // Store the token
+        const token = response.data.token
+        localStorage.setItem('authToken', token)
 
-        alert('Registered successfully!')
-      // Redirect or perform other actions here
+        this.message = 'Registered successfully!'
+        this.isSuccess = true
+
+        this.$router.push('/login')
       } catch (error) {
-        if (error.response && error.response.status === 422) {
-        // Extract and store validation error messages
-          this.validationErrors = error.response.data.errors
+        if (error.response) {
+          if (error.response.status === 422) {
+            this.message = (error.response.data.data || 'Please check your input.')
+            this.isSuccess = false
+          } else if (error.response.status === 404) {
+            this.message = 'Endpoint not found. Please try again later.'
+            this.isSuccess = false
+          } else {
+            this.message = 'Registration failed. Please try again.'
+            this.isSuccess = false
+          }
         } else {
-          alert('Registration failed. Please try again.')
+          this.message = 'Network error. Please try again later.'
+          this.isSuccess = false
         }
       }
     }
   }
+
 }
 </script>
 
@@ -119,8 +136,6 @@ export default {
     max-width: 400px;
     margin: 20px auto;
     padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
     background: #f9f9f9;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -202,4 +217,23 @@ export default {
   .fab {
     font-size: 20px;
   }
+
+  .message-box {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
   </style>
