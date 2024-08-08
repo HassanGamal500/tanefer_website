@@ -70,23 +70,25 @@
                 </a>
               </div>
               <div class="col-4">
-                <div v-if="isAuthenticated">
-                  <NuxtLink to="/profile" exact active-class="w--current" class="nav-link w-nav-link">
-                    Profile
-                  </NuxtLink>
-                  <a class="nav-link w-nav-link" @click="logout">
-                    Logout
-                  </a>
+                <div v-if="isAuthenticated" class="dropdown">
+                  <button class="dropdown-button">
+                    Hi, {{ username }}
+                  </button>
+                  <div class="dropdown-menu">
+                    <NuxtLink to="/profile" exact active-class="w--current" class="dropdown-item">
+                      Profile
+                    </NuxtLink>
+                    <NuxtLink to="/booking-history" exact active-class="w--current" class="dropdown-item">
+                      Booking History
+                    </NuxtLink>
+                    <a class="dropdown-item" @click="logout">
+                      Logout
+                    </a>
+                  </div>
                 </div>
-                <div v-else>
+                <div v-else class="login-container">
                   <NuxtLink to="/login" exact active-class="w--current" class="nav-link w-nav-link">
                     Login
-                  </NuxtLink>
-                  <NuxtLink to="/register" exact active-class="w--current" class="nav-link w-nav-link">
-                    Register
-                  </NuxtLink>
-                  <NuxtLink to="/userProfile" exact active-class="w--current" class="nav-link w-nav-link">
-                    Profile
                   </NuxtLink>
                 </div>
               </div>
@@ -177,6 +179,14 @@ export default {
     },
     user () {
       return this.$store.getters['auth/user']
+    },
+    username () {
+      return this.$store.getters['auth/user']?.username || 'User'
+    }
+  },
+  async mounted () {
+    if (this.isAuthenticated) {
+      await this.$store.dispatch('auth/fetchUser')
     }
   },
   created () {
@@ -287,21 +297,62 @@ export default {
       }
       return navClass
     },
-    logout () {
-      this.logoutAction()
-      localStorage.removeItem('authToken')
-      this.$router.push('/') // Redirect to home or login page after logout
+    async logout () {
+      try {
+        await this.$store.dispatch('auth/logout')
+      } catch (error) {
+      }
     }
   }
 }
 </script>
 
-<style>
-.w-nav[data-animation="over-left"] .w-nav-overlay,
-.w-nav[data-animation="over-left"] [data-nav-menu-open] {
-  right: auto;
-  z-index: 1000;
-  top: 0;
-  background-color: red;
+<style scoped>
+.nav-bar-flex {
+  display: flex;
+  justify-content: space-between;
 }
+
+.login-container {
+  margin-left: auto; /* Pushes the Login link to the far right */
+}
+
+.nav-link.w-nav-link {
+  display: inline-block;
+  margin: 0 10px;
+  color: #fff; /* Adjust as needed */
+}
+
+.dropdown-button {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8); /* Transparent black */
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+.dropdown-menu .dropdown-item {
+  color: #fff;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background-color: #575757;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
 </style>

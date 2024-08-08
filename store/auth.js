@@ -50,17 +50,49 @@ export const actions = {
   },
   async fetchUser ({ commit }) {
     try {
-      const response = await this.$axios.get('https://api.tanefer.com/api/v2/auth/user')
-      const user = response.data
-      commit('setUser', user)
+      const token = localStorage.getItem('authToken')
+      if (!token) {
+        throw new Error('No authentication token found')
+      }
+
+      const response = await this.$axios.get('https://api.tanefer.com/api/v2/auth/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.status) {
+        const user = response.data.data
+
+        commit('setUser', user)
+      }
     } catch (error) {
       console.error('Error fetching user:', error)
     }
   },
-  logout ({ commit }) {
-    commit('clearAuthData')
-    this.$axios.setToken(false)
-    localStorage.removeItem('authToken')
+
+  async logout ({ commit }) {
+    try {
+      const token = localStorage.getItem('authToken')
+
+      if (token) {
+        await this.$axios.post('https://api.tanefer.com/api/v2/auth/logout', {}, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+      }
+
+      commit('clearAuthData')
+      if (process.client) {
+        localStorage.removeItem('authToken')
+      }
+      this.$axios.setToken(false)
+
+      this.$router.push('/')
+    } catch (error) {
+      console.error('Error during logout:', error)
+    }
   }
 }
 
