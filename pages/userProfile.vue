@@ -1,216 +1,230 @@
 <template>
-  <div class="profile-page-wrapper">
-    <LoadingScreen v-if="isLoading" />
-    <div class="profile-page-wrapper">
-      <div class="profile-wrapper">
-        <div class="profile-header">
-          <img :src="profile.image" alt="Profile Picture" class="profile-pic">
-          <div class="basic-info">
-            <h2>{{ editableFields.Title }} {{ editableFields.FirstName }} {{ editableFields.LastName }}</h2>
-          </div>
-        </div>
-        <div class="profile-info">
-          <div class="info-row">
-            <input v-model="editableFields.Title" type="text" placeholder="Title">
-            <input v-model="editableFields.FirstName" type="text" placeholder="First Name">
-            <input v-model="editableFields.LastName" type="text" placeholder="Last Name">
-          </div>
-          <div class="info-row">
-            <input v-model="editableFields.Gender" type="text" placeholder="Gender">
-            <input v-model="editableFields.Nationality" type="text" placeholder="Nationality">
-            <input v-model="editableFields.Phone" type="text" placeholder="Phone">
-          </div>
-          <div class="info-row">
-            <input v-model="editableFields.PassportNumber" type="text" placeholder="Passport Number">
-            <input v-model="editableFields.PassportExpiryDate" type="text" placeholder="Passport Expiry Date">
-            <input v-model="editableFields.PassportIssuingCountry" type="text" placeholder="Passport Issuing Country">
-          </div>
-        </div>
-        <div class="buttons btn-block btn-large">
-          <button @click="saveProfile">
-            Update Traveller Details
-          </button>
-        </div>
-        <div class="reservation-history">
-          <h3>Reservation History</h3>
-          <div class="empty-card">
-            <!-- Reservation history will be added here -->
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <v-container fluid>
+    <v-row>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Profile Information</span>
+          </v-card-title>
+          <v-card-subtitle>Basic Information</v-card-subtitle>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="profileData.username"
+                  label="Username"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="profileData.email"
+                  label="Email"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="profileData.phone"
+                  label="Phone"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+
+          <v-card-subtitle>Additional Information</v-card-subtitle>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="additionalData.title"
+                  :items="titles"
+                  label="Title"
+                  item-text="text"
+                  item-value="value"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-select
+                  v-model="additionalData.gender"
+                  :items="genders"
+                  label="Gender"
+                  item-text="text"
+                  item-value="value"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="additionalData.firstName"
+                  label="First Name"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="additionalData.lastName"
+                  label="Last Name"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="additionalData.birthday"
+                  label="Birthday"
+                  type="date"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="additionalData.passportNumber"
+                  label="Passport Number"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="additionalData.passportExpiryDate"
+                  label="Passport Expiry Date"
+                  type="date"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  v-model="additionalData.issuingCountry"
+                  label="Issuing Country"
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn
+              variant="outlined"
+              rounded="lg"
+              size="x-large"
+              class="custom-outline-button"
+              block
+              @click="saveProfile"
+            >
+              Save
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+      <v-col cols="12">
+        <v-card>
+          <v-card-title>
+            <span class="headline">Reservation History</span>
+          </v-card-title>
+          <v-card-text>
+            <!-- to be added later -->
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+import clientAPI from '../services/axiosConfig'
+
 export default {
   data () {
     return {
-      isLoading: false,
-      profile: {
-        image: 'https://via.placeholder.com/100',
-        firstName: 'John',
-        lastName: 'Doe',
-        gender: 'Male',
-        nationality: 'American',
-        phone: '+1 234 567 890',
-        passportNumber: '123456789',
-        passportExpiryDate: '2025-12-31',
-        passportIssuingCountry: 'USA',
-        title: 'Mr.'
+      profileData: {
+        username: '',
+        email: '',
+        phone: ''
       },
-      editableFields: {
-        FirstName: 'John',
-        LastName: 'Doe',
-        Gender: 'Male',
-        Nationality: 'American',
-        Phone: '+1 234 567 890',
-        PassportNumber: '123456789',
-        PassportExpiryDate: '2025-12-31',
-        PassportIssuingCountry: 'USA',
-        Title: 'Mr.'
+      additionalData: {
+        title: '',
+        gender: '',
+        firstName: '',
+        lastName: '',
+        birthday: '',
+        passportNumber: '',
+        passportExpiryDate: '',
+        issuingCountry: ''
       },
-      originalFields: {}
+      titles: [
+        { text: 'Mr', value: 'mr' },
+        { text: 'Miss', value: 'miss' },
+        { text: 'Mrs', value: 'mrs' },
+        { text: 'Ms', value: 'ms' }
+      ],
+      genders: [
+        { text: 'Male', value: 'male' },
+        { text: 'Female', value: 'female' }
+      ]
     }
   },
-  created () {
-    this.originalFields = { ...this.editableFields }
+  async mounted () {
+    try {
+      const token = localStorage.getItem('authToken')
+      const response = await clientAPI('https://api.tanefer.com/api/v2/auth').get('/profile', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.status) {
+        const { email, phone, username } = response.data.data
+        this.profileData.email = email
+        this.profileData.phone = phone
+        this.profileData.username = username
+      }
+    } catch (error) {
+
+    }
   },
   methods: {
-    saveProfile () {
-      this.profile = { ...this.editableFields }
-      this.originalFields = { ...this.editableFields }
-      alert('Profile saved successfully!')
-    },
-    cancelEdit () {
-      this.editableFields = { ...this.originalFields }
+    async saveProfile () {
+      try {
+        const token = localStorage.getItem('authToken')
+        const payload = {
+          ...this.profileData,
+          ...this.additionalData
+        }
+        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/profile', payload, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (response.data.status) {
+          alert('Profile updated successfully.')
+        } else {
+          alert('Failed to update profile.')
+        }
+      } catch (error) {
+        alert('An error occurred while updating the profile.')
+      }
     }
   }
 }
 </script>
 
-  <style scoped>
+<style scoped>
+.headline {
+  font-weight: bold;
+}
+.v-card {
+  margin: 20px;
+}
+.v-card-text {
+  padding: 20px;
+}
+.outline-button {
+  border: 2px solid #4F3316;
+  color: #4F3316;
+}
+.outline-button:hover {
+  background-color: #4F3316;
+  color: white;
+}
 
-  .profile-page-wrapper {
-    padding: 10px;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-  }
+.custom-outline-button {
+  border: 2px solid #4F3316;
+  color: #4F3316;
+}
 
-  .profile-wrapper {
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background: #f9f9f9;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    max-width: 800px; /* Increased width for larger screens */
-    flex: 1; /* Ensure it takes up available space */
-  }
+.custom-outline-button:hover {
+  background-color: #4F3316;
+  color: white;
+}
 
-  .profile-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .profile-pic {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-right: 20px;
-    object-fit: cover;
-  }
-
-  .basic-info {
-    flex: 1;
-  }
-
-  .basic-info h2 {
-    margin: 0;
-    font-size: 24px;
-    line-height: 1.4;
-  }
-
-  .profile-info {
-    margin-bottom: 20px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .info-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-
-  .info-row input {
-    flex: 1 1 calc(50% - 10px);
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background: #fff;
-    font-size: 14px;
-    color: #333;
-  }
-
-  .info-row input::placeholder {
-    color: #aaa;
-  }
-
-  .buttons {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-
-  .buttons button {
-    padding: 10px 20px;
-    margin: 0 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    background-color: #16404F;
-    color: #fff;
-    font-size: 16px;
-  }
-
-  .buttons button:hover {
-    color: black;
-    background-color: #A1C2CF;
-  }
-
-  .reservation-history {
-    margin-top: 20px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  }
-
-  .reservation-history h3 {
-    margin-bottom: 10px;
-  }
-
-  .empty-card {
-    border: 2px dashed #ccc;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    color: #888;
-  }
-
-  /* Responsive Styles */
-  @media (max-width: 768px) {
-    .info-row input {
-      flex: 1 1 100%;
-    }
-  }
-  </style>
+</style>

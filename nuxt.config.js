@@ -4,7 +4,9 @@
 export default {
   router: {
     base: ''
+  // middleware: ['auth']
   },
+  store: true,
   // serverMiddleware: [
   //   { path: '/', handler: '~/server-middleware/redirects.js' }
   // ],
@@ -47,7 +49,8 @@ export default {
   plugins: [
     { src: '~/plugins/vuex-persist', ssr: false },
     { src: '~/plugins/vue-gallery.js', ssr: false },
-    { src: '~/plugins/vueSocial.js', ssr: false }
+    { src: '~/plugins/vueSocial.js', ssr: false },
+    '~/plugins/axios'
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -65,6 +68,7 @@ export default {
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    // '@nuxtjs/auth',
     [
       'nuxt-gmaps', {
         key: 'AIzaSyCMpLmI6ZbrtqkEA_hIP7aWCJvRsCLz11c',
@@ -74,7 +78,6 @@ export default {
     'vue-social-sharing/nuxt',
     '@nuxtjs/gtm'
   ],
-
   // Configure the module
   gtm: {
     id: 'GTM-NW2KVR7' // Your GTM ID
@@ -86,8 +89,37 @@ export default {
     // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
     // baseURL: 'https://tanefer.nahrdev.com/api/v2'
     baseURL: 'https://api.tanefer.com/api/v2'
+
+    // baseURL: 'http://localhost:8000/api/v2'
   },
 
+  // auth: {
+  //   strategies: {
+  //     local: {
+  //       token: {
+  //         property: 'token',
+  //         global: true,
+  //         required: true,
+  //         type: 'Bearer'
+  //       },
+  //       user: {
+  //         property: 'data',
+  //         autoFetch: true
+  //       },
+  //       endpoints: {
+  //         login: { url: '/auth/login', method: 'post' },
+  //         logout: { url: '/auth/logout', method: 'post' },
+  //         user: { url: '/auth/profile', method: 'get' }
+  //       }
+  //     },
+
+  //     redirect: {
+  //       login: '/login',
+  //       logout: '/login',
+  //       home: '/'
+  //     }
+  //   }
+  // },
   // private API secret
   env: {
     clientSecret: 'GshMa0/o/hOZlR79Ns6hkg==',

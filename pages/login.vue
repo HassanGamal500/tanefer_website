@@ -12,6 +12,9 @@
           <button type="submit">
             Login
           </button>
+          <div v-if="message" :class="{'success-message': isSuccess, 'error-message': !isSuccess}" class="message-box">
+            {{ message }}
+          </div>
         </form>
         <p>
           Don't have an account? <router-link to="/register">
@@ -32,17 +35,41 @@
 </template>
 
 <script>
+import clientAPI from '../services/axiosConfig'
+
 export default {
   data () {
     return {
       email: '',
-      password: ''
+      password: '',
+      message: '',
+      isSuccess: true
     }
   },
   methods: {
-    login () {
-      // Handle login logic
-      alert('Logged in successfully!')
+    async login () {
+      try {
+        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/login', {
+          email: this.email,
+          password: this.password
+        })
+
+        const token = response.data.data.token
+        alert(token)
+        localStorage.setItem('authToken', token)
+        this.message = 'Logged in successfully!'
+        this.isSuccess = true
+
+        // this.$router.push('/')
+      } catch (error) {
+        if (error.response && error.response.status === 422) {
+          this.message = 'Validation error: ' + Object.values(error.response.data.errors).flat().join(', ')
+          this.isSuccess = false
+        } else {
+          this.message = 'Login failed. Please try again.'
+          this.isSuccess = false
+        }
+      }
     }
   }
 }
@@ -73,8 +100,6 @@ export default {
     max-width: 400px;
     margin: 20px auto;
     padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
     background: #f9f9f9;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
@@ -156,7 +181,23 @@ export default {
   .fab {
     font-size: 20px;
   }
-  </style>
 
-  <!-- Add the following to your index.html to include FontAwesome icons -->
-  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> -->
+  .message-box {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+  </style>
