@@ -1,40 +1,7 @@
 <template>
   <v-container fluid>
     <v-row>
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <!-- Placeholder Avatar -->
-        <div class="avatar-container">
-          <v-img
-            src="https://www.gravatar.com/avatar?d=mp"
-
-            class="avatar"
-            @click="uploadAvatar"
-          />
-          <div class="username">
-            {{ user ? user.username : '' }}
-          </div>>
-        </div>
-        <v-list class="sidebar-list">
-          <v-list-item link to="/profile">
-            <v-list-item-content>
-              <v-list-item-title>Profile</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item link to="/booking-history">
-            <v-list-item-content>
-              <v-list-item-title>Booking History</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-          <v-list-item link to="/change-password">
-            <v-list-item-content>
-              <v-list-item-title>Change Password</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list>
-      </div>
-
-      <!-- Main Content Area -->
+      <SideBar />
       <v-col cols="12" md="9" class="main-content">
         <v-card>
           <v-card-title>
@@ -236,6 +203,7 @@ export default {
 
 .username {
   margin-top: 10px;
+  margin-bottom: 10px;
   font-weight: bold;
 }
 
