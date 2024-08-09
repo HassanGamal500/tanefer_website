@@ -56,18 +56,20 @@ export default {
         })
 
         const token = response.data.data.token
-        alert(token)
         localStorage.setItem('authToken', token)
+        this.$store.commit('auth/setToken', token)
+        await this.$store.dispatch('auth/fetchUser')
         this.message = 'Logged in successfully!'
         this.isSuccess = true
-
-        this.$router.push('/')
+        this.$router.push('/').then(() => {
+          this.$nuxt.refresh()
+        })
       } catch (error) {
         if (error.response && error.response.status === 422) {
           this.message = 'Validation error: ' + Object.values(error.response.data.errors).flat().join(', ')
           this.isSuccess = false
         } else {
-          this.message = 'Login failed. Please try again.'
+          this.message = 'Login Failed Please try again'
           this.isSuccess = false
         }
       }
@@ -135,7 +137,7 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #16404F;
+  background-color: #764322;
   color: #fff;
   font-size: 16px;
   margin-top: 10px;
@@ -143,7 +145,7 @@ button {
 
 button:hover {
   color: black;
-  background-color: #A1C2CF;
+  background-color: #cfb0a1;
 }
 
 .social-login {

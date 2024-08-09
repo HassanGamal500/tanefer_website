@@ -6,6 +6,9 @@ export default {
     base: ''
   // middleware: ['auth']
   },
+  experimental: {
+    restoreState: true
+  },
   store: true,
   // serverMiddleware: [
   //   { path: '/', handler: '~/server-middleware/redirects.js' }

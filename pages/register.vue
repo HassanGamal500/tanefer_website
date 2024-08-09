@@ -14,7 +14,19 @@
             <input v-model="password" type="password" placeholder="Password" required>
             <input v-model="password_confirmation" type="password" placeholder="Confirm Password" required>
           </div>
-          <button type="submit">
+          <div class="terms-checkbox">
+            <input
+              id="terms"
+              v-model="agreedToTerms"
+              type="checkbox"
+              required
+            >
+            <label for="terms">
+              I agree to the
+              <router-link to="/termsAndConditions">terms and conditions</router-link>.
+            </label>
+          </div>
+          <button :disabled="!agreedToTerms" type="submit">
             Register
           </button>
           <div v-if="message" :class="{'success-message': isSuccess, 'error-message': !isSuccess}" class="message-box">
@@ -58,7 +70,8 @@ export default {
       password_confirmation: '',
       validationErrors: {},
       message: '',
-      isSuccess: true
+      isSuccess: true,
+      agreedToTerms: false
     }
   },
 
@@ -137,8 +150,6 @@ export default {
   max-width: 400px;
   margin: 20px auto;
   padding: 20px;
-  /* background: #f9f9f9;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
   text-align: center;
 }
 
@@ -149,16 +160,16 @@ h2 {
 .input-row {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Increased gap */
+  gap: 15px;
   margin-bottom: 20px;
 }
 
 .input-row input {
-  padding: 15px; /* Increased padding */
+  padding: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
   background: #fff;
-  font-size: 16px; /* Increased font size */
+  font-size: 16px;
   color: #333;
 }
 
@@ -167,11 +178,11 @@ h2 {
 }
 
 button {
-  padding: 15px 20px; /* Increased padding */
+  padding: 15px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  background-color: #16404F;
+  background-color: #764322;
   color: #fff;
   font-size: 16px;
   margin-top: 10px;
@@ -179,7 +190,7 @@ button {
 
 button:hover {
   color: black;
-  background-color: #A1C2CF;
+  background-color: #cfb0a1;
 }
 
 .social-login {
@@ -198,7 +209,7 @@ button:hover {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  display: none; /* Make buttons invisible */
+  display: none;
 }
 
 .facebook-btn {
@@ -237,5 +248,21 @@ button:hover {
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+}
+
+.terms-checkbox {
+  margin: 20px 0;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.terms-checkbox input {
+  margin: 0;
+}
+
+.terms-checkbox label {
+  font-size: 14px;
 }
 </style>

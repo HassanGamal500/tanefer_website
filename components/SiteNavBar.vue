@@ -69,7 +69,7 @@
                   Blogs
                 </a>
               </div>
-              <div class="col-4">
+              <div :key="isAuthenticated" class="col-4">
                 <div v-if="isAuthenticated" class="dropdown">
                   <button class="dropdown-button">
                     Hi, {{ username }}
