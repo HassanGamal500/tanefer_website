@@ -78,7 +78,7 @@
                     <NuxtLink to="/profile" exact active-class="w--current" class="dropdown-item">
                       Profile
                     </NuxtLink>
-                    <NuxtLink to="/booking-history" exact active-class="w--current" class="dropdown-item">
+                    <NuxtLink to="/bookingHistory" exact active-class="w--current" class="dropdown-item">
                       Booking History
                     </NuxtLink>
                     <a class="dropdown-item" @click="logout">
@@ -329,6 +329,7 @@ export default {
   color: #fff;
   font-size: 16px;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 .dropdown-menu {
