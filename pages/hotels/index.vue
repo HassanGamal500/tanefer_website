@@ -1,5 +1,9 @@
 <template>
-  <div>
+  <div v-if="comingSoon" class="coming-soon">
+    <h1>Coming Soon</h1>
+    <p>We are working hard to bring you this page. Stay tuned!</p>
+  </div>
+  <div v-else>
     <LoadingScreen v-if="isLoading" />
     <v-container class="lighten-5" style="margin-top: -7rem;">
       <v-snackbar
@@ -1369,6 +1373,7 @@ export default {
   },
   data () {
     return {
+      comingSoon: true,
       metaData: {
         page_name: null,
         seo_title: null,
@@ -2399,3 +2404,23 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+  .coming-soon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+  }
+
+  .coming-soon h1 {
+    font-size: 3em;
+    margin-bottom: 0.5em;
+  }
+
+  .coming-soon p {
+    font-size: 1.5em;
+  }
+</style>
