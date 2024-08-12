@@ -16,7 +16,7 @@
             {{ message }}
           </div>
         </form>
-        <p>
+        <p class="no-account">
           Don't have an account? <router-link to="/register">
             Register
           </router-link>
@@ -205,4 +205,9 @@ button:hover {
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
+
+.no-account {
+  margin-top: revert;
+}
+
 </style>

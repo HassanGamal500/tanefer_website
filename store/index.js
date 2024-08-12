@@ -755,3 +755,7 @@ export const actions = {
 }
 
 export const strict = false
+
+export const modules = {
+  loading: require('./loading').default
+}
