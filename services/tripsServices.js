@@ -6,8 +6,8 @@ import clientAPI from './axiosConfig'
 const baseURL = 'https://api.tanefer.com/api/v2'
 export default {
   // get all cities for search
-  getCities () {
-    return clientAPI(baseURL).get('/tours/list-city')
+  getCities (type) {
+    return clientAPI(baseURL).get(`/tours/list-city?type=${type}`)
   },
 
   // get top tours for packages page

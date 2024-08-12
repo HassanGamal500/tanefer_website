@@ -244,17 +244,12 @@ export default {
     }
   },
   async fetch () {
-    if (!this.cities.length) {
-      const res = tripsServices.getCities()
-      const data = await res
-      this.results = data.data.cities
-      this.$store.dispatch('setCities', this.results)
-      await this.getTrips()
-      await this.getTripsFilters()
-    } else {
-      await this.getTrips()
-      await this.getTripsFilters()
-    }
+    const res = tripsServices.getCities('adventure')
+    const data = await res
+    this.results = data.data.cities
+    this.$store.dispatch('setCities', this.results)
+    await this.getTrips()
+    await this.getTripsFilters()
     this.getMetaData()
   },
   head () {

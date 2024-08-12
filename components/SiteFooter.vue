@@ -41,6 +41,8 @@
               <a href="https://twitter.com/TaneferTours" target="_blank" class="w-inline-block"><img src="~/assets/images/twittter-icon.png" loading="lazy" alt=""></a>
               <a href="https://www.instagram.com/tanefer.tours" target="_blank" class="w-inline-block"><img src="~/assets/images/instegram-icon.png" loading="lazy" alt=""></a>
               <a href="https://www.youtube.com/channel/UCBOwPy-O-eVpIzjkz2tSJtg" target="_blank" class="w-inline-block"><img src="~/assets/images/youtube-icon.png" loading="lazy" alt=""></a>
+              <a href="https://www.tripadvisor.com/Attraction_Review-g294201-d21322483-Reviews-Tanefer_Tours-Cairo_Cairo_Governorate.html" target="_blank" class="w-inline-block"><img src="~/assets/images/Tripadvisor_logoset_solid_green.svg" loading="lazy" alt=""></a>
+              <a href="#" target="_blank" class="w-inline-block"><img src="~/assets/images/whatsapp.png" loading="lazy" alt=""></a>
             </div>
           </div>
           <div class="footer-col mt-2">

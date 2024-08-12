@@ -68,7 +68,17 @@ export default {
   },
   async fetch () {
     // if (!this.$store.state.cities.length) {
-    const res = tripsServices.getCities()
+    let cityType = ''
+    if (this.module === 'adventures') {
+      cityType = 'adventure'
+    } else if (this.module === 'cruises') {
+      cityType = 'cruise'
+    } else if (this.module === 'trips') {
+      cityType = 'package'
+    } else if (this.module === 'tripsResults') {
+      cityType = 'package'
+    }
+    const res = tripsServices.getCities(cityType)
     const data = await res
     this.cities = data.data.cities
     this.$store.dispatch('setCities', this.cities)
