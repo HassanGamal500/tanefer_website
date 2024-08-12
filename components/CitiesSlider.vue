@@ -68,12 +68,14 @@ export default {
   },
   async fetch () {
     // if (!this.$store.state.cities.length) {
-    let cityType = '';
+    let cityType = ''
     if (this.module === 'adventures') {
       cityType = 'adventure'
-    } else if(this.module === 'cruises') {
+    } else if (this.module === 'cruises') {
       cityType = 'cruise'
-    } else if(this.module === 'trips') {
+    } else if (this.module === 'trips') {
+      cityType = 'package'
+    } else if (this.module === 'tripsResults') {
       cityType = 'package'
     }
     const res = tripsServices.getCities(cityType)

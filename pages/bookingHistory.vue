@@ -24,9 +24,9 @@
                 <tr v-for="(booking, index) in bookings" :key="index">
                   <td>{{ booking.type }}</td>
                   <td>{{ booking.title }}</td>
-                  <td>{{ booking.orderDate }}</td>
+                  <td>{{ booking.date }}</td>
                   <td>{{ booking.duration }}</td>
-                  <td>{{ booking.totalFees }}</td>
+                  <td>{{ booking.total }}</td>
                   <td>{{ booking.status }}</td>
                   <td>
                     <button class="details-btn" @click="openDetails(booking)">
@@ -42,9 +42,9 @@
                 <h3>Booking Details</h3>
                 <p><strong>Type:</strong> {{ selectedBooking.type }}</p>
                 <p><strong>Title:</strong> {{ selectedBooking.title }}</p>
-                <p><strong>Order Date:</strong> {{ selectedBooking.orderDate }}</p>
+                <p><strong>Order Date:</strong> {{ selectedBooking.date }}</p>
                 <p><strong>Duration:</strong> {{ selectedBooking.duration }}</p>
-                <p><strong>Total Fees:</strong> {{ selectedBooking.totalFees }}</p>
+                <p><strong>Total Fees:</strong> {{ selectedBooking.total }}</p>
                 <p><strong>Status:</strong> {{ selectedBooking.status }}</p>
                 <h4>Customer Info</h4>
                 <p><strong>Name:</strong> {{ userInfo.name }}</p>
@@ -64,28 +64,39 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import clientAPI from '../services/axiosConfig'
 
 export default {
 
   data () {
     return {
       selectedBooking: null,
-      bookings: [
-        { type: 'Hotel', title: 'Luxor Hotel Stay', orderDate: '2024-08-01', duration: '3 days', totalFees: '$500', status: 'Confirmed' },
-        { type: 'Trip', title: 'Cairo City Tour', orderDate: '2024-07-25', duration: '1 day', totalFees: '$100', status: 'Completed' },
-        { type: 'Cruise', title: 'Nile River Cruise', orderDate: '2024-07-15', duration: '5 days', totalFees: '$1200', status: 'Cancelled' }
-      ],
-      userInfo: {
-        name: 'John Doe',
-        email: 'johndoe@example.com',
-        phone: '+123456789'
-      }
+      bookings: [],
+      userInfo: null
     }
   },
   computed: {
     ...mapGetters({
       user: 'auth/user'
     })
+  },
+  async mounted () {
+    try {
+      const token = localStorage.getItem('authToken')
+      const response = await clientAPI('https://api.tanefer.com/api/v2/booking').get('/histories', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.status === 200) {
+        const responseData = response.data
+        this.bookings = responseData.historyList
+        this.userInfo = responseData.userDetails
+      }
+    } catch (error) {
+      alert('Error fetching booking histories:', error)
+    }
   },
   methods: {
     openDetails (booking) {
