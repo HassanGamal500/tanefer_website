@@ -61,6 +61,7 @@ export default {
         await this.$store.dispatch('auth/fetchUser')
         this.message = 'Logged in successfully!'
         this.isSuccess = true
+        // alert(token)
         this.$router.push('/').then(() => {
           this.$nuxt.refresh()
         })
