@@ -1,10 +1,9 @@
-// import colors from 'vuetify/es5/util/colors'
-// import axios from 'axios'
+import axios from 'axios'
 
 export default {
   router: {
     base: ''
-  // middleware: ['auth']
+    // middleware: ['redirectNonGenerated']
   },
   experimental: {
     restoreState: true
@@ -38,7 +37,8 @@ export default {
   },
 
   // Customize the progress bar color
-  loading: { color: '#39b982' },
+  // loading: { color: '#39b982' },
+  loading: false,
 
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
@@ -150,51 +150,83 @@ export default {
     }
   },
 
+  // target: 'static',
+  // generate: {
+  //   // interval: 100,
+  //   fallback: true,
+  //   routes: [
+  //     '/',
+  //     '/trips',
+  //     '/booking/trip',
+  //     // '/trips/Cairo',
+  //     // '/trips/Luxor',
+  //     // '/trips/Aswan',
+  //     // '/trips/Alexandria',
+  //     // '/trips/Hurghada',
+  //     // '/trips/Sharm El Sheikh',
+  //     // '/trips/Dahab',
+  //     '/adventures',
+  //     '/booking/adventure',
+  //     // '/adventures/Cairo',
+  //     '/adventures/cairo',
+  //     // '/adventures/Luxor',
+  //     '/adventures/luxor',
+  //     // '/adventures/Aswan',
+  //     '/adventures/aswan',
+  //     // '/adventures/Alexandria',
+  //     '/adventures/alexandria',
+  //     // '/adventures/Hurghada',
+  //     '/adventures/hurghada',
+  //     '/adventures/Sharm El Sheikh',
+  //     // '/adventures/Dahab',
+  //     '/adventures/dahab',
+  //     // '/adventures/Giza',
+  //     '/adventures/giza',
+  //     '/booking/cruise',
+  //     '/cruises/Cairo',
+  //     '/cruises/Luxor',
+  //     '/cruises/Aswan',
+  //     '/cruises/Alexandria',
+  //     '/cruises/Hurghada',
+  //     '/cruises/Sharm El Sheikh',
+  //     '/cruises/Dahab',
+  //     '/comingSoon',
+  //     '/hotels'
+  //   ]
+  // },
+
   target: 'static',
   generate: {
-    // interval: 100,
     fallback: true,
-    routes: [
-      '/',
-      '/trips',
-      '/booking/trip',
-      // '/trips/Cairo',
-      // '/trips/Luxor',
-      // '/trips/Aswan',
-      // '/trips/Alexandria',
-      // '/trips/Hurghada',
-      // '/trips/Sharm El Sheikh',
-      // '/trips/Dahab',
-      '/adventures',
-      '/booking/adventure',
-      // '/adventures/Cairo',
-      '/adventures/cairo',
-      // '/adventures/Luxor',
-      '/adventures/luxor',
-      // '/adventures/Aswan',
-      '/adventures/aswan',
-      // '/adventures/Alexandria',
-      '/adventures/alexandria',
-      // '/adventures/Hurghada',
-      '/adventures/hurghada',
-      '/adventures/Sharm El Sheikh',
-      // '/adventures/Dahab',
-      '/adventures/dahab',
-      // '/adventures/Giza',
-      '/adventures/giza',
-      '/booking/cruise',
-      '/cruises/Cairo',
-      '/cruises/Luxor',
-      '/cruises/Aswan',
-      '/cruises/Alexandria',
-      '/cruises/Hurghada',
-      '/cruises/Sharm El Sheikh',
-      '/cruises/Dahab',
-      '/comingSoon',
-      '/hotels'
-    ]
-  },
+    routes: async () => {
+      const routes = [
+        '/',
+        '/trips',
+        '/booking/trip',
+        '/adventures',
+        '/booking/adventure',
+        '/comingSoon',
+        '/hotels',
+        '/cruises'
+      ]
 
+      try {
+        const citiesResponse = await axios.get('https://api.tanefer.com/api/v2/tours/list-city')
+        const cities = citiesResponse.data.cities
+
+        for (const city of cities) {
+          routes.push(`/adventures/${city.citySlug}`)
+          routes.push(`/trips/${city.citySlug}`)
+          routes.push(`/cruises/${city.citySlug}`)
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error generating routes:', error)
+      }
+
+      return routes
+    }
+  },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
     extend (config, ctx) {

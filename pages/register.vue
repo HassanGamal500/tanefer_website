@@ -38,7 +38,7 @@
             <strong>{{ field }}:</strong> {{ messages.join(', ') }}
           </span>
         </p>
-        <p>
+        <p class="no-account">
           Already have an account? <router-link to="/login">
             Login
           </router-link>
@@ -87,6 +87,7 @@ export default {
   methods: {
     async register () {
       try {
+        // Register the user
         const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/register', {
           username: this.username,
           email: this.email,
@@ -96,32 +97,40 @@ export default {
         })
 
         const token = response.data.token
+
+        // Store the token in localStorage
         localStorage.setItem('authToken', token)
 
+        // Set the token for future requests
+        clientAPI.defaults.headers.common.Authorization = `Bearer ${token}`
+
+        // Update the message and success status
         this.message = 'Registered successfully!'
         this.isSuccess = true
 
-        this.$router.push('/login')
+        // Optionally, update your Vuex store if you have one
+        this.$store.commit('auth/setToken', token)
+        this.$store.dispatch('auth/fetchUser')
+
+        // Redirect to the dashboard or home page
+        this.$router.push('/') // Replace '/dashboard' with your desired route
       } catch (error) {
         if (error.response) {
           if (error.response.status === 422) {
-            this.message = (error.response.data.data || 'Please check your input.')
-            this.isSuccess = false
+            this.validationErrors = error.response.data.errors || {}
+            this.message = error.response.data.message || 'Please check your input.'
           } else if (error.response.status === 404) {
             this.message = 'Endpoint not found. Please try again later.'
-            this.isSuccess = false
           } else {
             this.message = 'Registration failed. Please try again.'
-            this.isSuccess = false
           }
         } else {
           this.message = 'Network error. Please try again later.'
-          this.isSuccess = false
         }
+        this.isSuccess = false
       }
     }
   }
-
 }
 </script>
 
@@ -265,4 +274,9 @@ button:hover {
 .terms-checkbox label {
   font-size: 14px;
 }
+
+.no-account{
+  margin-top: revert;
+}
+
 </style>

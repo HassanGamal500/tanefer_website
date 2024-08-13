@@ -1,5 +1,7 @@
+<!-- eslint-disable vue/order-in-components -->
 <template>
   <v-app dark>
+    <LoadingScreen v-if="loading" />
     <site-nav-bar />
     <v-main>
       <Nuxt keep-alive />
@@ -9,14 +11,30 @@
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
 import SiteNavBar from '../components/SiteNavBar'
 import SiteFooter from '../components/SiteFooter'
+import LoadingScreen from '../components/LoadingScreen'
 
 export default {
   name: 'DefaultLayout',
   components: {
     SiteNavBar,
-    SiteFooter
+    SiteFooter,
+    LoadingScreen
+  },
+  beforeRouteEnter (to, from, next) {
+    next((vm) => {
+      vm.startLoading()
+    })
+  },
+  beforeRouteLeave (to, from, next) {
+    this.startLoading()
+    next()
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.startLoading()
+    next()
   },
   data () {
     return {
@@ -67,6 +85,22 @@ export default {
       ],
       __dangerouslyDisableSanitizers: ['script', 'noscript']
     }
+  },
+  computed: {
+    ...mapState('loading', {
+      loading: state => state.isLoading
+    })
+  },
+  watch: {
+    $route (to, from) {
+      this.startLoading()
+    }
+  },
+  mounted () {
+    this.stopLoading()
+  },
+  methods: {
+    ...mapActions('loading', ['startLoading', 'stopLoading'])
   }
 }
 </script>

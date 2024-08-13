@@ -16,7 +16,7 @@
             {{ message }}
           </div>
         </form>
-        <p>
+        <p class="no-account">
           Don't have an account? <router-link to="/register">
             Register
           </router-link>
@@ -61,6 +61,7 @@ export default {
         await this.$store.dispatch('auth/fetchUser')
         this.message = 'Logged in successfully!'
         this.isSuccess = true
+        // alert(token)
         this.$router.push('/').then(() => {
           this.$nuxt.refresh()
         })
@@ -204,4 +205,9 @@ button:hover {
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
+
+.no-account {
+  margin-top: revert;
+}
+
 </style>

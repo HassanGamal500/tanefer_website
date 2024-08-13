@@ -47,45 +47,54 @@ export default {
 }
 </script>
 
-  <style scoped>
-  .sidebar {
-    position: absolute;
-    width: 240px;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background-color: #CFB9A1;
-    padding-top: 20px;
-    padding-left: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-  }
+<style scoped>
+.sidebar {
+  position: absolute;
+  width: 240px;
+  height: 100vh; /* Set the height to the viewport height */
+  top: 0;
+  left: 0;
+  background-color: #CFB9A1;
+  padding-top: 20px;
+  padding-left: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensures proper spacing */
+}
 
-  .avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background-color: #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin-bottom: 20px;
-  }
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background-color: #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
 
-  .avatar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+.avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .username {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-weight: bold;
-  }
+.username {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  text-align: center; /* Center the username */
+}
 
-  .sidebar-list {
-    background-color: #CFB9A1;
-  }
-  </style>
+.sidebar-list {
+  background-color: #CFB9A1;
+  flex-grow: 1; /* Makes the list take up available space */
+}
+
+.sidebar-list v-list-item {
+  margin-bottom: 10px; /* Adds spacing between list items */
+}
+</style>

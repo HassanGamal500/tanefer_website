@@ -3,14 +3,14 @@
     <v-row>
       <SideBar />
       <v-col cols="12" md="9" class="main-content">
-        <v-card>
+        <v-card class="booking-history-card">
           <v-card-title>
             <span class="headline">Booking History</span>
           </v-card-title>
           <v-card-text>
             <table class="booking-history-table">
               <thead>
-                <tr>
+                <tr class="text-center">
                   <th>Type</th>
                   <th>Title</th>
                   <th>Order Date</th>
@@ -21,15 +21,15 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(booking, index) in bookings" :key="index">
+                <tr v-for="booking in bookings" :key="booking.id">
                   <td>{{ booking.type }}</td>
                   <td>{{ booking.title }}</td>
                   <td>{{ booking.date }}</td>
-                  <td>{{ booking.duration }}</td>
-                  <td>{{ booking.total }}</td>
+                  <td>{{ booking.duration || 'N/A' }}</td>
+                  <td>{{ booking.total | currency }}</td>
                   <td>{{ booking.status }}</td>
                   <td>
-                    <button class="details-btn" @click="openDetails(booking)">
+                    <button class="details-btn" @click="fetchBookingDetails(booking.id)">
                       Get Details
                     </button>
                   </td>
@@ -43,13 +43,11 @@
                 <p><strong>Type:</strong> {{ selectedBooking.type }}</p>
                 <p><strong>Title:</strong> {{ selectedBooking.title }}</p>
                 <p><strong>Order Date:</strong> {{ selectedBooking.date }}</p>
-                <p><strong>Duration:</strong> {{ selectedBooking.duration }}</p>
-                <p><strong>Total Fees:</strong> {{ selectedBooking.total }}</p>
+                <p><strong>Duration:</strong> {{ selectedBooking.duration || 'N/A' }}</p>
                 <p><strong>Status:</strong> {{ selectedBooking.status }}</p>
-                <h4>Customer Info</h4>
-                <p><strong>Name:</strong> {{ userInfo.name }}</p>
-                <p><strong>Email:</strong> {{ userInfo.email }}</p>
-                <p><strong>Phone:</strong> {{ userInfo.phone }}</p>
+                <p><strong>Accommodation Price:</strong> {{ selectedBooking.details.accommodation_price || 'N/A' }}</p>
+                <p><strong>Adults:</strong> {{ selectedBooking.details.adults }}</p>
+                <p><strong>Children:</strong> {{ selectedBooking.details.children }}</p>
                 <button class="details-btn" @click="closeDetails">
                   Close
                 </button>
@@ -67,12 +65,17 @@ import { mapGetters } from 'vuex'
 import clientAPI from '../services/axiosConfig'
 
 export default {
-
+  filters: {
+    currency (value) {
+      if (!value) { return '' }
+      return `$${value.toFixed(2)}` // Format as currency
+    }
+  },
   data () {
     return {
       selectedBooking: null,
-      bookings: [],
-      userInfo: null
+      bookings: [], // Initialize as an empty array
+      userInfo: null // Initialize as null
     }
   },
   computed: {
@@ -90,17 +93,39 @@ export default {
       })
 
       if (response.data.status === 200) {
-        const responseData = response.data
+        const responseData = response.data.data
         this.bookings = responseData.historyList
-        this.userInfo = responseData.userDetails
+        this.userInfo = responseData.user // Adjust to match the API response structure
       }
     } catch (error) {
-      alert('Error fetching booking histories:', error)
+      // eslint-disable-next-line no-console
+      console.error('Error fetching booking histories:', error)
+      alert('Error fetching booking histories.')
     }
   },
   methods: {
-    openDetails (booking) {
-      this.selectedBooking = booking
+    async fetchBookingDetails (id) {
+      try {
+        const token = localStorage.getItem('authToken')
+        const response = await clientAPI('https://api.tanefer.com/api/v2/booking').get(`/history-details/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (response.status === 200) { // Check HTTP status code directly
+          this.selectedBooking = response.data.data // Use response.data.data directly
+        } else {
+        // Handle unexpected status codes
+          // eslint-disable-next-line no-console
+          console.error('Unexpected response status:', response.status)
+          alert('Unexpected error occurred while fetching booking details.')
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching booking details:', error)
+        alert('Error fetching booking details.')
+      }
     },
     closeDetails () {
       this.selectedBooking = null
@@ -109,58 +134,79 @@ export default {
 }
 </script>
 
-  <style scoped>
-  .main-content {
-    margin-left: 240px; /* Same width as sidebar to avoid overlap */
-    padding: 20px;
-  }
+<style scoped>
+.sidebar {
+  position: absolute;
+  width: 240px; /* Adjust the width as needed */
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: #CFB9A1; /* Light brown background */
+  padding-top: 20px;
+  padding-left: 20px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better visual separation */
+  z-index: 1000; /* Ensure it stays above other content */
+}
 
-  .booking-history-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+.main-content {
+  margin-left: 240px; /* Same width as sidebar to avoid overlap */
+  padding: 20px;
+}
 
-  .booking-history-table th, .booking-history-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-  }
+.booking-history-table {
+  width: 100%;
+  border-collapse: collapse;
+}
 
-  .booking-history-table th {
-    background-color: #f2f2f2;
-  }
+.booking-history-card {
+  height: 400px;
+}
 
-  .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000; /* Ensure it appears above the navbar */
-  }
+.booking-history-table th, .booking-history-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
 
-  .popup-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 400px;
-    max-width: 80%;
-    z-index: 2001; /* Ensure it appears above the overlay */
-  }
+.booking-history-table th {
+  background-color: #f2f2f2;
+}
 
-  .details-btn {
-    margin-top: 10px;
-    padding: 10px;
-    background-color: #4F3316; /* Brown color */
-    color: white;
-    border: none;
-    cursor: pointer;
-  }
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Ensure it appears above the navbar */
+}
 
-  .details-btn:hover {
-    background-color: #3c2d1c; /* Darker brown color on hover */
-  }
-  </style>
+.popup-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 400px;
+  max-width: 80%;
+  z-index: 2001; /* Ensure it appears above the overlay */
+}
+
+.details-btn {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #4F3316; /* Brown color */
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.details-btn:hover {
+  background-color: #3c2d1c; /* Darker brown color on hover */
+}
+
+.text-center {
+  text-align: center;
+}
+</style>
