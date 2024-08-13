@@ -7,7 +7,7 @@
       :timeout="5000"
       auto-height
       vertical
-      >
+    >
       <v-row>
         <h4>{{ text }}</h4>
         <v-spacer />
@@ -50,7 +50,7 @@
                 :loading="loading"
                 :open-confirm-button="openConfirmButton"
                 :module="$route.params.module"
-                :hasCruise="checkHasCruise"
+                :has-cruise="checkHasCruise"
                 @dataReady="submitTravellersData"
                 @submitPayment="submitPayment"
                 @submitConfirmation="submitConfirmation"
@@ -570,6 +570,7 @@ import cruisesServices from '~/services/cruisesServices'
 import hotelsServices from '~/services/HotelsServices'
 
 export default {
+  middleware: 'auth',
   data () {
     return {
       bookFor: 'package',
