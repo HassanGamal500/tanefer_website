@@ -423,7 +423,7 @@ import adventureServices from '~/services/activitiesServies'
 import adventureCard from '~/components/adventuresComponents/AdventureCard'
 
 export default {
-  ssr: false,
+  ssr: true,
   components: {
     adventureCard
   },
