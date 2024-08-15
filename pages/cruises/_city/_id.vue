@@ -78,7 +78,7 @@
               <v-card class="pa-3">
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-img :src="image" height="200" class="rounded" />
+                    <v-img :src="image" height="230" class="rounded" />
                   </v-col>
                   <v-col cols="12" md="6" class="d-flex flex-wrap">
                     <v-img

@@ -19,10 +19,10 @@
       <template v-if="!loading && cruises.length">
         <v-card v-for="item in cruises" :key="item.id" max-width="1200" class="mb-5 px-3 mx-auto">
           <v-row>
-            <v-col cols="12" md="4">
-              <v-img :src="item.master_image" height="250" class="rounded" />
+            <v-col cols="12" md="5">
+              <v-img :src="item.master_image" height="270" class="rounded" />
             </v-col>
-            <v-col cols="12" md="8" class="d-flex flex-column justify-space-between">
+            <v-col cols="12" md="7" class="d-flex flex-column justify-space-between">
               <v-card-title class="d-flex justify-space-between flex-wrap align-cener px-0 py-0">
                 {{ item.name }}
                 <v-rating
@@ -133,8 +133,7 @@
               :value="cruise.stars"
             />
           </v-card-title>
-          <v-card-subtitle class="py-0 px-0 my-1">
-           sort:  {{ cruise.sort_cruise }} /Cruise Line: {{ cruise.cruise_line }} / Ship: {{ cruise.ship_name }} / Nights: {{ cruise.number_of_nights }} / Cities:
+          <v-card-subtitle class="py-0 px-0 my-1">sort:  {{ cruise.sort_cruise }} /Cruise Line: {{ cruise.cruise_line }} / Ship: {{ cruise.ship_name }} / Nights: {{ cruise.number_of_nights }} / Cities:
             <span v-for="(item, i) in cruise.cities" :key="i">{{ item.name + ', ' }}</span>
           </v-card-subtitle>
           <v-card-text class="px-0">
