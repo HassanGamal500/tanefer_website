@@ -23,10 +23,7 @@
                 />
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="profileData.phone"
-                  label="Phone"
-                />
+                <MobileInputAuth @update="assignPhone" />
               </v-col>
               <!-- Additional fields -->
               <v-col cols="12" md="6">
@@ -160,7 +157,7 @@ export default {
     return {
       menu1: null,
       passportMenus: null,
-      minExpireDate: null,
+      minExpireDate: this.getTodayDate(),
       profileData: {
         username: '',
         email: '',
@@ -245,12 +242,22 @@ export default {
       if (type === 'passport') { this.passExpireDateText = newDate }
       if (type === 'birthDate') { this.birthday = newDate }
     },
-    expire (n) {
+    // expire (n) {
+    //   const today = new Date()
+    //   today.setMonth(today.getMonth() + 6)
+    //   today.setDate(today.getDate() + 1)
+    //   this.passExpireDate[n] = today.toISOString().substring(0, 10)
+    //   this.minExpireDate = today.toISOString().substring(0, 10)
+    // },
+    getTodayDate () {
       const today = new Date()
-      today.setMonth(today.getMonth() + 6)
-      today.setDate(today.getDate() + 1)
-      this.passExpireDate[n] = today.toISOString().substring(0, 10)
-      this.minExpireDate = today.toISOString().substring(0, 10)
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, '0') // Months are 0-based, so add 1
+      const day = String(today.getDate()).padStart(2, '0') // Add leading zero if needed
+      return `${year}-${month}-${day}`
+    },
+    assignPhone (phone) {
+      this.profileData.phone = phone
     }
   }
 
