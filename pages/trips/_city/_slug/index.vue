@@ -115,14 +115,14 @@
                     Activity
                   </v-stepper-step>
 
-                  <v-divider />
+                  <!-- <v-divider />
 
                   <v-stepper-step
                     :complete="e1 > 2"
                     step="2"
                   >
                     Acomidation
-                  </v-stepper-step>
+                  </v-stepper-step> -->
 
                   <v-divider />
 
@@ -320,13 +320,13 @@
                     <v-btn
                       color="primary"
                       :disabled="!isButtonEnabled"
-                      @click="checkPackageDateIsExist"
+                      @click="checkTheStepCurrent"
                     >
                       Next
                     </v-btn>
                   </v-stepper-content>
 
-                  <v-stepper-content step="2">
+                  <!-- <v-stepper-content step="2">
                     <v-card
                       class="mb-12"
                     >
@@ -429,12 +429,6 @@
                                   mdi-swap-horizontal
                                 </v-icon> <a class="" style="font-size: 15px;margin: 2px 0;" @click="showRooms(h)">Select Room</a>
                                 <div class="cruise-result-trip justify-space-between pt-4">
-                                  <!-- <v-btn
-                                   class="float-right mx-2"
-                                   disabled
-                                  >
-                                    test
-                                  </v-btn> -->
                                   <template>
                                     <div class="text-center">
                                       <div v-if="isAvailables[h]">
@@ -468,308 +462,12 @@
                               </div>
                             </div>
                           </v-col>
-                          <!-- <v-col cols="12" md="12">
-                            <div v-if="selectedRoomGta !== null">
-                              <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
-                                <v-col cols="12" md="12">
-                                  <div class="cruise-result-trip justify-space-between">
-                                    <div>
-                                      <h6 class="text-h6 font-weight-bold">
-                                        Board: {{ selectedRoomGta.Board._ }}
-                                      </h6>
-                                    </div>
-                                    <div class="black--text">
-                                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="selectedRoomGta.AdditionalElements && selectedRoomGta.AdditionalElements.HotelOffers">
-                                        <strong>Hotel Offer:</strong> {{ selectedRoomGta.AdditionalElements.HotelOffers.HotelOffer.Name }}
-                                      </p>
-                                      <p class="" style="font-size: 15px;margin: 2px 0;">
-                                        <strong>Hotel Rooms:</strong>
-                                        <div style="font-size: 15px;margin: 2px 0;">
-                                          {{ selectedRoomGta.HotelRooms.HotelRoom.Name }} - Adults: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
-                                        </div>
-                                      </p>
-                                      <p class="" style="font-size: 15px;margin: 2px 0;">
-                                        <strong>Prices:</strong> {{ selectedRoomGta.Prices.Price.TotalFixAmounts.Nett }} {{ selectedRoomGta.Prices.Price.Currency }}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </v-col>
-                                <v-col cols="12" md="12">
-                                  <v-btn
-                                    v-if="e1 === 2"
-                                    class="white--text"
-                                    color="#4f3316"
-                                    elevation="6"
-                                    large
-                                    block
-                                    raised
-                                    :disabled="getRatePlanCode === null || confirmedSelectedRoom"
-                                    @click="confirmSelectedRoom"
-                                  >
-                                    <span v-if="getbookingRule === null">Confirm Selected Rooms</span>
-                                    <span v-else>Confirmed Successfully</span>
-                                  </v-btn>
-                                </v-col>
-                              </v-row>
-                            </div>
-                          </v-col>
-                          <v-col cols="12" md="12">
-                            <div v-if="confirmedSelectedRoom">
-                              <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
-                                <v-col cols="12" md="12">
-                                  <div class="cruise-result-trip justify-space-between">
-                                    <v-form ref="form" v-model="travellersFormValid">
-                                      <p class="body-1 font-weight-bold text-h5">
-                                        Holder Information
-                                      </p>
-                                      <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
-                                        <v-row>
-                                          <v-col class="py-0" cols="12" sm="6" md="6">
-                                            <v-text-field
-                                              v-model="name"
-                                              outlined
-                                              :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
-                                              label="Full Name"
-                                              required
-                                              color="blue"
-                                              class="rounded-lg"
-                                            />
-                                          </v-col>
-                                          <v-col class="py-0" cols="12" sm="6" md="6">
-                                            <v-text-field
-                                              v-model="surname"
-                                              outlined
-                                              :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
-                                              label="Surname"
-                                              required
-                                              color="blue"
-                                              class="rounded-lg"
-                                            />
-                                          </v-col>
-                                          <v-col class="py-0" cols="12" sm="6" md="6">
-                                            <mobile-input @update="assignPhone" />
-                                          </v-col>
-                                          <v-col class="py-0" cols="12" sm="6" md="6">
-                                            <v-text-field
-                                              v-model="email"
-                                              outlined
-                                              :rules="emailRules"
-                                              label="E-mail"
-                                              required
-                                              color="blue"
-                                              class="rounded-lg"
-                                            />
-                                          </v-col>
-                                          <v-col class="py-0" cols="12" sm="6" md="6">
-                                            <v-text-field
-                                              v-model="age"
-                                              outlined
-                                              label="Age"
-                                              required
-                                              color="blue"
-                                              class="rounded-lg"
-                                            />
-                                          </v-col>
-                                          <v-col class="py-0" cols="12" sm="6" md="6">
-                                            <v-combobox
-                                              v-model="title"
-                                              :items="['Mr', 'Mrs', 'Ms', 'Miss']"
-                                              :search-input.sync="search"
-                                              hide-selected
-                                              hint="Add title and press enter to append it"
-                                              label="Title"
-                                              outlined
-                                              :rules="requiredRule"
-                                              class="pa-0 rounded-lg"
-                                              height="56px"
-                                              color="blue"
-                                            >
-                                              <template #no-data>
-                                                <v-list-item>
-                                                  <v-list-item-content>
-                                                    <v-list-item-title>
-                                                      No results matching "<strong>{{ search }}</strong>". Press <kbd>enter</kbd> to create a new one
-                                                    </v-list-item-title>
-                                                  </v-list-item-content>
-                                                </v-list-item>
-                                              </template>
-                                            </v-combobox>
-                                          </v-col>
-                                          <v-col class="py-0" cols="12" sm="6" md="6">
-                                            <v-autocomplete
-                                              v-model="issueCountry"
-                                              :rules="[() => !!issueCountry || 'This field is required']"
-                                              :items="countries"
-                                              item-text="name"
-                                              item-value="code"
-                                              placeholder="Issuing Country"
-                                              name="issue-country-for-passports"
-                                              required
-                                              outlined
-                                              hide-no-data
-                                              color="blue"
-                                              autocomplete="off"
-                                              :menu-props="{ auto: true, maxWidth: 200, overflowY: true }"
-                                              class="rounded-lg"
-                                            />
-                                          </v-col>
-                                        </v-row>
-                                      </v-card>
-                                    </v-form>
-                                  </div>
-                                </v-col>
-                                <div v-for="(traveller, t) in otherTravellers" :key="t">
-                                  <v-col cols="12" md="12">
-                                    <div class="cruise-result-trip justify-space-between">
-                                      <v-form ref="form" v-model="travellersFormValids">
-                                        <p class="body-1 font-weight-bold text-h5">
-                                          Traveller ({{ traveller.id }}) Information
-                                        </p>
-                                        <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
-                                          <v-row>
-                                            <v-col class="py-0" cols="12" sm="12" md="12">
-                                              <v-text-field
-                                                v-model="bNames[t]"
-                                                outlined
-                                                :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
-                                                label="Full Name"
-                                                required
-                                                color="blue"
-                                                class="rounded-lg"
-                                              />
-                                            </v-col>
-                                            <v-col class="py-0" cols="12" sm="6" md="6">
-                                              <v-text-field
-                                                v-model="bSurnames[t]"
-                                                outlined
-                                                :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
-                                                label="Surname"
-                                                required
-                                                color="blue"
-                                                class="rounded-lg"
-                                              />
-                                            </v-col>
-                                            <v-col class="py-0" cols="12" sm="6" md="6">
-                                              <v-text-field
-                                                v-model="bAges[t]"
-                                                outlined
-                                                label="Age"
-                                                required
-                                                color="blue"
-                                                class="rounded-lg"
-                                              />
-                                            </v-col>
-                                          </v-row>
-                                        </v-card>
-                                      </v-form>
-                                    </div>
-                                  </v-col>
-                                </div>
-                                <div v-for="(children, c) in otherChildren" :key="c">
-                                  <v-col cols="12" md="12">
-                                    <div class="cruise-result-trip justify-space-between">
-                                      <v-form ref="form" v-model="travellersFormValids">
-                                        <p class="body-1 font-weight-bold text-h5">
-                                          Children ({{ children.id }}) Information
-                                        </p>
-                                        <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
-                                          <v-row>
-                                            <v-col class="py-0" cols="12" sm="12" md="12">
-                                              <v-text-field
-                                                v-model="bNamesChild[c]"
-                                                outlined
-                                                :rules="[v => (!!v && v.length > 2) || 'Full Name is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Name Must be letters only with no spaces']"
-                                                label="Full Name"
-                                                required
-                                                color="blue"
-                                                class="rounded-lg"
-                                              />
-                                            </v-col>
-                                            <v-col class="py-0" cols="12" sm="6" md="6">
-                                              <v-text-field
-                                                v-model="bSurnamesChild[c]"
-                                                outlined
-                                                :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters', v => /^[_A-z]*((-|\s)*[_A-z])*$/.test(v) || 'Surname Must be letters only with no spaces']"
-                                                label="Surname"
-                                                required
-                                                color="blue"
-                                                class="rounded-lg"
-                                              />
-                                            </v-col>
-                                            <v-col class="py-0" cols="12" sm="6" md="6">
-                                              <v-text-field
-                                                v-model="bAgesChild[c]"
-                                                outlined
-                                                label="Age"
-                                                required
-                                                color="blue"
-                                                class="rounded-lg"
-                                              />
-                                            </v-col>
-                                          </v-row>
-                                        </v-card>
-                                      </v-form>
-                                    </div>
-                                  </v-col>
-                                </div>
-                                <v-col>
-                                  <v-btn
-                                    v-if="e1 === 2"
-                                    class="white--text"
-                                    color="#4f3316"
-                                    elevation="6"
-                                    large
-                                    block
-                                    raised
-                                    :disabled="!isButtonEnabledFormValidation || isBooked"
-                                    @click="finalBookHotel"
-                                  >
-                                    <span v-if="!isBooked">Book Hotel</span>
-                                    <span v-else>Booked Successfully</span>
-                                  </v-btn>
-                                </v-col>
-                              </v-row>
-                            </div>
-                          </v-col> -->
                         </v-row>
                       </div>
                     </v-card>
                     <v-card
                       class="mb-12"
                     >
-                      <!-- <div v-if="selectedRoomGta !== null">
-                        <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
-                          <v-col cols="12" md="12" class="pt-4">
-                            <div v-if="selectedRoomGta !== null">
-                              <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
-                                <v-col cols="12" md="12">
-                                  <div class="cruise-result-trip justify-space-between">
-                                    <div>
-                                      <h6 class="text-h6 font-weight-bold">
-                                        Board: {{ selectedRoomGta.Board._ }}
-                                      </h6>
-                                    </div>
-                                    <div class="black--text">
-                                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="selectedRoomGta.AdditionalElements && selectedRoomGta.AdditionalElements.HotelOffers">
-                                        <strong>Hotel Offer:</strong> {{ selectedRoomGta.AdditionalElements.HotelOffers.HotelOffer.Name }}
-                                      </p>
-                                      <p class="" style="font-size: 15px;margin: 2px 0;">
-                                        <strong>Hotel Rooms:</strong>
-                                        <div style="font-size: 15px;margin: 2px 0;">
-                                          {{ selectedRoomGta.HotelRooms.HotelRoom.Name }} - Adults: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Adults }} - Children: {{ selectedRoomGta.HotelRooms.HotelRoom.RoomOccupancy.Children }}
-                                        </div>
-                                      </p>
-                                      <p class="" style="font-size: 15px;margin: 2px 0;">
-                                        <strong>Prices:</strong> {{ selectedRoomGta.Prices.Price.TotalFixAmounts.Nett }} {{ selectedRoomGta.Prices.Price.Currency }}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </v-col>
-                              </v-row>
-                            </div>
-                          </v-col>
-                        </v-row>
-                      </div> -->
                       <div v-for="(gta, g) in selectedRoomGtaArray" :key="g">
                         <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
                           <v-col cols="12" md="12" class="pt-4">
@@ -806,22 +504,6 @@
                                     </div>
                                   </div>
                                 </v-col>
-                                <!-- <v-col cols="12" md="12">
-                                  <v-btn
-                                    v-if="e1 === 2"
-                                    class="white--text"
-                                    color="#4f3316"
-                                    elevation="6"
-                                    large
-                                    block
-                                    raised
-                                    :disabled="getRatePlanCode === null || confirmedSelectedRoom"
-                                    @click="confirmSelectedRoom"
-                                  >
-                                    <span v-if="getbookingRule === null">Confirm Selected Rooms</span>
-                                    <span v-else>Confirmed Successfully</span>
-                                  </v-btn>
-                                </v-col> -->
                               </v-row>
                             </div>
                           </v-col>
@@ -1121,7 +803,6 @@
                         </v-row>
                       </div>
                     </v-card>
-                    <!-- :disabled="!isBooked" -->
                     <v-btn
                       color="primary"
                       @click="checkTheStepCurrent"
@@ -1135,7 +816,7 @@
                     >
                       Back
                     </v-btn>
-                  </v-stepper-content>
+                  </v-stepper-content> -->
 
                   <v-stepper-content step="3">
                     <v-card
@@ -1383,30 +1064,6 @@
                         <span class="quantity px-2 font-weight-bold">$ {{ initialPrice }}</span>
                       </span>
                     </p>
-                    <!-- <v-btn
-                      v-if="e1 === 2"
-                      class="white--text"
-                      color="#4f3316"
-                      elevation="6"
-                      large
-                      block
-                      raised
-                    >
-                      Save Trip
-                    </v-btn> -->
-                    <!-- <v-divider class="my-2" />
-                    <v-btn
-                      v-if="e1 === 2"
-                      class="white--text"
-                      color="#4f3316"
-                      elevation="6"
-                      large
-                      block
-                      raised
-                      @click="openBookFlight"
-                    >
-                      Book Flight
-                    </v-btn> -->
                   </v-card-text>
                 </div>
                 <div v-else>
@@ -1905,15 +1562,9 @@
                 </v-row>
               </div>
               <v-divider class="mb-4" />
-              <div>
-                <!-- <p class="font-weight-bold" style="font-size: 25px;color: #000;">
-                  Hotels
-                </p> -->
+              <!-- <div>
                 <v-row class="mt-4">
                   <v-col cols="12" md="9">
-                    <!-- <div v-for="(hotel, h) in listGtaHotelDetails" :key="h">
-                      <p>{{ hotel.HotelName }}</p>
-                    </div> -->
                     <p class="font-weight-bold" style="font-size: 25px;color: #000;">
                       Hotels
                     </p>
@@ -1923,7 +1574,7 @@
                   </v-col>
                 </v-row>
               </div>
-              <v-divider class="mb-4" />
+              <v-divider class="mb-4" /> -->
               <div>
                 <v-row class="mt-4">
                   <v-col cols="12" md="9">
@@ -3385,7 +3036,8 @@ export default {
       }
     },
     checkTheStepCurrent () {
-      if (this.e1 === 2) {
+      // if (this.e1 === 2) {
+      if (this.e1 === 1) {
         this.loaded = true
         this.openProceed = true
         this.showCheckout = true
