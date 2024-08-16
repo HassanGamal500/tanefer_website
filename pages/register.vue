@@ -10,7 +10,7 @@
             <input v-model="email" type="email" placeholder="Email" required>
           </div>
           <div class="input-row">
-            <input v-model="phone" type="tel" placeholder="Phone Number" required>
+            <MobileInput @update="assignPhone" />
             <input v-model="password" type="password" placeholder="Password" required>
             <input v-model="password_confirmation" type="password" placeholder="Confirm Password" required>
           </div>
@@ -129,6 +129,10 @@ export default {
         }
         this.isSuccess = false
       }
+    },
+
+    assignPhone (phone) {
+      this.phone = phone
     }
   }
 }

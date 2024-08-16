@@ -23,13 +23,28 @@
                 />
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="profileData.phone"
-                  label="Phone"
-                />
+                <MobileInputAuth @update="assignPhone" />
               </v-col>
               <!-- Additional fields -->
               <v-col cols="12" md="6">
+                <v-select
+                  v-model="additionalData.gender"
+                  :items="['Male', 'Female']"
+                  label="Gender"
+                  :menu-props="{ zIndex: 9999 }"
+                />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-combobox
+                  v-model="additionalData.title"
+                  :items="['Mr', 'Mrs', 'Ms', 'Miss']"
+                  :search-input.sync="search"
+                  hide-selected
+                  hint="Add title and press enter to append it"
+                  label="Title"
+                  :menu-props="{ zIndex: 9999 }"
+                />
+              </v-col>            <v-col cols="12" md="6">
                 <v-text-field
                   v-model="additionalData.firstName"
                   label="First Name"
@@ -42,12 +57,33 @@
                 />
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="additionalData.birthday"
-                  label="Birthday"
-                  type="date"
-                />
+                <v-menu
+                  ref="menu1"
+                  v-model="menu1"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  min-width="290px"
+                  :z-index="9999"
+                >
+                  <template #activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="additionalData.birthday"
+                      label="Birthday"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                    />
+                  </template>
+                  <v-date-picker
+                    ref="picker"
+                    v-model="additionalData.birthday"
+                    :max="new Date().toISOString().substr(0, 10)"
+                    color="late"
+                    @input="menu1 = false"
+                  />
+                </v-menu>
               </v-col>
+
               <v-col cols="12" md="6">
                 <v-text-field
                   v-model="additionalData.passportNumber"
@@ -55,16 +91,40 @@
                 />
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="additionalData.passportExpiryDate"
-                  label="Passport Expiry Date"
-                  type="date"
-                />
+                <v-menu
+                  v-model="passportMenus"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  min-width="290px"
+                  :z-index="9999"
+                >
+                  <template #activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="additionalData.passExpireDateText"
+                      label="Passport Expire Date"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on"
+                    />
+                  </template>
+                  <v-date-picker
+                    v-model="additionalData.passExpireDate"
+                    color="late"
+                    :min="minExpireDate"
+                    @input="passportMenus = false, formatDate(passExpireDate, 1, 'passport')"
+                  />
+                </v-menu>
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
+                <v-autocomplete
                   v-model="additionalData.issuingCountry"
-                  label="Issuing Country"
+                  :items="countries"
+                  item-text="name"
+                  item-value="code"
+                  placeholder="Issuing Country"
+                  hide-no-data
+                  autocomplete="off"
+                  :menu-props="{ auto: true, maxWidth: 200, overflowY: true, zIndex: 9999 }"
                 />
               </v-col>
             </v-row>
@@ -95,25 +155,39 @@ export default {
   middleware: 'auth',
   data () {
     return {
+      menu1: null,
+      passportMenus: null,
+      minExpireDate: this.getTodayDate(),
       profileData: {
         username: '',
         email: '',
         phone: ''
       },
       additionalData: {
+        gender: '',
+        title: '',
         firstName: '',
         lastName: '',
         birthday: '',
         passportNumber: '',
-        passportExpiryDate: '',
+        passExpireDateText: '',
+        passExpireDate: '',
         issuingCountry: ''
       }
     }
   },
+
   computed: {
     ...mapGetters({
       user: 'auth/user'
-    })
+    }),
+    countries () {
+      return this.$store.state.countries
+    }
+  },
+  created () {
+    // this.menu1 = false
+    // this.passportMenus = false
   },
   async mounted () {
     try {
@@ -159,8 +233,34 @@ export default {
     },
     uploadAvatar () {
       // Logic to handle avatar upload
+    },
+    formatDate (date, i, type) {
+      if (!date) { return null }
+      const [year, month, day] = date.split('-')
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const newDate = `${day} ${months[month - 1]} ${year}`
+      if (type === 'passport') { this.passExpireDateText = newDate }
+      if (type === 'birthDate') { this.birthday = newDate }
+    },
+    // expire (n) {
+    //   const today = new Date()
+    //   today.setMonth(today.getMonth() + 6)
+    //   today.setDate(today.getDate() + 1)
+    //   this.passExpireDate[n] = today.toISOString().substring(0, 10)
+    //   this.minExpireDate = today.toISOString().substring(0, 10)
+    // },
+    getTodayDate () {
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, '0') // Months are 0-based, so add 1
+      const day = String(today.getDate()).padStart(2, '0') // Add leading zero if needed
+      return `${year}-${month}-${day}`
+    },
+    assignPhone (phone) {
+      this.profileData.phone = phone
     }
   }
+
 }
 </script>
 
