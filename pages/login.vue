@@ -12,8 +12,10 @@
           <button type="submit">
             Login
           </button>
-          <div v-if="message" :class="{'success-message': isSuccess, 'error-message': !isSuccess}" class="message-box">
-            {{ message }}
+          <div v-if="message.length" :class="{'success-message': isSuccess, 'error-message': !isSuccess}" class="message-box">
+            <div v-for="msg in message" :key="msg">
+              {{ msg }}
+            </div>
           </div>
         </form>
         <p class="no-account">
@@ -22,7 +24,6 @@
           </router-link>
         </p>
         <div class="social-login">
-          <!-- Buttons are invisible but still in the DOM -->
           <button class="facebook-btn" style="display: none;">
             <i class="fab fa-facebook-f" /> Login with Facebook
           </button>
@@ -43,36 +44,50 @@ export default {
     return {
       email: '',
       password: '',
-      message: '',
+      message: [],
       isSuccess: true
     }
   },
   methods: {
-    async login () {
-      try {
-        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/login', {
-          email: this.email,
-          password: this.password
+    login () {
+      clientAPI('https://api.tanefer.com/api/v2/auth').post('/login', {
+        email: this.email,
+        password: this.password
+      })
+        .then((response) => {
+          if (response.data.status) {
+            const token = response.data.data.token
+            localStorage.setItem('authToken', token)
+            this.$store.commit('auth/setToken', token)
+            this.$store.dispatch('auth/fetchUser').then(() => {
+              this.message = ['Logged in successfully!']
+              this.isSuccess = true
+              this.$router.push('/').then(() => {
+                this.$nuxt.refresh()
+              })
+            })
+          } else {
+            this.handleErrors(response.data)
+          }
         })
+        .catch((error) => {
+          if (error.response && error.response.data) {
+            this.handleErrors(error.response.data)
+          } else {
+            this.message = ['An error occurred while attempting to login. Please try again.']
+            this.isSuccess = false
+          }
+        })
+    },
 
-        const token = response.data.data.token
-        localStorage.setItem('authToken', token)
-        this.$store.commit('auth/setToken', token)
-        await this.$store.dispatch('auth/fetchUser')
-        this.message = 'Logged in successfully!'
-        this.isSuccess = true
-        // alert(token)
-        this.$router.push('/').then(() => {
-          this.$nuxt.refresh()
-        })
-      } catch (error) {
-        if (error.response && error.response.status === 422) {
-          this.message = 'Validation error: ' + Object.values(error.response.data.errors).flat().join(', ')
-          this.isSuccess = false
+    handleErrors (data) {
+      if (data.status === false) {
+        if (data.data && typeof data.data === 'object') {
+          this.message = Object.values(data.data).filter(Boolean)
         } else {
-          this.message = 'Login Failed Please try again'
-          this.isSuccess = false
+          this.message = [data.message || 'An error occurred. Please try again.']
         }
+        this.isSuccess = false
       }
     }
   }
@@ -104,8 +119,6 @@ export default {
   max-width: 400px;
   margin: 20px auto;
   padding: 20px;
-  /* background: #f9f9f9;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
   text-align: center;
 }
 
@@ -116,16 +129,16 @@ h2 {
 .input-row {
   display: flex;
   flex-direction: column;
-  gap: 15px; /* Increased gap */
+  gap: 15px;
   margin-bottom: 20px;
 }
 
 .input-row input {
-  padding: 15px; /* Increased padding */
+  padding: 15px;
   border: 1px solid #ccc;
   border-radius: 5px;
   background: #fff;
-  font-size: 16px; /* Increased font size */
+  font-size: 16px;
   color: #333;
 }
 
@@ -134,7 +147,7 @@ h2 {
 }
 
 button {
-  padding: 15px 20px; /* Increased padding */
+  padding: 15px 20px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -165,7 +178,7 @@ button:hover {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  display: none; /* Make buttons invisible */
+  display: none;
 }
 
 .facebook-btn {
@@ -209,5 +222,4 @@ button:hover {
 .no-account {
   margin-top: revert;
 }
-
 </style>

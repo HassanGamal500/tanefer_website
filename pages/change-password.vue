@@ -7,20 +7,20 @@
           <v-card-title>
             Change Password
           </v-card-title>
-          <v-alert 
-            v-if="showSuccessAlert" 
-            type="success" 
-            class="mb-4" 
+          <v-alert
+            v-if="showSuccessAlert"
+            type="success"
+            class="mb-4"
             dismissible
             @input="showSuccessAlert = false"
           >
             {{ successMessage }}
           </v-alert>
 
-          <v-alert 
-            v-if="showErrorAlert" 
-            type="error" 
-            class="mb-4" 
+          <v-alert
+            v-if="showErrorAlert"
+            type="error"
+            class="mb-4"
             dismissible
             @input="showErrorAlert = false"
           >
