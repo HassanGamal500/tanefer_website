@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import clientAPI from '../services/axiosConfig'
+// import clientAPI from '../services/axiosConfig'
 
 export default {
   data () {
@@ -49,48 +49,29 @@ export default {
     }
   },
   methods: {
-    login () {
-      clientAPI('https://api.tanefer.com/api/v2/auth').post('/login', {
+    async login () {
+      const result = await this.$store.dispatch('auth/login', {
         email: this.email,
         password: this.password
       })
-        .then((response) => {
-          if (response.data.status) {
-            const token = response.data.data.token
-            localStorage.setItem('authToken', token)
-            this.$store.commit('auth/setToken', token)
-            this.$store.dispatch('auth/fetchUser').then(() => {
-              this.message = ['Logged in successfully!']
-              this.isSuccess = true
-              this.$router.push('/').then(() => {
-                this.$nuxt.refresh()
-              })
-            })
-          } else {
-            this.handleErrors(response.data)
-          }
+
+      if (result.success) {
+        this.message = ['Logged in successfully!']
+        this.isSuccess = true
+        this.$router.push('/').then(() => {
+          this.$nuxt.refresh()
         })
-        .catch((error) => {
-          if (error.response && error.response.data) {
-            this.handleErrors(error.response.data)
-          } else {
-            this.message = ['An error occurred while attempting to login. Please try again.']
-            this.isSuccess = false
-          }
-        })
+      } else {
+        this.handleErrors(result.message)
+      }
     },
 
-    handleErrors (data) {
-      if (data.status === false) {
-        if (data.data && typeof data.data === 'object') {
-          this.message = Object.values(data.data).filter(Boolean)
-        } else {
-          this.message = [data.message || 'An error occurred. Please try again.']
-        }
-        this.isSuccess = false
-      }
+    handleErrors (message) {
+      this.message = [message]
+      this.isSuccess = false
     }
   }
+
 }
 </script>
 

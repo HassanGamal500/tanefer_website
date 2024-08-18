@@ -29,25 +29,58 @@ export const actions = {
       this.$axios.setToken(token, 'Bearer')
       localStorage.setItem('authToken', token)
       await dispatch('fetchUser')
+      return { success: true }
     } catch (error) {
       console.error('Error during login:', error)
+      let message = 'An error occurred during login. Please try again.'
+
+      if (error.response) {
+        const { status, data } = error.response
+        if (status === 401) {
+          message = 'Invalid credentials. Please check your email and password.'
+        } else if (status === 422 && data.data) {
+          message = data.data // Use data from response
+        } else if (data.message) {
+          message = data.message
+        }
+      }
+
+      return { success: false, message }
     }
   },
+
   async register ({ commit, dispatch }, authData) {
     try {
       const response = await this.$axios.post('https://api.tanefer.com/api/v2/auth/register', {
+        username: authData.username,
         email: authData.email,
-        password: authData.password
+        phone: authData.phone,
+        password: authData.password,
+        password_confirmation: authData.password_confirmation
       })
       const token = response.data.data.token
       commit('setToken', token)
       this.$axios.setToken(token, 'Bearer')
       localStorage.setItem('authToken', token)
       await dispatch('fetchUser')
+      return { success: true }
     } catch (error) {
       console.error('Error during registration:', error)
+      let message = 'An error occurred during registration. Please try again.'
+
+      if (error.response) {
+        const { status, data } = error.response
+        if (status === 422 && data.data) {
+          message = data.data // Use data from response
+        } else if (data.message) {
+          message = data.message
+        }
+      }
+
+      return { success: false, message }
     }
   },
+
   async fetchUser ({ commit }) {
     try {
       const token = localStorage.getItem('authToken')

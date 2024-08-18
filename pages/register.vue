@@ -52,7 +52,7 @@
 </template>
 
 <script>
-import clientAPI from '../services/axiosConfig'
+// import clientAPI from '../services/axiosConfig'
 
 export default {
   data () {
@@ -78,79 +78,116 @@ export default {
     }
   },
 
+  // methods: {
+  //   async register () {
+  //   // Check if the terms and conditions are agreed upon
+  //     if (!this.agreedToTerms) {
+  //       this.message = ['Please agree to the terms and conditions.']
+  //       this.isSuccess = false
+  //       return
+  //     }
+
+  //     try {
+  //     // Make the API request
+  //       const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/register', {
+  //         username: this.username,
+  //         email: this.email,
+  //         phone: this.phone.e164,
+  //         password: this.password,
+  //         password_confirmation: this.password_confirmation
+  //       })
+
+  //       // Check if the response indicates success with status code 201
+  //       if (response.status === 201) {
+  //         const token = response.data.data.token
+  //         localStorage.setItem('authToken', token)
+  //         clientAPI.defaults.headers.common.Authorization = `Bearer ${token}`
+
+  //         this.message = ['Registered successfully!']
+  //         this.isSuccess = true
+
+  //         // Optionally, update your Vuex store if you have one
+  //         this.$store.commit('auth/setToken', token)
+  //         this.$store.dispatch('auth/fetchUser').then(() => {
+  //           this.$router.push('/').then(() => {
+  //             this.$nuxt.refresh() // Ensure page refreshes
+  //           })
+  //         })
+  //       } else {
+  //         this.handleErrors(response.data)
+  //       }
+  //     } catch (error) {
+  //     // Handle various types of error responses
+  //       if (error.response) {
+  //         if (error.response.data) {
+  //           this.handleErrors(error.response.data)
+  //         } else {
+  //           this.message = ['An error occurred. Please try again.']
+  //           this.isSuccess = false
+  //         }
+  //       } else if (error.request) {
+  //       // This condition is for cases where no response was received
+  //         this.message = ['Network error. Please try again later.']
+  //         this.isSuccess = false
+  //       } else {
+  //       // This condition is for any other errors
+  //         this.message = [`Error: ${error.message}`]
+  //         this.isSuccess = false
+  //       }
+  //     }
+  //   },
+
+  //   handleErrors (data) {
+  //     if (data.status === false) {
+  //       if (data.data && typeof data.data === 'object') {
+  //         this.message = Object.values(data.data).filter(Boolean)
+  //       } else {
+  //         this.message = [data.message || 'An error occurred. Please try again.']
+  //       }
+  //       this.isSuccess = false
+  //     }
+  //   },
+
+  //   assignPhone (phone) {
+  //     this.phone = phone
+  //   }
+  // }
   methods: {
     async register () {
-    // Check if the terms and conditions are agreed upon
       if (!this.agreedToTerms) {
         this.message = ['Please agree to the terms and conditions.']
         this.isSuccess = false
         return
       }
 
-      try {
-      // Make the API request
-        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/register', {
-          username: this.username,
-          email: this.email,
-          phone: this.phone.e164,
-          password: this.password,
-          password_confirmation: this.password_confirmation
+      const result = await this.$store.dispatch('auth/register', {
+        username: this.username,
+        email: this.email,
+        phone: this.phone.e164,
+        password: this.password,
+        password_confirmation: this.password_confirmation
+      })
+
+      if (result.success) {
+        this.message = ['Registered successfully!']
+        this.isSuccess = true
+        this.$router.push('/').then(() => {
+          this.$nuxt.refresh()
         })
-
-        // Check if the response indicates success with status code 201
-        if (response.status === 201) {
-          const token = response.data.data.token
-          localStorage.setItem('authToken', token)
-          clientAPI.defaults.headers.common.Authorization = `Bearer ${token}`
-
-          this.message = ['Registered successfully!']
-          this.isSuccess = true
-
-          // Optionally, update your Vuex store if you have one
-          this.$store.commit('auth/setToken', token)
-          this.$store.dispatch('auth/fetchUser').then(() => {
-            this.$router.push('/').then(() => {
-              this.$nuxt.refresh() // Ensure page refreshes
-            })
-          })
-        } else {
-          this.handleErrors(response.data)
-        }
-      } catch (error) {
-      // Handle various types of error responses
-        if (error.response) {
-          if (error.response.data) {
-            this.handleErrors(error.response.data)
-          } else {
-            this.message = ['An error occurred. Please try again.']
-            this.isSuccess = false
-          }
-        } else if (error.request) {
-        // This condition is for cases where no response was received
-          this.message = ['Network error. Please try again later.']
-          this.isSuccess = false
-        } else {
-        // This condition is for any other errors
-          this.message = [`Error: ${error.message}`]
-          this.isSuccess = false
-        }
+      } else {
+        this.handleErrors(result.message)
       }
     },
 
-    handleErrors (data) {
-      if (data.status === false) {
-        if (data.data && typeof data.data === 'object') {
-          this.message = Object.values(data.data).filter(Boolean)
-        } else {
-          this.message = [data.message || 'An error occurred. Please try again.']
-        }
-        this.isSuccess = false
-      }
-    },
-
-    assignPhone (phone) {
-      this.phone = phone
+    handleErrors (message) {
+      this.message = [message]
+      this.isSuccess = false
     }
+  },
+  assignPhone (phone) {
+    // eslint-disable-next-line no-console
+    console.log('Assigned phone:', phone)
+    this.phone = phone
   }
 
 }
