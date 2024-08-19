@@ -39,7 +39,8 @@ export default {
   },
   methods: {
     assignPhone (phone) {
-      this.$emit('update:phone', phone)
+      // this.$emit('update:phone', phone)
+      this.$emit('update', phone)
     }
   }
 }

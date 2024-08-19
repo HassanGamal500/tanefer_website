@@ -1,4 +1,5 @@
 import clientAPI from './axiosConfig'
+import clientAuthAPI from './axiosAuthConfig'
 
 // const baseURL = 'https://be.tanefer.com/api'
 // const baseURL = 'http://localhost:8000/api/v2'
@@ -81,6 +82,6 @@ export default {
     return clientAPI(baseURL).post('/packages/get-booking', payload)
   },
   saveHotel (payload) {
-    return clientAPI(baseURL).post('/hotels/save', payload)
+    return clientAuthAPI(baseURL).post('/hotels/save', payload)
   }
 }

@@ -1,5 +1,6 @@
 import clientAPI from './axiosConfig'
 import wpClientAPI from './axiosConfigWp'
+import clientAuthAPI from './axiosAuthConfig'
 
 // const baseURL = 'https://be.tanefer.com/api/v2'
 // const baseURL = 'http://localhost:8000/api/v2'
@@ -28,7 +29,7 @@ export default {
 
   // book adventure
   bookAdventure (payload) {
-    return clientAPI(baseURL).post('/packages/activities/book', payload)
+    return clientAuthAPI(baseURL).post('/packages/activities/book', payload)
   },
 
   // get durations

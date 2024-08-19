@@ -1,4 +1,5 @@
 import clientAPI from './axiosConfig'
+import clientAuthAPI from './axiosAuthConfig'
 
 // const baseURL = 'https://be.tanefer.com/api/v2'
 // const baseURL = 'http://localhost:8000/api/v2'
@@ -27,7 +28,7 @@ export default {
 
   // book cruise
   bookCruise (id, payload) {
-    return clientAPI(baseURL).post(`/cruises/${id}/booking`, payload)
+    return clientAuthAPI(baseURL).post(`/cruises/${id}/booking`, payload)
   },
 
   // get Meta
