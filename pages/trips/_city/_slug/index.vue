@@ -126,7 +126,7 @@
 
                   <v-divider />
 
-                  <v-stepper-step step="3">
+                  <v-stepper-step step="2">
                     Trip Summary
                   </v-stepper-step>
                 </v-stepper-header>
@@ -150,7 +150,7 @@
                                 <v-col cols="12" lg="4" md="8" sm="8" xs="12">
                                   <span style="float: right;">
                                     <v-row>
-                                      <v-col cols="2">
+                                      <v-col cols="2" v-if="packageDetails.activities[0].type !== 'adventure'">
                                         <v-btn
                                           style="background-color: transparent; border: 1px solid #4f3316;"
                                           elevation="4"
@@ -163,10 +163,10 @@
                                           </v-icon>
                                         </v-btn>
                                       </v-col>
-                                      <v-col cols="6" class="text-center">
+                                      <v-col :cols="packageDetails.activities[0].type !== 'adventure' ? '6' : '12'" class="text-center">
                                         <span class="quantity text-center font-weight-bold">{{ activity.days_number }} days</span>
                                       </v-col>
-                                      <v-col cols="2">
+                                      <v-col cols="2" v-if="packageDetails.activities[0].type !== 'adventure'">
                                         <v-btn
                                           style="background-color: #4f3316;"
                                           color="#4f3316"
@@ -818,7 +818,7 @@
                     </v-btn>
                   </v-stepper-content> -->
 
-                  <v-stepper-content step="3">
+                  <v-stepper-content step="2">
                     <v-card
                       class="mb-12"
                       color="grey lighten-1"

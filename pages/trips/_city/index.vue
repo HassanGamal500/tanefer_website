@@ -32,7 +32,7 @@
                   <h1 class="font-weight-medium">
                     {{ tripsCity.CityName }} trips
                   </h1>
-                  <p class="body-2">
+                  <p class="body-2" v-if="tripsCity.CityDescription">
                     {{ tripsCity.CityDescription }}
                   </p>
                 </div>
