@@ -233,6 +233,13 @@ export default {
       if (ctx.isDev) {
         config.devtool = ctx.isClient ? 'source-map' : 'inline-source-map'
       }
+    },
+    terser: {
+      terserOptions: {
+        compress: {
+          drop_console: false
+        }
+      }
     }
   }
 }

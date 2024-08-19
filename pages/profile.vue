@@ -5,33 +5,45 @@
       <v-col cols="12" md="9" class="main-content">
         <v-card>
           <v-card-title>
-            <span class="headline">Profile Information</span>
+            Profile Information
           </v-card-title>
+
+          <v-alert
+            v-if="showSuccessAlert"
+            type="success"
+            class="mb-4"
+            dismissible
+            @input="showSuccessAlert = false"
+          >
+            {{ successMessage }}
+          </v-alert>
+
+          <v-alert
+            v-if="showErrorAlert"
+            type="error"
+            class="mb-4"
+            dismissible
+            @input="showErrorAlert = false"
+          >
+            {{ errorMessage }}
+          </v-alert>
+
           <v-card-subtitle>Basic Information</v-card-subtitle>
           <v-card-text>
             <v-row>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="profileData.username"
-                  label="Username"
-                />
+                <v-text-field v-model="profileData.username" label="Username" />
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="profileData.email"
-                  label="Email"
-                />
+                <v-text-field v-model="profileData.email" label="Email" disabled />
               </v-col>
-              <!-- <v-col cols="12" md="6">
-                <MobileInputAuth @update="assignPhone" />
-              </v-col> -->
               <v-col cols="12" md="6">
                 <phone-input v-model="profileData.phone" />
               </v-col>
-              <!-- Additional fields -->
+
               <v-col cols="12" md="6">
                 <v-select
-                  v-model="additionalData.gender"
+                  v-model="travellerData.passengerGender"
                   :items="['Male', 'Female']"
                   label="Gender"
                   :menu-props="{ zIndex: 9999 }"
@@ -39,38 +51,23 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-combobox
-                  v-model="additionalData.title"
+                  v-model="travellerData.passengerTitle"
                   :items="['Mr', 'Mrs', 'Ms', 'Miss']"
-                  :search-input.sync="search"
-                  hide-selected
-                  hint="Add title and press enter to append it"
                   label="Title"
                   :menu-props="{ zIndex: 9999 }"
                 />
-              </v-col>            <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="additionalData.firstName"
-                  label="First Name"
-                />
               </v-col>
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="additionalData.lastName"
-                  label="Last Name"
-                />
+                <v-text-field v-model="travellerData.passengerFirstName" label="First Name" />
               </v-col>
               <v-col cols="12" md="6">
-                <v-menu
-                  ref="menu1"
-                  v-model="menu1"
-                  :close-on-content-click="false"
-                  transition="scale-transition"
-                  min-width="290px"
-                  :z-index="9999"
-                >
+                <v-text-field v-model="travellerData.passengerLastName" label="Last Name" />
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-menu ref="menu1" v-model="menu1" :close-on-content-click="false" transition="scale-transition" min-width="290px">
                   <template #activator="{ on, attrs }">
                     <v-text-field
-                      v-model="additionalData.birthday"
+                      v-model="travellerData.dateOfBirth"
                       label="Birthday"
                       readonly
                       v-bind="attrs"
@@ -79,19 +76,15 @@
                   </template>
                   <v-date-picker
                     ref="picker"
-                    v-model="additionalData.birthday"
-                    :max="new Date().toISOString().substr(0, 10)"
+                    v-model="travellerData.dateOfBirth"
                     color="late"
+                    :max="new Date().toISOString().substr(0, 10)"
                     @input="menu1 = false"
                   />
                 </v-menu>
               </v-col>
-
               <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="additionalData.passportNumber"
-                  label="Passport Number"
-                />
+                <v-text-field v-model="travellerData.passNum" label="Passport Number" />
               </v-col>
               <v-col cols="12" md="6">
                 <v-menu
@@ -103,7 +96,7 @@
                 >
                   <template #activator="{ on, attrs }">
                     <v-text-field
-                      v-model="additionalData.passExpireDateText"
+                      v-model="travellerData.passExpireDate"
                       label="Passport Expire Date"
                       readonly
                       v-bind="attrs"
@@ -111,16 +104,16 @@
                     />
                   </template>
                   <v-date-picker
-                    v-model="additionalData.passExpireDate"
+                    v-model="travellerData.passExpireDate"
                     color="late"
                     :min="minExpireDate"
-                    @input="passportMenus = false, formatDate(passExpireDate, 1, 'passport')"
+                    @input="passportMenus = false"
                   />
                 </v-menu>
               </v-col>
               <v-col cols="12" md="6">
                 <v-autocomplete
-                  v-model="additionalData.issuingCountry"
+                  v-model="travellerData.issueCountry"
                   :items="countries"
                   item-text="name"
                   item-value="code"
@@ -166,123 +159,145 @@ export default {
         email: '',
         phone: ''
       },
-      additionalData: {
-        gender: '',
-        title: '',
-        firstName: '',
-        lastName: '',
-        birthday: '',
-        passportNumber: '',
-        passExpireDateText: '',
+      travellerData: {
+        passengerTitle: '',
+        passengerGender: '',
+        passengerFirstName: '',
+        passengerLastName: '',
+        dateOfBirth: '',
         passExpireDate: '',
-        issuingCountry: ''
-      }
+        passNum: '',
+        issueCountry: ''
+      },
+      showSuccessAlert: false,
+      showErrorAlert: false,
+      successMessage: '',
+      errorMessage: ''
     }
   },
 
   computed: {
     ...mapGetters({
-      user: 'auth/user'
+      user: 'auth/user',
+      travellerDataFromStore: 'travellers/travellerData'
     }),
     countries () {
       return this.$store.state.countries
     }
   },
-  created () {
-    // this.menu1 = false
-    // this.passportMenus = false
-  },
-  async mounted () {
-    try {
-      const token = localStorage.getItem('authToken')
-      const response = await clientAPI('https://api.tanefer.com/api/v2/auth').get('/profile', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
 
-      if (response.data.status) {
-        const { email, phone, username } = response.data.data
-        this.profileData.email = email
-        this.profileData.phone = phone
-        this.profileData.username = username
-      }
-    } catch (error) {
-      alert('Error fetching profile:', error)
-    }
+  mounted () {
+    this.loadProfile()
   },
+
   methods: {
-    async saveProfile () {
+    async loadProfile () {
       try {
         const token = localStorage.getItem('authToken')
-        const payload = {
-          ...this.profileData,
-          ...this.additionalData
-        }
-        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/profile', payload, {
+        const profileResponse = await clientAPI('https://api.tanefer.com/api/v2/auth').get('/profile', {
           headers: {
             Authorization: `Bearer ${token}`
           }
         })
 
-        if (response.data.status) {
-          alert('Profile updated successfully.')
-        } else {
-          alert('Failed to update profile.')
+        if (profileResponse.data.status) {
+          const { email, phone, username } = profileResponse.data.data
+          this.profileData.email = email
+          this.profileData.phone = phone
+          this.profileData.username = username
+
+          const travellerResponse = await this.$store.dispatch('travellers/fetchTravellerData', this.user.id)
+          if (travellerResponse.success) {
+            this.travellerData = { ...this.travellerDataFromStore }
+          }
         }
       } catch (error) {
-        alert('An error occurred while updating the profile.')
+        // eslint-disable-next-line no-console
+        console.error('Error fetching profile:', error)
       }
     },
-    uploadAvatar () {
-      // Logic to handle avatar upload
+
+    async saveProfile () {
+      try {
+        const token = localStorage.getItem('authToken')
+
+        const profileResponse = await clientAPI('https://api.tanefer.com/api/v2/auth').get('/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (profileResponse.data.status) {
+          const userId = profileResponse.data.data.id
+
+          const travellerPayload = {
+            passenger_title: this.travellerData.passengerTitle,
+            passenger_gender: this.travellerData.passengerGender,
+            passenger_first_name: this.travellerData.passengerFirstName,
+            passenger_last_name: this.travellerData.passengerLastName,
+            date_of_birth: this.travellerData.dateOfBirth,
+            pass_expire_date: this.travellerData.passExpireDate,
+            pass_num: this.travellerData.passNum,
+            issue_country: this.travellerData.issueCountry
+          }
+
+          const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post(`/users/save-traveller-data?user_id=${userId}`, travellerPayload, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+
+          if (response.data.status) {
+            // Show success alert with message from response
+            this.showSuccessAlert = true
+            this.successMessage = response.data.message
+
+            // Save traveller data to Vuex store
+            await this.$store.dispatch('travellers/saveTravellerData', travellerPayload)
+
+            this.showErrorAlert = false
+          } else {
+            this.showSuccessAlert = true
+            this.successMessage = response.data.message
+          }
+        }
+      } catch (error) {
+        this.showErrorAlert = true
+        this.errorMessage = 'An error occurred while saving traveller data.'
+        this.showSuccessAlert = false
+      }
     },
-    formatDate (date, i, type) {
-      if (!date) { return null }
-      const [year, month, day] = date.split('-')
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-      const newDate = `${day} ${months[month - 1]} ${year}`
-      if (type === 'passport') { this.passExpireDateText = newDate }
-      if (type === 'birthDate') { this.birthday = newDate }
-    },
-    // expire (n) {
-    //   const today = new Date()
-    //   today.setMonth(today.getMonth() + 6)
-    //   today.setDate(today.getDate() + 1)
-    //   this.passExpireDate[n] = today.toISOString().substring(0, 10)
-    //   this.minExpireDate = today.toISOString().substring(0, 10)
-    // },
+
     getTodayDate () {
       const today = new Date()
       const year = today.getFullYear()
-      const month = String(today.getMonth() + 1).padStart(2, '0') // Months are 0-based, so add 1
-      const day = String(today.getDate()).padStart(2, '0') // Add leading zero if needed
+      const month = String(today.getMonth() + 1).padStart(2, '0')
+      const day = String(today.getDate()).padStart(2, '0')
       return `${year}-${month}-${day}`
     },
-    assignPhone (phone) {
-      this.profileData.phone = phone
+    assignPhone (fullPhone) {
+      this.profileData.phone = fullPhone
     }
   }
-
 }
 </script>
 
 <style scoped>
 .sidebar {
   position: absolute;
-  width: 240px; /* Adjust the width as needed */
+  width: 240px;
   height: 100%;
   top: 0;
   left: 0;
-  background-color: #CFB9A1; /* Light brown background */
+  background-color: #CFB9A1;
   padding-top: 20px;
   padding-left: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better visual separation */
-  z-index: 1000; /* Ensure it stays above other content */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 }
 
 .main-content {
-  margin-left: 240px; /* Same width as sidebar to avoid overlap */
+  margin-left: 240px;
   padding: 20px;
 }
 
@@ -290,7 +305,7 @@ export default {
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background-color: #ccc; /* Placeholder color */
+  background-color: #ccc;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -311,7 +326,7 @@ export default {
 }
 
 .sidebar-list {
-  background-color: #CFB9A1; /* Match sidebar color */
+  background-color: #CFB9A1;
 }
 
 .custom-outline-button {
