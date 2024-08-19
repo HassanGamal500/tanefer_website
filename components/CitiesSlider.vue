@@ -19,7 +19,7 @@
             <v-card
               class="ma-4"
               height="200"
-              width="150"
+              width="300"
               elevation="0"
               @click="toggle"
             >
@@ -30,7 +30,7 @@
               >
                 <v-scale-transition>
                   <v-img
-                    :src="city.cityImage ? city.cityImage : require(`~/assets/images/${getCityImage(city.CityName)}`)"
+                    :src="city.cityImage"
                     class="white--text align-center"
                     gradient="to top, rgba(0,0,0,.1), rgba(0,0,0,.5)"
                     height="200px"
