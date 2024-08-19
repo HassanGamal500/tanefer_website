@@ -68,14 +68,14 @@ export default {
   filters: {
     currency (value) {
       if (!value) { return '' }
-      return `$${value.toFixed(2)}` // Format as currency
+      return `$${value.toFixed(2)}`
     }
   },
   data () {
     return {
       selectedBooking: null,
-      bookings: [], // Initialize as an empty array
-      userInfo: null // Initialize as null
+      bookings: [],
+      userInfo: null
     }
   },
   computed: {
@@ -95,7 +95,7 @@ export default {
       if (response.data.status === 200) {
         const responseData = response.data.data
         this.bookings = responseData.historyList
-        this.userInfo = responseData.user // Adjust to match the API response structure
+        this.userInfo = responseData.user
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -113,8 +113,8 @@ export default {
           }
         })
 
-        if (response.status === 200) { // Check HTTP status code directly
-          this.selectedBooking = response.data.data // Use response.data.data directly
+        if (response.status === 200) {
+          this.selectedBooking = response.data.data
         } else {
         // Handle unexpected status codes
           // eslint-disable-next-line no-console
@@ -137,19 +137,19 @@ export default {
 <style scoped>
 .sidebar {
   position: absolute;
-  width: 240px; /* Adjust the width as needed */
+  width: 240px;
   height: 100%;
   top: 0;
   left: 0;
-  background-color: #CFB9A1; /* Light brown background */
+  background-color: #CFB9A1;
   padding-top: 20px;
   padding-left: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Optional shadow for better visual separation */
-  z-index: 1000; /* Ensure it stays above other content */
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 }
 
 .main-content {
-  margin-left: 240px; /* Same width as sidebar to avoid overlap */
+  margin-left: 240px;
   padding: 20px;
 }
 
@@ -181,7 +181,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000; /* Ensure it appears above the navbar */
+  z-index: 2000;
 }
 
 .popup-content {
@@ -190,20 +190,20 @@ export default {
   border-radius: 5px;
   width: 400px;
   max-width: 80%;
-  z-index: 2001; /* Ensure it appears above the overlay */
+  z-index: 2001;
 }
 
 .details-btn {
   margin-top: 10px;
   padding: 10px;
-  background-color: #4F3316; /* Brown color */
+  background-color: #4F3316;
   color: white;
   border: none;
   cursor: pointer;
 }
 
 .details-btn:hover {
-  background-color: #3c2d1c; /* Darker brown color on hover */
+  background-color: #3c2d1c;
 }
 
 .text-center {
