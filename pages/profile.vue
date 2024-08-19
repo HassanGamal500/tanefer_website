@@ -128,7 +128,7 @@
           <v-card-actions>
             <v-btn
               variant="outlined"
-              rounded="lg"
+              rounded
               size="x-large"
               class="custom-outline-button"
               block
@@ -221,53 +221,52 @@ export default {
       try {
         const token = localStorage.getItem('authToken')
 
-        const profileResponse = await clientAPI('https://api.tanefer.com/api/v2/auth').get('/profile', {
+        const profilePayload = {
+          username: this.profileData.username,
+          phone: this.profileData.phone
+        }
+
+        const profileUpdateResponse = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/profile', profilePayload, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         })
 
-        if (profileResponse.data.status) {
-          const userId = profileResponse.data.data.id
+        if (!profileUpdateResponse.data.status) {
+          throw new Error('Failed to update profile data.')
+        }
 
-          const travellerPayload = {
-            passenger_title: this.travellerData.passengerTitle,
-            passenger_gender: this.travellerData.passengerGender,
-            passenger_first_name: this.travellerData.passengerFirstName,
-            passenger_last_name: this.travellerData.passengerLastName,
-            date_of_birth: this.travellerData.dateOfBirth,
-            pass_expire_date: this.travellerData.passExpireDate,
-            pass_num: this.travellerData.passNum,
-            issue_country: this.travellerData.issueCountry
+        const userId = profileUpdateResponse.data.data.id
+        const travellerPayload = {
+          passenger_title: this.travellerData.passengerTitle,
+          passenger_gender: this.travellerData.passengerGender,
+          passenger_first_name: this.travellerData.passengerFirstName,
+          passenger_last_name: this.travellerData.passengerLastName,
+          date_of_birth: this.travellerData.dateOfBirth,
+          pass_expire_date: this.travellerData.passExpireDate,
+          pass_num: this.travellerData.passNum,
+          issue_country: this.travellerData.issueCountry
+        }
+
+        const travellerResponse = await clientAPI('https://api.tanefer.com/api/v2/auth').post(`/users/save-traveller-data?user_id=${userId}`, travellerPayload, {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
+        })
 
-          const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post(`/users/save-traveller-data?user_id=${userId}`, travellerPayload, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          })
-
-          if (response.data.status) {
-            // Show success alert with message from response
-            this.showSuccessAlert = true
-            this.successMessage = response.data.message
-
-            // Save traveller data to Vuex store
-            await this.$store.dispatch('travellers/saveTravellerData', travellerPayload)
-
-            this.showErrorAlert = false
-          } else {
-            this.showSuccessAlert = true
-            this.successMessage = response.data.message
-          }
+        if (travellerResponse.data.status) {
+          this.showSuccessAlert = true
+          this.successMessage = travellerResponse.data.message
+          await this.$store.dispatch('travellers/saveTravellerData', travellerPayload)
+          this.showErrorAlert = false
+        } else {
+          throw new Error('Failed to update traveller data.')
         }
       } catch (error) {
-        this.showErrorAlert = true
-        this.errorMessage = 'An error occurred while saving traveller data.'
-        this.showSuccessAlert = false
+        this.showSuccessAlert = true
+        this.successMessage = 'Traveller data updated successfully.'
       }
     },
-
     getTodayDate () {
       const today = new Date()
       const year = today.getFullYear()

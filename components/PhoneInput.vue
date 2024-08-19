@@ -11,6 +11,7 @@
         hide-details
         dense
         class="minimal-input"
+        @change="emitPhone"
       />
     </v-col>
 
@@ -22,7 +23,7 @@
         hide-details
         dense
         class="minimal-input"
-        @blur="emitPhone"
+        @input="emitPhone"
       />
     </v-col>
   </v-row>
@@ -47,11 +48,11 @@ export default {
     value: {
       immediate: true,
       handler (newValue) {
-        const phoneRegex = /^(\+\d+)(\d+)$/
+        const phoneRegex = /^(\+\d+)(\d+)?$/
         const matches = newValue.match(phoneRegex)
         if (matches) {
           this.selectedCountryCode = matches[1]
-          this.phoneNumber = matches[2]
+          this.phoneNumber = matches[2] || ''
         }
       }
     }
@@ -62,7 +63,7 @@ export default {
   methods: {
     async fetchCountryCodes () {
       try {
-        const response = await fetch('https://restcountries.com/v3.1/all') // Fetch country codes from API
+        const response = await fetch('https://restcountries.com/v3.1/all')
         const countries = await response.json()
         this.countryCodes = countries.map(country => ({
           label: `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''} (${country.name.common})`,
@@ -75,7 +76,7 @@ export default {
     },
     emitPhone () {
       const fullPhoneNumber = `${this.selectedCountryCode}${this.phoneNumber}`
-      this.$emit('input', fullPhoneNumber) // Emit the combined value to the parent component
+      this.$emit('input', fullPhoneNumber)
     }
   }
 }
