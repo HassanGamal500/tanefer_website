@@ -22,8 +22,11 @@
                   label="Email"
                 />
               </v-col>
-              <v-col cols="12" md="6">
+              <!-- <v-col cols="12" md="6">
                 <MobileInputAuth @update="assignPhone" />
+              </v-col> -->
+              <v-col cols="12" md="6">
+                <phone-input v-model="profileData.phone" />
               </v-col>
               <!-- Additional fields -->
               <v-col cols="12" md="6">

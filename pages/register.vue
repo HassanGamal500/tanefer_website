@@ -10,16 +10,17 @@
             <input v-model="email" type="email" placeholder="Email" required>
           </div>
           <div class="input-row">
-            <MobileInput @update="assignPhone" />
+            <MobileInput @update:phone="assignPhone" />
             <input v-model="password" type="password" placeholder="Password" required>
-            <input v-model="password_confirmation" type="password" placeholder="Confirm Password" required>
+            <input
+              v-model="password_confirmation"
+              type="password"
+              placeholder="Confirm Password"
+              required
+            >
           </div>
           <div class="terms-checkbox">
-            <input
-              id="terms"
-              v-model="agreedToTerms"
-              type="checkbox"
-            >
+            <input id="terms" v-model="agreedToTerms" type="checkbox">
             <label for="terms">
               I agree to the
               <router-link to="/termsAndConditions">terms and conditions</router-link>.
@@ -28,7 +29,7 @@
           <button type="submit">
             Register
           </button>
-          <div v-if="message" :class="{'success-message': isSuccess, 'error-message': !isSuccess}" class="message-box">
+          <div v-if="message" :class="{ 'success-message': isSuccess, 'error-message': !isSuccess }" class="message-box">
             {{ message }}
           </div>
         </form>
@@ -37,24 +38,19 @@
             Login
           </router-link>
         </p>
-        <div class="social-login">
-          <!-- Buttons are invisible but still in the DOM -->
-          <button class="facebook-btn" style="display: none;">
-            <i class="fab fa-facebook-f" /> Register with Facebook
-          </button>
-          <button class="google-btn" style="display: none;">
-            <i class="fab fa-google" /> Register with Google
-          </button>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-// import clientAPI from '../services/axiosConfig'
+import axios from 'axios'
+import MobileInput from '../components/MobileInput.vue'
 
 export default {
+  components: {
+    MobileInput
+  },
   data () {
     return {
       username: '',
@@ -68,7 +64,6 @@ export default {
       agreedToTerms: false
     }
   },
-
   head () {
     return {
       title: 'Register Page',
@@ -77,119 +72,55 @@ export default {
       ]
     }
   },
-
-  // methods: {
-  //   async register () {
-  //   // Check if the terms and conditions are agreed upon
-  //     if (!this.agreedToTerms) {
-  //       this.message = ['Please agree to the terms and conditions.']
-  //       this.isSuccess = false
-  //       return
-  //     }
-
-  //     try {
-  //     // Make the API request
-  //       const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/register', {
-  //         username: this.username,
-  //         email: this.email,
-  //         phone: this.phone.e164,
-  //         password: this.password,
-  //         password_confirmation: this.password_confirmation
-  //       })
-
-  //       // Check if the response indicates success with status code 201
-  //       if (response.status === 201) {
-  //         const token = response.data.data.token
-  //         localStorage.setItem('authToken', token)
-  //         clientAPI.defaults.headers.common.Authorization = `Bearer ${token}`
-
-  //         this.message = ['Registered successfully!']
-  //         this.isSuccess = true
-
-  //         // Optionally, update your Vuex store if you have one
-  //         this.$store.commit('auth/setToken', token)
-  //         this.$store.dispatch('auth/fetchUser').then(() => {
-  //           this.$router.push('/').then(() => {
-  //             this.$nuxt.refresh() // Ensure page refreshes
-  //           })
-  //         })
-  //       } else {
-  //         this.handleErrors(response.data)
-  //       }
-  //     } catch (error) {
-  //     // Handle various types of error responses
-  //       if (error.response) {
-  //         if (error.response.data) {
-  //           this.handleErrors(error.response.data)
-  //         } else {
-  //           this.message = ['An error occurred. Please try again.']
-  //           this.isSuccess = false
-  //         }
-  //       } else if (error.request) {
-  //       // This condition is for cases where no response was received
-  //         this.message = ['Network error. Please try again later.']
-  //         this.isSuccess = false
-  //       } else {
-  //       // This condition is for any other errors
-  //         this.message = [`Error: ${error.message}`]
-  //         this.isSuccess = false
-  //       }
-  //     }
-  //   },
-
-  //   handleErrors (data) {
-  //     if (data.status === false) {
-  //       if (data.data && typeof data.data === 'object') {
-  //         this.message = Object.values(data.data).filter(Boolean)
-  //       } else {
-  //         this.message = [data.message || 'An error occurred. Please try again.']
-  //       }
-  //       this.isSuccess = false
-  //     }
-  //   },
-
-  //   assignPhone (phone) {
-  //     this.phone = phone
-  //   }
-  // }
   methods: {
+    assignPhone (phone) {
+      this.phone = phone
+    },
     async register () {
       if (!this.agreedToTerms) {
-        this.message = ['Please agree to the terms and conditions.']
+        this.message = 'Please agree to the terms and conditions.'
         this.isSuccess = false
         return
       }
 
-      const result = await this.$store.dispatch('auth/register', {
-        username: this.username,
-        email: this.email,
-        phone: this.phone.e164,
-        password: this.password,
-        password_confirmation: this.password_confirmation
-      })
-
-      if (result.success) {
-        this.message = ['Registered successfully!']
-        this.isSuccess = true
-        this.$router.push('/').then(() => {
-          this.$nuxt.refresh()
+      try {
+        const response = await axios.post('https://api.tanefer.com/api/v2/auth/register', {
+          username: this.username,
+          email: this.email,
+          phone: this.phone.e164,
+          password: this.password,
+          password_confirmation: this.password_confirmation
         })
-      } else {
-        this.handleErrors(result.message)
+
+        if (response.status === 201) {
+          const token = response.data.data.token
+
+          localStorage.setItem('authToken', token)
+
+          axios.defaults.headers.common.Authorization = `Bearer ${token}`
+
+          this.message = 'Registered successfully!'
+          this.isSuccess = true
+
+          window.location.href = '/'
+        } else {
+          this.handleErrors(response.data.data)
+        }
+      } catch (error) {
+        if (error.response) {
+          this.handleErrors(error.response.data.data || 'An error occurred during registration. Please try again.')
+        } else {
+          this.message = 'An unexpected error occurred. Please check your network connection and try again.'
+          this.isSuccess = false
+        }
       }
     },
 
     handleErrors (message) {
-      this.message = [message]
+      this.message = message
       this.isSuccess = false
     }
-  },
-  assignPhone (phone) {
-    // eslint-disable-next-line no-console
-    console.log('Assigned phone:', phone)
-    this.phone = phone
   }
-
 }
 </script>
 
@@ -197,6 +128,9 @@ export default {
 .page-wrapper {
   position: relative;
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .background-color {
@@ -205,7 +139,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #CFB9A1;
+  background-color: #f5f5f5;
   z-index: -1;
 }
 
@@ -217,7 +151,9 @@ export default {
 .auth-wrapper {
   max-width: 400px;
   margin: 20px auto;
-  padding: 20px;
+  padding: 40px;
+  background-color: white;
+  border-radius: 10px;
   text-align: center;
 }
 
@@ -254,49 +190,12 @@ button {
   color: #fff;
   font-size: 16px;
   margin-top: 10px;
+  width: 100%;
 }
 
 button:hover {
   color: black;
   background-color: #cfb0a1;
-}
-
-.social-login {
-  margin-top: 20px;
-}
-
-.social-login button {
-  width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  display: none;
-}
-
-.facebook-btn {
-  background-color: #3b5998;
-  color: #fff;
-}
-
-.google-btn {
-  background-color: #db4a39;
-  color: #fff;
-}
-
-.facebook-btn:hover,
-.google-btn:hover {
-  color: black;
-}
-
-.fab {
-  font-size: 20px;
 }
 
 .message-box {
@@ -334,7 +233,7 @@ button:hover {
   font-size: 14px;
 }
 
-.no-account{
-  margin-top: revert;
+.no-account {
+  margin-top: 20px;
 }
 </style>
