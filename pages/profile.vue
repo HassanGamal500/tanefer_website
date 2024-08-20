@@ -37,10 +37,18 @@
               <v-col cols="12" md="6">
                 <v-text-field v-model="profileData.email" label="Email" disabled />
               </v-col>
+
+              <!-- Phone Input Component -->
               <v-col cols="12" md="6">
-                <phone-input v-model="profileData.phone" />
+                <phone-input
+                  :country-code="profileData.country_code"
+                  :phone-number-value="profileData.phone_number"
+                  @update-country-code="updateCountryCode"
+                  @update-phone-number="updatePhoneNumber"
+                />
               </v-col>
 
+              <!-- Traveller Data Fields -->
               <v-col cols="12" md="6">
                 <v-select
                   v-model="travellerData.passengerGender"
@@ -157,7 +165,8 @@ export default {
       profileData: {
         username: '',
         email: '',
-        phone: ''
+        country_code: '+1',
+        phone_number: ''
       },
       travellerData: {
         passengerTitle: '',
@@ -201,9 +210,11 @@ export default {
         })
 
         if (profileResponse.data.status) {
-          const { email, phone, username } = profileResponse.data.data
+          const { email, phone, code, username } = profileResponse.data.data
+
           this.profileData.email = email
-          this.profileData.phone = phone
+          this.profileData.phone_number = phone || ''
+          this.profileData.country_code = code || '+1'
           this.profileData.username = username
 
           const travellerResponse = await this.$store.dispatch('travellers/fetchTravellerData', this.user.id)
@@ -223,7 +234,8 @@ export default {
 
         const profilePayload = {
           username: this.profileData.username,
-          phone: this.profileData.phone
+          phone: this.profileData.phone_number,
+          code: this.profileData.country_code
         }
 
         const profileUpdateResponse = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/profile', profilePayload, {
@@ -267,6 +279,7 @@ export default {
         this.successMessage = 'Traveller data updated successfully.'
       }
     },
+
     getTodayDate () {
       const today = new Date()
       const year = today.getFullYear()
@@ -274,8 +287,12 @@ export default {
       const day = String(today.getDate()).padStart(2, '0')
       return `${year}-${month}-${day}`
     },
-    assignPhone (fullPhone) {
-      this.profileData.phone = fullPhone
+
+    updateCountryCode (newCode) {
+      this.profileData.country_code = newCode
+    },
+    updatePhoneNumber (newNumber) {
+      this.profileData.phone_number = newNumber
     }
   }
 }

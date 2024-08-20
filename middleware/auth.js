@@ -1,5 +1,6 @@
-export default function ({ store, redirect }) {
+export default function ({ store, redirect, route }) {
   if (!store.getters['auth/isAuthenticated']) {
-    return redirect('/login')
+    const redirectTo = route.fullPath
+    return redirect(`/login?redirect=${redirectTo}`)
   }
 }

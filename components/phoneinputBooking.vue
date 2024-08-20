@@ -90,13 +90,13 @@ export default {
 <style scoped>
 .minimal-input .v-input__control {
   background-color: white !important;
-  border-bottom: 1px solid black !important;
+  border: 1px solid #ccc !important; /* Adds the border around the input */
+  border-radius: 8px !important; /* Adds border radius for rounded corners */
   box-shadow: none !important;
-  border-radius: 0 !important;
 }
 
 .minimal-input .v-input__slot {
-  padding: 0;
+  padding: 8px 12px !important; /* Adds padding for better spacing */
 }
 
 .minimal-input .v-label {

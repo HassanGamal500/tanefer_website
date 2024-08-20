@@ -6,17 +6,16 @@
         <h2>Register</h2>
         <form @submit.prevent="register">
           <div class="input-row">
-            <input v-model="username" type="text" placeholder="Username" required>
-            <input v-model="email" type="email" placeholder="Email" required>
+            <input v-model="username" type="text" placeholder="Username">
+            <input v-model="email" type="email" placeholder="Email">
           </div>
           <div class="input-row">
             <MobileInput @update:phone="assignPhone" />
-            <input v-model="password" type="password" placeholder="Password" required>
+            <input v-model="password" type="password" placeholder="Password">
             <input
               v-model="password_confirmation"
               type="password"
               placeholder="Confirm Password"
-              required
             >
           </div>
           <div class="terms-checkbox">

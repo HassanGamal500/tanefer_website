@@ -43,8 +43,13 @@
               class="rounded-lg"
             />
           </v-col>
-          <v-col class="py-0" cols="12" sm="6" md="6">
-            <mobile-input @update="assignPhone" />
+          <v-col class="py-0" cols="6" sm="6" md="6">
+            <phoneinput-Booking
+              :country-code="code"
+              :phone-number-value="phone"
+              @update-country-code="updateCountryCode"
+              @update-phone-number="updatePhoneNumber"
+            />
           </v-col>
         </v-row>
       </v-card>
@@ -139,7 +144,6 @@
                       readonly
                       color="blue"
                       outlined
-                      :rules="[() => !!dateOfBirth || 'This field is required']"
                       class="rounded-lg"
                       v-on="on"
                     />
@@ -157,7 +161,6 @@
                 <v-text-field
                   v-model="passNum"
                   label="Passport number"
-                  :rules="[() => !!passNum || 'This field is required', () => /^[a-z0-9A-Z0-9]*$/.test(passNum) || 'No special characters allowed', () => passNum != null && passNum.length >= 5 || 'Passport number must be at least 5 characters', () => passNum != null && passNum.length <= 15 || 'Passport number must be at most 15 characters']"
                   outlined
                   color="blue"
                   class="rounded-lg"
@@ -179,8 +182,7 @@
                       outlined
                       label="Passport expire date"
                       readonly
-                      :rules="[() => !!passExpireDate || 'This field is required']"
-                      color="blue"
+                      color="late"
                       class="rounded-lg"
                       v-on="on"
                     />
@@ -188,7 +190,6 @@
                   <v-date-picker
                     v-model="passExpireDate"
                     color="late"
-                    :rules="[() => !!passExpireDate || 'This field is required']"
                     :min="minExpireDate"
                     type="date"
                     @input="passportMenus = false, formatDate(passExpireDate, 1, 'passport')"
@@ -259,42 +260,12 @@
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
-      <!-- <v-expansion-panels focusable class="mb-5">
-        <v-expansion-panel style="border-radius: 18px;">
-          <v-expansion-panel-header color="#4C4C4C" class="white--text font-weight-bold text-h6 change-icon-style" style="border-radius: 18px; line-height: 2;">
-            Confirmation
-          </v-expansion-panel-header>
-          <v-expansion-panel-content class="my-8">
-            <v-row>
-              <v-col cols="12" sm="12" class="my-0 py-0">
-                <v-btn class="white--text text-capitalize"
-                  color="#A4713C"
-                  elevation="6"
-                  x-large
-                  block
-                  raised
-                  :loading="loading"
-                  @click="nextSteps('confirm')"
-                  :disabled="!openConfirmButton"
-                >
-                Confirm Booking
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels> -->
     </v-form>
-    <!-- <v-btn v-if="travellers" block :loading="loading" class="late px-12 py-5 white--text" @click="submit">
-      book now
-    </v-btn>
-    <v-btn v-else class="brown px-12 py-5 white--text" @click="submit">
-      Continue to payment
-    </v-btn> -->
   </div>
 </template>
 
 <script>
+import clientAPI from '../services/axiosConfig'
 
 export default {
   // eslint-disable-next-line vue/require-prop-types
@@ -308,6 +279,7 @@ export default {
       nameRules: [v => (!!v && v.length > 1) || 'Item is required at least 2 characters',
         v => /^[A-Za-z][A-Za-z]*$/.test(v) || 'Name Must be letters only with no spaces'
       ],
+      code: '',
       phone: '',
       email: '',
       emailRules: [
@@ -383,6 +355,9 @@ export default {
       return new Date(min).toISOString().substr(0, 10)
     }
   },
+  mounted () {
+    this.loadTravellerData()
+  },
   created () {
     this.passengers = this.travellers
       ? {
@@ -391,35 +366,67 @@ export default {
           infants: 0
         }
       : this.$store.state.passengers
-    // const passengersNum = Number(this.passengers.adults) + Number(this.passengers.children) + Number(this.passengers.infants)
-    // for (let i = 0; i < passengersNum; i++) {
-    //   this.passportMenus[i] = false
-    //   this.menu1[i] = false
-    //   this.dateOfBirth.push('')
-    //   this.passNum.push('')
-    // }
     this.passportMenus = false
     this.menu1 = false
     this.dateOfBirth = null
     this.passNum = null
-    // this.dateOfBirth.push('')
-    // this.passNum.push('')
-    // }
   },
   methods: {
-    assignPhone (phone) {
-      this.phone = phone
+    // assignPhone (phone) {
+    //   this.phone = phone
+    // },
+    formatDateForDisplay (date) {
+      if (!date) { return null }
+      const options = { day: '2-digit', month: 'short', year: 'numeric' }
+      return new Date(date).toLocaleDateString('en-GB', options)
+    },
+    async loadTravellerData () {
+      try {
+        const token = localStorage.getItem('authToken')
+        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').get('/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+
+        if (response.data.status) {
+          // eslint-disable-next-line camelcase
+          const { username, email, phone, code, passenger_title, passenger_gender, passenger_first_name, passenger_last_name, date_of_birth, pass_expire_date, pass_num, issue_country } = response.data.data
+          this.name = username
+          this.email = email
+          this.phone = phone
+          this.code = code
+          // eslint-disable-next-line camelcase
+          this.passengerTitle = passenger_title
+          // eslint-disable-next-line camelcase
+          this.passengerGender = passenger_gender
+          // eslint-disable-next-line camelcase
+          this.passengerFirstName = passenger_first_name
+          // eslint-disable-next-line camelcase
+          this.passengerLastName = passenger_last_name
+          // eslint-disable-next-line camelcase
+          this.dateOfBirthText = this.formatDateForDisplay(date_of_birth)
+          // eslint-disable-next-line camelcase
+          this.passExpireDateText = this.formatDateForDisplay(pass_expire_date)
+          // eslint-disable-next-line camelcase
+          this.passNum = pass_num
+          // eslint-disable-next-line camelcase
+          this.issueCountry = issue_country
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching traveller data:', error)
+      }
     },
     formatDate (date, i, type) {
       if (!date) { return null }
       const [year, month, day] = date.split('-')
       const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
       const newDate = `${day} ${months[month - 1]} ${year}`
-      // if (type === 'passport') { this.passExpireDateText[i] = newDate }
-      // if (type === 'birthDate') { this.dateOfBirthText[i] = newDate }
       if (type === 'passport') { this.passExpireDateText = newDate }
       if (type === 'birthDate') { this.dateOfBirthText = newDate }
     },
+
     getProperDate (n) {
       if (!this.dateOfBirth[n - 1]) {
         if (this.adultsNum >= (n)) {
@@ -443,58 +450,18 @@ export default {
     },
     prepareTravellersData () {
       this.travellersData = null
-      // const type
-      // const title
-      // const gender
-      // if (this.passengerGender) {
-      //   this.passengerGender === 'Male' ? gender = 'M' : gender = 'F'
-      // }
-      // type = 'ADT'
-      // title = this.passengerTitle
       this.travellersData = {
         passengerType: 'ADT',
         passengerTitle: this.passengerTitle,
-        // passengerGender: this.passengerGender ? (this.passengerGender === 'Male' ? 'M' : 'F') : '',
         passengerGender: this.passengerGender ? (this.passengerGender === 'Male' ? 'male' : 'female') : '',
         passengerFirstName: this.passengerFirstName,
         passengerLastName: this.passengerLastName,
-        date_of_birth: this.dateOfBirth,
-        passport_number: this.passNum,
-        passport_expire_date: this.passExpireDate,
-        passport_issue_country: this.issueCountry
+        date_of_birth: this.getYmdFormat(this.dateOfBirthText),
+        passport_number: parseInt(this.passNum),
+        passport_expire_date: this.getYmdFormat(this.passExpireDateText),
+        passport_issue_country: this.issueCountry,
+        contact_phone: `${this.code}${this.phone}`
       }
-      // for (let index = 0; index < this.passengersNum; index++) {
-      //   if (this.adultsNum >= (index + 1)) {
-      //     type = 'ADT'
-      //     title = this.passengerTitle[index]
-      //     if (this.passengerGender[index] === undefined) {
-      //       if (title === 'Mr') {
-      //         this.passengerGender[index] = 'M'
-      //         gender = 'M'
-      //       } else if (['Mrs', 'Ms', 'Miss'].includes(title)) {
-      //         this.passengerGender[index] = 'F'
-      //         gender = 'F'
-      //       }
-      //     }
-      //   } else if (this.childrenNum >= ((index + 1) - this.adultsNum)) {
-      //     type = 'CNN'
-      //     title = 'CHD'
-      //   } else if (this.infantsNum >= ((index + 1) - (this.adultsNum + this.childrenNum))) {
-      //     type = 'INF'
-      //     title = 'INF'
-      //   }
-      //   this.travellersData.push({
-      //     passengerType: type,
-      //     passengerTitle: title,
-      //     passengerGender: gender,
-      //     passengerFirstName: this.passengerFirstName[index],
-      //     passengerLastName: this.passengerLastName[index],
-      //     date_of_birth: this.dateOfBirth[index],
-      //     passport_number: this.passNum[index],
-      //     passport_expire_date: this.passExpireDate[index],
-      //     passport_issue_country: this.issueCountry[index]
-      //   })
-      // }
     },
     getBirthdate (date) {
       let newDate = ''
@@ -505,15 +472,15 @@ export default {
       return newDate
     },
     submit () {
-      this.$refs.form.validate()
+      // this.$refs.form.validate()
       if (this.travellersFormValid) {
-        if (this.phone.isValid) {
+        if (this.phone !== '') {
           this.snackbar = false
           this.prepareTravellersData()
           const contactInfo = {
             name: this.name,
             email: this.email,
-            phone: this.phone
+            phone: `${this.code}${this.phone}`
           }
           this.$emit('dataReady', this.travellersData, contactInfo)
           this.enablePayNow = true
@@ -541,6 +508,19 @@ export default {
         this.$emit('submitConfirmation')
         this.enableConfirmation = false
       }
+    },
+    updateCountryCode (newCode) {
+      this.code = newCode
+    },
+    updatePhoneNumber (newNumber) {
+      this.phone = newNumber
+    },
+    getYmdFormat (dateString) {
+      const date = new Date(dateString)
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
     }
   }
 }

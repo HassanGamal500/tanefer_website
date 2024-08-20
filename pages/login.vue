@@ -6,8 +6,8 @@
         <h2>Login</h2>
         <form @submit.prevent="login">
           <div class="input-row">
-            <input v-model="email" type="email" placeholder="Email" required>
-            <input v-model="password" type="password" placeholder="Password" required>
+            <input v-model="email" type="email" placeholder="Email">
+            <input v-model="password" type="password" placeholder="Password">
           </div>
           <button type="submit">
             Login
@@ -58,9 +58,11 @@ export default {
       if (result.success) {
         this.message = ['Logged in successfully!']
         this.isSuccess = true
-        this.$router.push('/').then(() => {
-          this.$nuxt.refresh()
-        })
+        // this.$router.push('/').then(() => {
+        //   this.$nuxt.refresh()
+        // })
+        const redirectTo = this.$route.query.redirect || '/'
+        this.$router.push(redirectTo)
       } else {
         this.handleErrors(result.message)
       }
