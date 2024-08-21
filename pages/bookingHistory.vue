@@ -43,6 +43,7 @@
                 <p><strong>Type:</strong> {{ selectedBooking.type }}</p>
                 <p><strong>Title:</strong> {{ selectedBooking.title }}</p>
                 <p><strong>Order Date:</strong> {{ selectedBooking.date }}</p>
+                <p><strong>Total Price:</strong> {{ selectedBooking.total | currency }}</p>
                 <p><strong>Duration:</strong> {{ selectedBooking.duration || 'N/A' }}</p>
                 <p><strong>Status:</strong> {{ selectedBooking.status }}</p>
                 <p><strong>Accommodation Price:</strong> {{ selectedBooking.details.accommodation_price || 'N/A' }}</p>
@@ -207,6 +208,9 @@ export default {
 }
 
 .text-center {
+  text-align: center;
+}
+tr {
   text-align: center;
 }
 </style>

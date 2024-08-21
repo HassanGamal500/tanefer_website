@@ -7,6 +7,7 @@
         item-text="label"
         item-value="code"
         label="Code"
+        outlined
         solo-flat
         hide-details
         dense
@@ -19,6 +20,7 @@
       <v-text-field
         v-model="phoneNumber"
         label="Phone"
+        outlined
         solo-flat
         hide-details
         dense

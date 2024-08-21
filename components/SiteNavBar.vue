@@ -354,6 +354,12 @@ export default {
 
 .dropdown:hover .dropdown-menu {
   display: block;
+
+}
+
+.dropdown {
+  margin-top: 8px;
+  padding-left: 10px;
 }
 
 </style>

@@ -5,7 +5,6 @@
     size="lg"
     default-country-code="US"
     :preferred-countries="['US', 'EG']"
-    required
     :countries-height="25"
     no-flags
     class="mb-5"
@@ -39,7 +38,6 @@ export default {
   },
   methods: {
     assignPhone (phone) {
-      // this.$emit('update:phone', phone)
       this.$emit('update', phone)
     }
   }

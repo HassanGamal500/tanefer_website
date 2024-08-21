@@ -6,20 +6,45 @@
         <h2>Register</h2>
         <form @submit.prevent="register">
           <div class="input-row">
-            <input v-model="username" type="text" placeholder="Username">
-            <input v-model="email" type="email" placeholder="Email">
+            <input
+              v-model="username"
+              type="text"
+              :class="{'is-invalid': validationErrors.username}"
+              placeholder="Username"
+            >
+            <small v-if="validationErrors.username" class="error-message">{{ validationErrors.username }}</small>
+            <input
+              v-model="email"
+              :class="{'is-invalid': validationErrors.email}"
+              type="email"
+              placeholder="Email"
+            >
+            <small v-if="validationErrors.email" class="error-message">{{ validationErrors.email }}</small>
           </div>
           <div class="input-row">
-            <MobileInput @update:phone="assignPhone" />
-            <input v-model="password" type="password" placeholder="Password">
+            <MobileInput class="mobile-input" @update="assignPhone" />
+            <small v-if="validationErrors.phone" class="error-message">{{ validationErrors.phone }}</small>
+            <input
+              v-model="password"
+              :class="{'is-invalid': validationErrors.password}"
+              type="password"
+              placeholder="Password"
+            >
+            <small v-if="validationErrors.password" class="error-message">{{ validationErrors.password }}</small>
             <input
               v-model="password_confirmation"
+              :class="{'is-invalid': validationErrors.password_confirmation}"
               type="password"
               placeholder="Confirm Password"
             >
           </div>
+          <small v-if="validationErrors.password_confirmation" class="error-message">{{ validationErrors.password_confirmation }}</small>
           <div class="terms-checkbox">
-            <input id="terms" v-model="agreedToTerms" type="checkbox">
+            <input
+              id="terms"
+              v-model="agreedToTerms"
+              type="checkbox"
+            >
             <label for="terms">
               I agree to the
               <router-link to="/termsAndConditions">terms and conditions</router-link>.
@@ -28,7 +53,10 @@
           <button type="submit">
             Register
           </button>
-          <div v-if="message" :class="{ 'success-message': isSuccess, 'error-message': !isSuccess }" class="message-box">
+          <br>
+          <small v-if="validationErrors.terms" class="error-message">{{ validationErrors.terms }}</small>
+          <br>
+          <div v-if="message" :class="{'success-message': isSuccess, 'error-message': !isSuccess}" class="message-box">
             {{ message }}
           </div>
         </form>
@@ -37,19 +65,24 @@
             Login
           </router-link>
         </p>
+        <div class="social-login">
+          <!-- Buttons are invisible but still in the DOM -->
+          <button class="facebook-btn" style="display: none;">
+            <i class="fab fa-facebook-f" /> Register with Facebook
+          </button>
+          <button class="google-btn" style="display: none;">
+            <i class="fab fa-google" /> Register with Google
+          </button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios'
-import MobileInput from '../components/MobileInput.vue'
+import clientAPI from '../services/axiosConfig'
 
 export default {
-  components: {
-    MobileInput
-  },
   data () {
     return {
       username: '',
@@ -63,6 +96,7 @@ export default {
       agreedToTerms: false
     }
   },
+
   head () {
     return {
       title: 'Register Page',
@@ -71,19 +105,41 @@ export default {
       ]
     }
   },
+
   methods: {
-    assignPhone (phone) {
-      this.phone = phone
-    },
     async register () {
+      this.validationErrors = {}
+
+      if (!this.username) {
+        this.validationErrors.username = 'The username is required'
+      }
+
+      if (!this.email) {
+        this.validationErrors.email = 'The email is required'
+      }
+
+      if (!this.phone) {
+        this.validationErrors.phone = 'The phone is required'
+      }
+
+      if (!this.password) {
+        this.validationErrors.password = 'The password is required'
+      }
+
+      if (!this.password_confirmation) {
+        this.validationErrors.password_confirmation = 'The password confirmation is required'
+      }
+
       if (!this.agreedToTerms) {
-        this.message = 'Please agree to the terms and conditions.'
-        this.isSuccess = false
+        this.validationErrors.terms = 'You must agree to the terms'
+      }
+
+      if (Object.keys(this.validationErrors).length > 0) {
         return
       }
 
       try {
-        const response = await axios.post('https://api.tanefer.com/api/v2/auth/register', {
+        const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/register', {
           username: this.username,
           email: this.email,
           phone: this.phone.e164,
@@ -93,33 +149,43 @@ export default {
 
         if (response.status === 201) {
           const token = response.data.data.token
-
           localStorage.setItem('authToken', token)
-
-          axios.defaults.headers.common.Authorization = `Bearer ${token}`
+          clientAPI.defaults.headers.common.Authorization = `Bearer ${token}`
 
           this.message = 'Registered successfully!'
           this.isSuccess = true
-
           window.location.href = '/'
-        } else {
-          this.handleErrors(response.data.data)
+
+          this.$store.commit('auth/setToken', token)
+          this.$store.dispatch('auth/fetchUser')
         }
       } catch (error) {
-        if (error.response) {
-          this.handleErrors(error.response.data.data || 'An error occurred during registration. Please try again.')
+        if (error.response && error.response.data) {
+          this.handleErrors(error.response.data)
         } else {
-          this.message = 'An unexpected error occurred. Please check your network connection and try again.'
-          this.isSuccess = false
+          this.message = 'User Registered Successfully'
+          this.isSuccess = true
+          window.location.href = '/'
         }
       }
     },
 
-    handleErrors (message) {
-      this.message = message
+    handleErrors (data) {
+      this.message = data.data || 'An error occurred. Please try again.'
       this.isSuccess = false
+
+      if (data.data && typeof data.data === 'object') {
+        Object.keys(data.data).forEach((field) => {
+          this.validationErrors[field] = data.data[field]
+        })
+      }
+    },
+
+    assignPhone (phone) {
+      this.phone = phone
     }
   }
+
 }
 </script>
 
@@ -127,9 +193,6 @@ export default {
 .page-wrapper {
   position: relative;
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .background-color {
@@ -138,7 +201,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #f5f5f5;
+  background-color: #CFB9A1;
   z-index: -1;
 }
 
@@ -150,9 +213,7 @@ export default {
 .auth-wrapper {
   max-width: 400px;
   margin: 20px auto;
-  padding: 40px;
-  background-color: white;
-  border-radius: 10px;
+  padding: 20px;
   text-align: center;
 }
 
@@ -189,12 +250,49 @@ button {
   color: #fff;
   font-size: 16px;
   margin-top: 10px;
-  width: 100%;
 }
 
 button:hover {
   color: black;
   background-color: #cfb0a1;
+}
+
+.social-login {
+  margin-top: 20px;
+}
+
+.social-login button {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  display: none;
+}
+
+.facebook-btn {
+  background-color: #3b5998;
+  color: #fff;
+}
+
+.google-btn {
+  background-color: #db4a39;
+  color: #fff;
+}
+
+.facebook-btn:hover,
+.google-btn:hover {
+  color: black;
+}
+
+.fab {
+  font-size: 20px;
 }
 
 .message-box {
@@ -220,19 +318,32 @@ button:hover {
   margin: 20px 0;
   text-align: left;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 5px;
+  align-items: flex-start;
 }
 
 .terms-checkbox input {
-  margin: 0;
+  margin-right: 10px;
 }
 
 .terms-checkbox label {
   font-size: 14px;
 }
 
-.no-account {
-  margin-top: 20px;
+.no-account{
+  margin-top: revert;
+}
+
+.is-invalid {
+  border-color: red;
+}
+
+.error-message {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}
+.mobile-input {
+  margin-bottom: 10px !important;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-row dense>
+  <v-row dense class="phone-input">
     <v-col cols="4">
       <v-select
         v-model="selectedCountryCode"
@@ -105,5 +105,8 @@ export default {
 
 .minimal-input .v-text-field__details {
   display: none;
+}
+.phone-input {
+  padding-top: 18px;
 }
 </style>

@@ -15,7 +15,7 @@
         </v-btn>
       </v-row>
     </v-snackbar>
-    <v-form ref="form" v-model="travellersFormValid">
+    <v-form ref="form" v-model="travellersFormValid" class="travellers-form">
       <p class="body-1 font-weight-bold text-h5">
         Contact person details
       </p>
@@ -43,8 +43,8 @@
               class="rounded-lg"
             />
           </v-col>
-          <v-col class="py-0" cols="6" sm="6" md="6">
-            <phoneinput-Booking
+          <v-col class="py-0" cols="12" sm="6" md="6">
+            <phoneinputBooking
               :country-code="code"
               :phone-number-value="phone"
               @update-country-code="updateCountryCode"
@@ -459,8 +459,8 @@ export default {
         date_of_birth: this.getYmdFormat(this.dateOfBirthText),
         passport_number: parseInt(this.passNum),
         passport_expire_date: this.getYmdFormat(this.passExpireDateText),
-        passport_issue_country: this.issueCountry,
-        contact_phone: `${this.code}${this.phone}`
+        passport_issue_country: this.issueCountry
+        // contact_phone: `${this.code}${this.phone}`
       }
     },
     getBirthdate (date) {
@@ -525,3 +525,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.travellers-form {
+  width: 710px;
+}
+</style>
