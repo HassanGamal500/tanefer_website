@@ -44,19 +44,19 @@
           active-class="w--current"
           class="nav-link w-nav-link"
         >Blogs</a>
-        <div :key="isAuthenticated" class="col-4">
+        <div :key="isAuthenticated">
           <div v-if="isAuthenticated" class="dropdown">
-            <button class="dropdown-button">
+            <!-- <button class="dropdown-button">
               Hi, {{ username }}
-            </button>
+            </button> -->
             <div class="dropdown-menu">
-              <NuxtLink to="/profile" exact active-class="w--current" class="dropdown-item">
+              <NuxtLink to="/profile" exact active-class="w--current" class="nav-link w-nav-link">
                 Profile
               </NuxtLink>
-              <NuxtLink to="/bookingHistory" exact active-class="w--current" class="dropdown-item">
+              <NuxtLink to="/bookingHistory" exact active-class="w--current" class="nav-link w-nav-link">
                 Booking History
               </NuxtLink>
-              <a class="dropdown-item" @click="logout">
+              <a exact active-class="w--current" class="nav-link w-nav-link" @click="logout">
                 Logout
               </a>
             </div>

@@ -54,7 +54,7 @@ export default {
   height: 100vh;
   top: 0;
   left: 0;
-  background-color: #CFB9A1;
+  background-color: #CFB9A1 !important;
   padding-top: 20px;
   padding-left: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -90,7 +90,7 @@ export default {
 }
 
 .sidebar-list {
-  background-color: #CFB9A1;
+  background-color: #CFB9A1 !important;
   flex-grow: 1;
   overflow-y: auto;
   padding: 0;
@@ -98,6 +98,9 @@ export default {
   list-style: none;
 }
 
+v-list {
+  background-color: #CFB9A1 !important;
+}
 .sidebar-list v-list-item {
   margin-bottom: 10px;
 }
