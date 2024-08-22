@@ -5,15 +5,26 @@
         v-model="selectedCountryCode"
         :items="filteredCountryCodes"
         item-text="label"
-        item-value="code"
+        item-value="dial_code"
         label="Code"
-        solo-flat
-        hide-details
         dense
+        hide-details
         class="minimal-input"
-        :search-input.sync="searchQuery"
+        @menu="focusSearch"
         @change="emitPhone"
-      />
+      >
+        <template #prepend-item>
+          <v-text-field
+            ref="searchInput"
+            v-model="searchQuery"
+            label="Search country"
+            dense
+            solo
+            hide-details
+            @input="filterCountries"
+          />
+        </template>
+      </v-select>
     </v-col>
 
     <v-col cols="7">
@@ -47,16 +58,8 @@ export default {
       selectedCountryCode: this.countryCode,
       phoneNumber: this.phoneNumberValue,
       countryCodes: [],
-      searchQuery: '' // Used for filtering the country codes
-    }
-  },
-  computed: {
-    filteredCountryCodes () {
-      if (!this.searchQuery) { return this.countryCodes }
-      const query = this.searchQuery.toLowerCase()
-      return this.countryCodes.filter(country =>
-        country.label.toLowerCase().startsWith(query) // Filter countries based on the search query
-      )
+      filteredCountryCodes: [],
+      searchQuery: ''
     }
   },
   watch: {
@@ -74,22 +77,37 @@ export default {
     }
   },
   mounted () {
-    this.fetchCountryCodes()
+    this.loadCountryCodes()
   },
   methods: {
-    async fetchCountryCodes () {
-      try {
-        const response = await fetch('https://restcountries.com/v3.1/all')
-        const countries = await response.json()
-        this.countryCodes = countries.map(country => ({
-          label: `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''} (${country.name.common})`,
-          code: `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`
-        }))
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching country codes:', error)
+    loadCountryCodes () {
+      const countries = require('~/assets/CountryCodes.json')
+      this.countryCodes = countries.map(country => ({
+        label: `${country.dial_code} (${country.name})`,
+        dial_code: country.dial_code,
+        name: country.name
+      }))
+
+      this.filteredCountryCodes = this.countryCodes
+    },
+
+    filterCountries () {
+      const query = this.searchQuery.toLowerCase()
+      if (query) {
+        this.filteredCountryCodes = this.countryCodes.filter(country =>
+          country.name.toLowerCase().startsWith(query)
+        )
+      } else {
+        this.filteredCountryCodes = this.countryCodes
       }
     },
+
+    focusSearch () {
+      this.$nextTick(() => {
+        this.$refs.searchInput.focus()
+      })
+    },
+
     emitPhone () {
       this.$emit('update-country-code', this.selectedCountryCode)
       this.$emit('update-phone-number', this.phoneNumber)

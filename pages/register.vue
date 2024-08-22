@@ -171,6 +171,7 @@ export default {
 
           this.$store.commit('auth/setToken', token)
           await this.$store.dispatch('auth/fetchUser')
+          window.location.href = '/'
         }
       } catch (error) {
         if (error.response && error.response.data) {
@@ -178,19 +179,11 @@ export default {
         } else {
           this.message = 'User Registered Successfully'
           this.isSuccess = true
-          // const redirectTo = this.$route.query.redirect
 
-          // if (redirectTo) {
-          //   this.$router.push(redirectTo).catch(() => {
-          //     window.location.href = redirectTo
-          //   })
-          // } else {
-          //   window.location.href = '/'
-          // }
           const redirectTo = this.$route.query.redirect
-
           if (redirectTo) {
-            this.$router.push(redirectTo)
+            // this.$router.push(redirectTo)
+            window.location.href = redirectTo
           } else {
             window.location.href = '/'
           }

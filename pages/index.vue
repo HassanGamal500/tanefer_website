@@ -1,6 +1,8 @@
 <template>
   <div>
+    <LoadingScreen v-if="isLoading" />
     <div
+      v-else
       data-delay="5000"
       data-animation="fade"
       data-autoplay="1"
@@ -461,10 +463,10 @@
 </template>
 
 <script>
-// import { allCities, headersNoAuth } from '../links'
 import adventureServices from '~/services/activitiesServies'
 
 export default {
+
   data () {
     return {
       sizes: null,
@@ -482,7 +484,6 @@ export default {
   },
   head () {
     return {
-      // title: 'Experience Egypt'
       title: this.metaData.seo_title,
       meta: [
         {
@@ -508,36 +509,44 @@ export default {
       ]
     }
   },
+  computed: {
+    isLoading () {
+      return this.$store.getters['loading/isLoading']
+    }
+  },
   async created () {
     this.sizes = this.$vuetify.breakpoint
+
+    this.$store.dispatch('loading/startLoading')
+
     await this.getMetaData()
     await this.getPosts()
+
+    this.$store.dispatch('loading/stopLoading')
   },
   methods: {
     async getMetaData () {
       try {
-        const promise = adventureServices.getMetaData(3)
-        const response = await promise
+        const response = await adventureServices.getMetaData(3)
         const results = response.data
-        // console.log(results)
         if (results.data) {
           this.metaData = results.data
         }
       } catch (error) {
-        this.loaded = false
+        // eslint-disable-next-line no-console
+        console.error('Error fetching metadata', error)
       }
     },
     async getPosts () {
       try {
-        const promise = adventureServices.getPostsBlog()
-        const response = await promise
+        const response = await adventureServices.getPostsBlog()
         const results = response.data
-        // console.log(results)
         if (results.data) {
           this.posts = results.data
         }
       } catch (error) {
-        this.loaded = false
+        // eslint-disable-next-line no-console
+        console.error('Error fetching posts', error)
       }
     }
   }
