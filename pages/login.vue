@@ -19,7 +19,7 @@
           </div>
         </form>
         <p class="no-account">
-          Don't have an account? <router-link to="/register">
+          Don't have an account? <router-link :to="{ path: '/register', query: { redirect: $route.query.redirect || '/' } }">
             Register
           </router-link>
         </p>

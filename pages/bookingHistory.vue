@@ -136,18 +136,19 @@ export default {
 </script>
 
 <style scoped>
+
 .sidebar {
-  position: absolute;
-  width: 240px;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-color: #CFB9A1;
-  padding-top: 20px;
-  padding-left: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-}
+    position: absolute;
+    width: 240px;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #CFB9A1;
+    padding-top: 20px;
+    padding-left: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
 
 .main-content {
   margin-left: 240px;
@@ -160,7 +161,8 @@ export default {
 }
 
 .booking-history-card {
-  height: 400px;
+  height: 100%;
+  min-height: 400px;
 }
 
 .booking-history-table th, .booking-history-table td {

@@ -22,7 +22,12 @@
             <small v-if="validationErrors.email" class="error-message">{{ validationErrors.email }}</small>
           </div>
           <div class="input-row">
-            <MobileInput class="mobile-input" @update="assignPhone" />
+            <phoneinputRegister
+              :country-code="countryCode"
+              :phone-number-value="phoneNumber"
+              @update-country-code="updateCountryCode"
+              @update-phone-number="updatePhoneNumber"
+            />
             <small v-if="validationErrors.phone" class="error-message">{{ validationErrors.phone }}</small>
             <input
               v-model="password"
@@ -89,6 +94,8 @@ export default {
       email: '',
       password: '',
       phone: '',
+      countryCode: '+1',
+      phoneNumber: '',
       password_confirmation: '',
       validationErrors: {},
       message: '',
@@ -107,6 +114,12 @@ export default {
   },
 
   methods: {
+    updateCountryCode (newCode) {
+      this.countryCode = newCode
+    },
+    updatePhoneNumber (newPhone) {
+      this.phoneNumber = newPhone
+    },
     async register () {
       this.validationErrors = {}
 
@@ -118,7 +131,7 @@ export default {
         this.validationErrors.email = 'The email is required'
       }
 
-      if (!this.phone) {
+      if (!this.phoneNumber) {
         this.validationErrors.phone = 'The phone is required'
       }
 
@@ -131,7 +144,7 @@ export default {
       }
 
       if (!this.agreedToTerms) {
-        this.validationErrors.terms = 'You must agree to the terms'
+        this.validationErrors.terms = 'You must agree to the terms & conditions'
       }
 
       if (Object.keys(this.validationErrors).length > 0) {
@@ -142,7 +155,8 @@ export default {
         const response = await clientAPI('https://api.tanefer.com/api/v2/auth').post('/register', {
           username: this.username,
           email: this.email,
-          phone: this.phone.e164,
+          phone: this.phoneNumber,
+          code: this.countryCode,
           password: this.password,
           password_confirmation: this.password_confirmation
         })
@@ -154,10 +168,9 @@ export default {
 
           this.message = 'Registered successfully!'
           this.isSuccess = true
-          window.location.href = '/'
 
           this.$store.commit('auth/setToken', token)
-          this.$store.dispatch('auth/fetchUser')
+          await this.$store.dispatch('auth/fetchUser')
         }
       } catch (error) {
         if (error.response && error.response.data) {
@@ -165,7 +178,22 @@ export default {
         } else {
           this.message = 'User Registered Successfully'
           this.isSuccess = true
-          window.location.href = '/'
+          // const redirectTo = this.$route.query.redirect
+
+          // if (redirectTo) {
+          //   this.$router.push(redirectTo).catch(() => {
+          //     window.location.href = redirectTo
+          //   })
+          // } else {
+          //   window.location.href = '/'
+          // }
+          const redirectTo = this.$route.query.redirect
+
+          if (redirectTo) {
+            this.$router.push(redirectTo)
+          } else {
+            window.location.href = '/'
+          }
         }
       }
     },

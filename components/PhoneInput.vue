@@ -1,9 +1,9 @@
 <template>
   <v-row dense class="phone-input">
-    <v-col cols="4">
+    <v-col cols="5">
       <v-select
         v-model="selectedCountryCode"
-        :items="countryCodes"
+        :items="filteredCountryCodes"
         item-text="label"
         item-value="code"
         label="Code"
@@ -11,11 +11,12 @@
         hide-details
         dense
         class="minimal-input"
+        :search-input.sync="searchQuery"
         @change="emitPhone"
       />
     </v-col>
 
-    <v-col cols="8">
+    <v-col cols="7">
       <v-text-field
         v-model="phoneNumber"
         label="Phone"
@@ -45,7 +46,17 @@ export default {
     return {
       selectedCountryCode: this.countryCode,
       phoneNumber: this.phoneNumberValue,
-      countryCodes: []
+      countryCodes: [],
+      searchQuery: '' // Used for filtering the country codes
+    }
+  },
+  computed: {
+    filteredCountryCodes () {
+      if (!this.searchQuery) { return this.countryCodes }
+      const query = this.searchQuery.toLowerCase()
+      return this.countryCodes.filter(country =>
+        country.label.toLowerCase().startsWith(query) // Filter countries based on the search query
+      )
     }
   },
   watch: {
@@ -106,6 +117,7 @@ export default {
 .minimal-input .v-text-field__details {
   display: none;
 }
+
 .phone-input {
   padding-top: 18px;
 }

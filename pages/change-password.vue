@@ -180,6 +180,7 @@ export default {
 
   .change-password-card {
     padding-bottom: 30px;
+    height:100%;
   }
 
   .v-card {
