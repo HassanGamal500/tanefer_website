@@ -22,7 +22,7 @@
             <small v-if="validationErrors.email" class="error-message">{{ validationErrors.email }}</small>
           </div>
           <div class="input-row">
-            <phoneinputRegister
+            <phoneinputBooking
               :country-code="countryCode"
               :phone-number-value="phoneNumber"
               @update-country-code="updateCountryCode"

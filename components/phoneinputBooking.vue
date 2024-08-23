@@ -1,6 +1,6 @@
 <template>
   <v-row dense>
-    <v-col cols="6">
+    <v-col cols="5">
       <v-select
         v-model="selectedCountryCode"
         :items="filteredCountryCodes"
@@ -9,6 +9,7 @@
         label="Code"
         outlined
         dense
+        height="52px"
         hide-details
         class="minimal-input"
         @menu="focusSearch"
@@ -28,12 +29,13 @@
       </v-select>
     </v-col>
 
-    <v-col cols="6">
+    <v-col cols="7">
       <v-text-field
         v-model="phoneNumber"
         label="Phone"
         outlined
         solo-flat
+        height="52px"
         hide-details
         dense
         class="minimal-input"
