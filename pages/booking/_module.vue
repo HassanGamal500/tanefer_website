@@ -881,6 +881,7 @@ export default {
             }))
           }))
         }))
+        // check the request body for booking
         body = {
           passengerDetails: this.travellersData,
           bookingDetails: {

@@ -51,7 +51,7 @@ export default {
 .sidebar {
   position: absolute;
   width: 240px;
-  height: 100vh;
+  min-height: 100vh;
   top: 0;
   left: 0;
   background-color: #CFB9A1 !important;
