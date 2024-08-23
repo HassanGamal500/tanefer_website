@@ -137,7 +137,7 @@ export default {
 
 <style scoped>
 
-.sidebar {
+/* .sidebar {
     position: absolute;
     width: 240px;
     min-height: 100vh;
@@ -149,7 +149,7 @@ export default {
     padding-left: 20px;
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-  }
+  } */
 
 .main-content {
   margin-left: 240px;

@@ -48,20 +48,17 @@ export default {
 </script>
 
 <style scoped>
-.sidebar {
+  .sidebar {
   position: absolute;
   width: 240px;
-  min-height: 100vh;
+  height: 100%;
   top: 0;
   left: 0;
-  background-color: #CFB9A1 !important;
+  background-color: #CFB9A1;
   padding-top: 20px;
   padding-left: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 
 .avatar {
