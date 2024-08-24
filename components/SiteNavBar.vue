@@ -10,6 +10,7 @@
             exact
             active-class="logo w-inline-block w--current"
             class="logo w-inline-block"
+            @click.native.prevent="goHome"
           >
             <img src="../assets/images/TaNeferLogo.png" loading="lazy" alt="">
           </NuxtLink>
@@ -296,6 +297,9 @@ export default {
           break
       }
       return navClass
+    },
+    goHome () {
+      window.location.href = '/'
     },
     async logout () {
       try {

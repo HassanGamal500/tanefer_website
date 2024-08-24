@@ -45,8 +45,8 @@
           </v-col>
           <v-col class="py-0" cols="12" sm="6" md="6">
             <phoneinputBooking
-              :country-code="code"
-              :phone-number-value="phone"
+              :country-code="country_code"
+              :phone-number-value="phone_number"
               @update-country-code="updateCountryCode"
               @update-phone-number="updatePhoneNumber"
             />
@@ -279,8 +279,8 @@ export default {
       nameRules: [v => (!!v && v.length > 1) || 'Item is required at least 2 characters',
         v => /^[A-Za-z][A-Za-z]*$/.test(v) || 'Name Must be letters only with no spaces'
       ],
-      code: '',
-      phone: '',
+      country_code: '',
+      phone_number: '',
       email: '',
       emailRules: [
         v => !!v || 'E-mail is required',
@@ -394,8 +394,8 @@ export default {
           const { username, email, phone, code, passenger_title, passenger_gender, passenger_first_name, passenger_last_name, date_of_birth, pass_expire_date, pass_num, issue_country } = response.data.data
           this.name = username
           this.email = email
-          this.phone = phone
-          this.code = code
+          this.phone_number = phone
+          this.country_code = code
           // eslint-disable-next-line camelcase
           this.passengerTitle = passenger_title
           // eslint-disable-next-line camelcase
@@ -510,10 +510,10 @@ export default {
       }
     },
     updateCountryCode (newCode) {
-      this.code = newCode
+      this.country_code = newCode
     },
     updatePhoneNumber (newNumber) {
-      this.phone = newNumber
+      this.phone_number = newNumber
     },
     getYmdFormat (dateString) {
       const date = new Date(dateString)

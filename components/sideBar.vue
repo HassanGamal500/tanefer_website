@@ -48,10 +48,10 @@ export default {
 </script>
 
 <style scoped>
-.sidebar {
+  .sidebar {
   position: absolute;
   width: 240px;
-  height: 100vh; /* Set the height to the viewport height */
+  height: 100%;
   top: 0;
   left: 0;
   background-color: #CFB9A1;
@@ -59,9 +59,6 @@ export default {
   padding-left: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* Ensures proper spacing */
 }
 
 .avatar {
@@ -86,15 +83,22 @@ export default {
   margin-top: 10px;
   margin-bottom: 10px;
   font-weight: bold;
-  text-align: center; /* Center the username */
+  text-align: center;
 }
 
 .sidebar-list {
-  background-color: #CFB9A1;
-  flex-grow: 1; /* Makes the list take up available space */
+  background-color: #CFB9A1 !important;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
+v-list {
+  background-color: #CFB9A1 !important;
+}
 .sidebar-list v-list-item {
-  margin-bottom: 10px; /* Adds spacing between list items */
+  margin-bottom: 10px;
 }
 </style>

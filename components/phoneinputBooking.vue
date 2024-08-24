@@ -1,27 +1,41 @@
 <template>
   <v-row dense>
-    <v-col cols="4">
+    <v-col cols="5">
       <v-select
         v-model="selectedCountryCode"
-        :items="countryCodes"
+        :items="filteredCountryCodes"
         item-text="label"
-        item-value="code"
+        item-value="dial_code"
         label="Code"
         outlined
-        solo-flat
-        hide-details
         dense
+        height="52px"
+        hide-details
         class="minimal-input"
+        @menu="focusSearch"
         @change="emitPhone"
-      />
+      >
+        <template #prepend-item>
+          <v-text-field
+            ref="searchInput"
+            v-model="searchQuery"
+            label="Search country"
+            dense
+            solo
+            hide-details
+            @input="filterCountries"
+          />
+        </template>
+      </v-select>
     </v-col>
 
-    <v-col cols="8">
+    <v-col cols="7">
       <v-text-field
         v-model="phoneNumber"
         label="Phone"
         outlined
         solo-flat
+        height="52px"
         hide-details
         dense
         class="minimal-input"
@@ -47,7 +61,9 @@ export default {
     return {
       selectedCountryCode: this.countryCode,
       phoneNumber: this.phoneNumberValue,
-      countryCodes: []
+      countryCodes: [],
+      filteredCountryCodes: [],
+      searchQuery: ''
     }
   },
   watch: {
@@ -65,21 +81,34 @@ export default {
     }
   },
   mounted () {
-    this.fetchCountryCodes()
+    this.loadCountryCodes()
   },
   methods: {
-    async fetchCountryCodes () {
-      try {
-        const response = await fetch('https://restcountries.com/v3.1/all')
-        const countries = await response.json()
-        this.countryCodes = countries.map(country => ({
-          label: `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''} (${country.name.common})`,
-          code: `${country.idd.root}${country.idd.suffixes ? country.idd.suffixes[0] : ''}`
-        }))
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching country codes:', error)
+    loadCountryCodes () {
+      const countries = require('~/assets/CountryCodes.json')
+      this.countryCodes = countries.map(country => ({
+        label: `${country.dial_code} (${country.name})`,
+        dial_code: country.dial_code,
+        name: country.name
+      }))
+
+      this.filteredCountryCodes = this.countryCodes
+    },
+    filterCountries () {
+      const query = this.searchQuery.toLowerCase()
+      if (query) {
+        this.filteredCountryCodes = this.countryCodes.filter(country =>
+          country.name.toLowerCase().startsWith(query)
+        )
+      } else {
+        this.filteredCountryCodes = this.countryCodes
       }
+    },
+
+    focusSearch () {
+      this.$nextTick(() => {
+        this.$refs.searchInput.focus()
+      })
     },
     emitPhone () {
       this.$emit('update-country-code', this.selectedCountryCode)

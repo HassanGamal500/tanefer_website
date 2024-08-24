@@ -44,12 +44,29 @@
           active-class="w--current"
           class="nav-link w-nav-link"
         >Blogs</a>
-        <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
-          Login
-        </NuxtLink>
-        <NuxtLink to="#" exact active-class="w--current" class="nav-link w-nav-link">
-          Register
-        </NuxtLink>
+        <div :key="isAuthenticated">
+          <div v-if="isAuthenticated" class="dropdown">
+            <!-- <button class="dropdown-button">
+              Hi, {{ username }}
+            </button> -->
+            <div class="dropdown-menu">
+              <NuxtLink to="/profile" exact active-class="w--current" class="nav-link w-nav-link">
+                Profile
+              </NuxtLink>
+              <NuxtLink to="/bookingHistory" exact active-class="w--current" class="nav-link w-nav-link">
+                Booking History
+              </NuxtLink>
+              <a exact active-class="w--current" class="nav-link w-nav-link" @click="logout">
+                Logout
+              </a>
+            </div>
+          </div>
+          <div v-else class="login-container">
+            <NuxtLink to="/login" exact active-class="w--current" class="nav-link w-nav-link">
+              Login
+            </NuxtLink>
+          </div>
+        </div>
       </div>
     </nav>
   </div>
@@ -57,7 +74,25 @@
 
 <script>
 export default {
-
+  computed: {
+    isAuthenticated () {
+      return this.$store.getters['auth/isAuthenticated']
+    },
+    user () {
+      return this.$store.getters['auth/user']
+    },
+    username () {
+      return this.$store.getters['auth/user']?.username || 'User'
+    }
+  },
+  methods: {
+    async logout () {
+      try {
+        await this.$store.dispatch('auth/logout')
+      } catch (error) {
+      }
+    }
+  }
 }
 </script>
 
