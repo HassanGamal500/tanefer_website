@@ -932,7 +932,8 @@ export default {
           session_id: this.$store.state.cruiseReserveData.session,
           start_date: this.$store.state.cruiseReserveData.start_date,
           end_date: this.$store.state.cruiseReserveData.end_date,
-          roomGuests: this.$store.state.cruiseRooms
+          // roomGuests: this.$store.state.cruiseRooms
+          roomGuests: this.$store.state.cruiseReserveData.rooms
         }
       } else if (this.$route.params.module === 'hotel') {
         body = {
