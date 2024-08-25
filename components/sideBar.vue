@@ -1,11 +1,11 @@
 <template>
   <div class="sidebar">
     <div class="avatar-container">
-      <img
-        src="../assets/images/Screenshot 2024-08-25 103455.png"
+      <v-img
+        src="https://www.gravatar.com/avatar?d=mp"
         class="avatar"
         @click="uploadAvatar"
-      >
+      />
       <div class="username">
         {{ user ? user.username : '' }}
       </div>
@@ -54,7 +54,7 @@ export default {
   height: 100%;
   top: 0;
   left: 0;
-  background-color: #D2A763;
+  background-color: #cfbb9a;
   padding-top: 20px;
   padding-left: 20px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
@@ -87,7 +87,7 @@ export default {
 }
 
 .sidebar-list {
-  background-color: #D2A763 !important;
+  background-color: #cfbb9a !important;
   flex-grow: 1;
   overflow-y: auto;
   padding: 0;
