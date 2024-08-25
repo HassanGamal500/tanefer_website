@@ -61,8 +61,13 @@ export default {
         // this.$router.push('/').then(() => {
         //   this.$nuxt.refresh()
         // })
-        const redirectTo = this.$route.query.redirect || '/'
-        this.$router.push(redirectTo)
+        const redirectTo = this.$route.query.redirect
+        if (redirectTo) {
+          // this.$router.push(redirectTo)
+          window.location.href = redirectTo
+        } else {
+          window.location.href = '/'
+        }
       } else {
         this.handleErrors(result.message)
       }

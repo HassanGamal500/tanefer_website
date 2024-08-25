@@ -332,6 +332,7 @@ export default {
   border: none;
   color: #fff;
   font-size: 16px;
+  margin-top: 15px;
   cursor: pointer;
   margin-top: 10px;
 }

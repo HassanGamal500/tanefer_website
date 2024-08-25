@@ -122,7 +122,7 @@ export const actions = {
       }
       this.$axios.setToken(false)
 
-      this.$router.push('/')
+      window.location.href = '/'
     } catch (error) {
       console.error('Error during logout:', error)
     }

@@ -1,7 +1,9 @@
 <template>
   <v-container fluid>
     <v-row>
-      <SideBar />
+      <v-col cols="12" md="3" class="d-none d-md-block">
+        <SideBar />
+      </v-col>
       <v-col cols="12" md="9" class="main-content">
         <v-card>
           <v-card-title>
@@ -31,15 +33,14 @@
           <v-card-subtitle>Basic Information</v-card-subtitle>
           <v-card-text>
             <v-row>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-text-field v-model="profileData.username" label="Username" />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-text-field v-model="profileData.email" label="Email" disabled />
               </v-col>
 
-              <!-- Phone Input Component -->
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <phone-input
                   :country-code="profileData.country_code"
                   :phone-number-value="profileData.phone_number"
@@ -48,8 +49,7 @@
                 />
               </v-col>
 
-              <!-- Traveller Data Fields -->
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-select
                   v-model="travellerData.passengerGender"
                   :items="['Male', 'Female']"
@@ -57,7 +57,7 @@
                   :menu-props="{ zIndex: 9999 }"
                 />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-combobox
                   v-model="travellerData.passengerTitle"
                   :items="['Mr', 'Mrs', 'Ms', 'Miss']"
@@ -65,13 +65,13 @@
                   :menu-props="{ zIndex: 9999 }"
                 />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-text-field v-model="travellerData.passengerFirstName" label="First Name" />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-text-field v-model="travellerData.passengerLastName" label="Last Name" />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-menu ref="menu1" v-model="menu1" :close-on-content-click="false" transition="scale-transition" min-width="290px">
                   <template #activator="{ on, attrs }">
                     <v-text-field
@@ -91,10 +91,10 @@
                   />
                 </v-menu>
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-text-field v-model="travellerData.passNum" label="Passport Number" />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-menu
                   v-model="passportMenus"
                   :close-on-content-click="false"
@@ -119,7 +119,7 @@
                   />
                 </v-menu>
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col cols="12" sm="6">
                 <v-autocomplete
                   v-model="travellerData.issueCountry"
                   :items="countries"
@@ -137,7 +137,7 @@
             <v-btn
               variant="outlined"
               rounded
-              size="x-large"
+              size="large"
               class="custom-outline-button"
               block
               @click="saveProfile"
@@ -299,50 +299,29 @@ export default {
 </script>
 
 <style scoped>
-/* .sidebar {
-  position: absolute;
-  width: 240px;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-color: #CFB9A1;
-  padding-top: 20px;
-  padding-left: 20px;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-} */
-
 .main-content {
-  margin-left: 240px;
   padding: 20px;
+  margin-left: -40px;
+
 }
 
-.avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-color: #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
+@media (max-width: 600px) {
+  .main-content {
+    margin-left: 0;
+    padding: 10px;
+  }
 
-.avatar-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+  .v-card-title {
+    font-size: 1.25rem;
+  }
 
-.username {
-  margin-top: 10px;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
+  .v-card-subtitle {
+    font-size: 1rem;
+  }
 
-.sidebar-list {
-  background-color: #CFB9A1;
+  .v-btn {
+    font-size: 0.875rem;
+  }
 }
 
 .custom-outline-button {
