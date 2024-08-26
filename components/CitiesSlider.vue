@@ -81,45 +81,12 @@ export default {
     const res = tripsServices.getCities(cityType)
     const data = await res
     this.cities = data.data.cities
-    this.$store.dispatch('setCities', this.cities)
+    // this.$store.dispatch('setCities', this.cities)
     // } else {
     //   this.cities = this.$store.state.cities
     // }
   },
   methods: {
-    getCityImage (name) {
-      let img = ''
-      switch (name) {
-        case 'Cairo':
-          img = 'cairo-city.jpg'
-          break
-        case 'Giza':
-          img = 'blog-img.jpg'
-          break
-        case 'Aswan':
-          img = 'aswan.jpg'
-          break
-        case 'Luxor':
-          img = '208568-p-800.png'
-          break
-        case 'Sharm El Sheikh':
-          img = 'dahab9-p-500.jpeg'
-          break
-        case 'Hurghada':
-          img = 'dahab7.jpg'
-          break
-        case 'Alexandria':
-          img = 'alex.jpg'
-          break
-        case 'Dahab':
-          img = 'dahab3.jpg'
-          break
-        default:
-          img = 'egypt.jpg'
-          break
-      }
-      return img
-    },
     submit (city) {
       this.$store.dispatch('setTripCity', city)
       if (this.module === 'adventures') {

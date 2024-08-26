@@ -692,7 +692,7 @@ export default {
         let cityId
         this.$route.query.cityId ? cityId = this.$route.query.cityId : cityId = this.cities.find(city => city.citySlug === this.$route.params.city).CityID
         // eslint-disable-next-line no-console
-        const promise = adventureServices.getCityAdventures(cityId, 1)
+        const promise = adventureServices.getCityAdventures(cityId, 0)
         const response = await promise
         const results = response.data
         if (results.data.ActivityList.length > 0) {
