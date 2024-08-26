@@ -8,15 +8,20 @@
             to="/"
             aria-current="page"
             exact
-            active-class="logo w-inline-block w--current"
+            active-class="logo w-inline-block w--current hqlogo"
             class="logo w-inline-block"
             @click.native.prevent="goHome"
           >
-            <img src="../assets/images/TaNeferLogo.png" loading="lazy" alt="">
+            <img src="../assets/images/hqlogo.png" loading="lazy" alt="" style="width: 209px; height: 62px;">
           </NuxtLink>
           <div>
             <div class="d-flex-end" />
             <div class="phone-num">
+              <!-- <div class="hed-number">
+                <a href="tel:+18773343890">
+                  <i class="fas fa-phone" /> +1-877-334-3890
+                </a>
+              </div> -->
               <div class="hed-number">
                 +1-877-334-3890
               </div>
@@ -362,6 +367,10 @@ export default {
 
 }
 
+.hqlogo {
+height: 62px !important;
+width: 209px !important;
+}
 .dropdown {
   margin-top: 8px;
   padding-left: 10px;

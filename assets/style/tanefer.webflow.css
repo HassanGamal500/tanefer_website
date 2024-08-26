@@ -138,6 +138,10 @@ label {
   font-weight: 400;
 }
 
+img {
+  border-radius: 2px;
+}
+
 .page-head {
   min-height: 660px;
   background-image: url('../images/flight-bg.png');
@@ -5616,6 +5620,13 @@ label {
 
 .service-booking-block {
   position: relative;
+  border-radius: 2px;
+}
+
+.service-booking-block:hover {
+  transform: translateY(-10px);
+  border: 1px solid goldenrod;
+  box-shadow: rgb(218, 165, 32 , 0.5) 0px 7px 7px 0px;
 }
 
 .service-booking-block.move-down-50 {
@@ -5691,6 +5702,10 @@ label {
   color: #fff !important;
   font-size: 18px;
   font-weight: 300;
+}
+
+.min-bt:hover {
+  background-color: #4f3316;
 }
 
 .align-last {
@@ -5856,6 +5871,11 @@ label {
   padding-bottom: 100px;
 }
 
+.home-destination-img:hover {
+  transform: translateY(-10px);
+  border: 2px solid #bd9468;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
 .home-destination-row {
   display: -webkit-box;
   display: -webkit-flex;
@@ -5892,6 +5912,7 @@ label {
 }
 
 .home-destnation-name {
+  z-index: 100;
   position: absolute;
   bottom: 30px;
   width: 100%;
@@ -7161,9 +7182,37 @@ label {
     background-size: cover;
   }
 
+  /* .nav-link {
+    font-size: 16px;
+  } */
   .nav-link {
     font-size: 16px;
+    position: relative;
+    color: #000; /* Adjust text color as needed */
+    text-decoration: none;
+    padding-bottom: 5px; /* Create space for the underline */
+    transition: color 0.3s ease;
   }
+  
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: goldenrod; /* Adjust color to match your theme */
+    left: 0;
+    bottom: 0;
+    transition: width 0.3s ease;
+  }
+  
+  .nav-link:hover {
+    color: goldenrod; /* Change the text color on hover */
+  }
+  
+  .nav-link:hover::after {
+    width: 100%;
+  }
+  
 
   .bookink-txt-field.car-txt {
     padding-top: 0px;

@@ -1,42 +1,48 @@
 <template>
   <v-container fluid>
     <v-row>
-      <SideBar />
+      <v-col cols="12" md="3" class="d-none d-md-block">
+        <SideBar />
+      </v-col>
+
       <v-col cols="12" md="9" class="main-content">
         <v-card class="booking-history-card">
           <v-card-title>
             <span class="headline">Booking History</span>
           </v-card-title>
           <v-card-text>
-            <table class="booking-history-table">
-              <thead>
-                <tr class="text-center">
-                  <th>Type</th>
-                  <th>Title</th>
-                  <th>Order Date</th>
-                  <th>Duration</th>
-                  <th>Total Fees</th>
-                  <th>Status</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="booking in bookings" :key="booking.id">
-                  <td>{{ booking.type }}</td>
-                  <td>{{ booking.title }}</td>
-                  <td>{{ booking.date }}</td>
-                  <td>{{ booking.duration || 'N/A' }}</td>
-                  <td>{{ booking.total | currency }}</td>
-                  <td>{{ booking.status }}</td>
-                  <td>
-                    <button class="details-btn" @click="fetchBookingDetails(booking.id)">
-                      Get Details
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-container">
+              <table class="booking-history-table">
+                <thead>
+                  <tr class="text-center">
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Order Date</th>
+                    <th>Duration</th>
+                    <th>Total Fees</th>
+                    <th>Status</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="booking in bookings" :key="booking.id">
+                    <td>{{ booking.type }}</td>
+                    <td>{{ booking.title }}</td>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.duration || 'N/A' }}</td>
+                    <td>{{ booking.total | currency }}</td>
+                    <td>{{ booking.status }}</td>
+                    <td>
+                      <button class="details-btn" @click="fetchBookingDetails(booking.id)">
+                        Get Details
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
+            <!-- Popup for booking details -->
             <div v-if="selectedBooking" class="popup-overlay" @click="closeDetails">
               <div class="popup-content" @click.stop>
                 <h3>Booking Details</h3>
@@ -136,21 +142,6 @@ export default {
 </script>
 
 <style scoped>
-
-/* .sidebar {
-    position: absolute;
-    width: 240px;
-    min-height: 100vh;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background-color: #CFB9A1;
-    padding-top: 20px;
-    padding-left: 20px;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-  } */
-
 .main-content {
   margin-left: 240px;
   padding: 20px;
@@ -161,11 +152,6 @@ export default {
   border-collapse: collapse;
 }
 
-.booking-history-card {
-  height: 100%;
-  min-height: 400px;
-}
-
 .booking-history-table th, .booking-history-table td {
   border: 1px solid #ddd;
   padding: 8px;
@@ -173,6 +159,17 @@ export default {
 
 .booking-history-table th {
   background-color: #f2f2f2;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.booking-history-card {
+  height: 100%;
+  min-height: 400px;
 }
 
 .popup-overlay {
@@ -193,7 +190,7 @@ export default {
   padding: 20px;
   border-radius: 5px;
   width: 400px;
-  max-width: 80%;
+  max-width: 90%;
   z-index: 2001;
 }
 
@@ -212,6 +209,18 @@ export default {
 
 .text-center {
   text-align: center;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .popup-content {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 tr {
   text-align: center;

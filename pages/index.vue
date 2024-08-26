@@ -18,7 +18,7 @@
                 Experience
               </div>
               <div class="rotator-title">
-                The worLd
+                The world
               </div>
             </div>
           </div>
@@ -143,7 +143,7 @@
                   rel="noopener noreferrer"
                   class="_w-100 w-inline-block"
                 >
-                  <img src="~/assets/images/flight-home.jpg" loading="lazy" alt="" class="_w-100">
+                  <img src="~/assets/images/flight-home.jpg" loading="lazy" alt="" class="_w-100 service-booking-img">
                   <div class="mooking-name">
                     Flights
                   </div>
@@ -466,6 +466,10 @@
 import adventureServices from '~/services/activitiesServies'
 
 export default {
+  beforeRouteLeave (to, from, next) {
+    this.$store.dispatch('loading/stopLoading')
+    next()
+  },
 
   data () {
     return {
@@ -518,12 +522,14 @@ export default {
     this.sizes = this.$vuetify.breakpoint
 
     this.$store.dispatch('loading/startLoading')
-
     await this.getMetaData()
+    this.$store.dispatch('loading/stopLoading')
     await this.getPosts()
-
+  },
+  beforeDestroy () {
     this.$store.dispatch('loading/stopLoading')
   },
+
   methods: {
     async getMetaData () {
       try {
@@ -562,4 +568,80 @@ export default {
   width: 100%;
   margin: 50px 0;
 }
+/* .service-booking-img {
+  object-fit: cover;
+  transition: transform 0.3s ease;
+} */
+/* .service-booking-img:hover {
+  transform: scale(1.05);
+} */
+.home-destination-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.home-destination-col {
+  flex: 1;
+  margin: 10px;
+  min-width: 300px;
+}
+
+.home-destination-block {
+  position: relative;
+  overflow: hidden;
+  width: 300px;
+  height: 200px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.home-destination-block img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.home-destination-block:hover img {
+  transform: scale(1.1);
+}
+
+.home-destination-name {
+  z-index: 1000;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.home-destination-block:hover .home-destination-name {
+  opacity: 1;
+}
+
+.home-destination-block::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.home-destination-block:hover::before {
+  opacity: 1;
+}
+
 </style>
