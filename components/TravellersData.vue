@@ -530,4 +530,10 @@ export default {
 .travellers-form {
   width: 710px;
 }
+
+@media (max-width: 768px) {
+  .travellers-form {
+  max-width: 370px;
+}
+ }
 </style>

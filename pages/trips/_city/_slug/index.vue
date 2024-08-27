@@ -1544,7 +1544,7 @@
                   Adventures
                 </p> -->
                 <v-row class="mt-4">
-                  <v-col cols="12" md="9">
+                  <v-col cols="9" md="9">
                     <!-- <div v-for="(activity, a) in packageDetails.activities" :key="a">
                       <div v-for="(day, d) in packageDetails.activities[a].days" :key="d">
                         <div v-for="(adventure, d2) in packageDetails.activities[a].days[d].days" :key="d2">
@@ -1556,7 +1556,7 @@
                       Adventures
                     </p>
                   </v-col>
-                  <v-col cols="12" md="3">
+                  <v-col cols="3" md="3">
                     <p>$ {{ initialPrice }}</p>
                   </v-col>
                 </v-row>
@@ -1577,12 +1577,12 @@
               <v-divider class="mb-4" /> -->
               <div>
                 <v-row class="mt-4">
-                  <v-col cols="12" md="9">
+                  <v-col cols="9" md="9">
                     <p class="font-weight-bold" style="font-size: 25px;color: #000;">
                       Additional Cost
                     </p>
                   </v-col>
-                  <v-col cols="12" md="3">
+                  <v-col cols="3" md="3">
                     <p>$ {{ additionalPrice }}</p>
                   </v-col>
                 </v-row>
@@ -1590,12 +1590,12 @@
               <v-divider class="mb-4" />
               <div>
                 <v-row class="mt-4">
-                  <v-col cols="12" md="9">
+                  <v-col cols="9" md="9">
                     <p class="font-weight-bold" style="font-size: 25px;color: #000;">
                       Discount
                     </p>
                   </v-col>
-                  <v-col cols="12" md="3">
+                  <v-col cols="3" md="3">
                     <p>% {{ discountPercentage }}</p>
                   </v-col>
                 </v-row>
@@ -1969,12 +1969,28 @@
                                   <v-expansion-panel-header>
                                     Includes
                                   </v-expansion-panel-header>
-                                  <v-expansion-panel-content>
+                                  <!-- <v-expansion-panel-content>
                                     <span v-for="(include, i) in adventure.activityIncludes" :key="i">
                                       <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
                                         <span class="text-truncate">{{ include }}</span>
                                       </v-chip>
                                     </span>
+                                  </v-expansion-panel-content> -->
+                                  <v-expansion-panel-content>
+                                    <v-row>
+                                      <v-col cols="12">
+                                        <span v-for="(include, i) in adventure.activityIncludes" :key="i">
+                                          <v-chip
+                                            dense
+                                            label
+                                            class="my-1 px-4 ma-2 py-2 text-truncate"
+                                            color="#F6F6F6"
+                                          >
+                                            <span class="text-xs">{{ include }}</span> <!-- Text size utility class -->
+                                          </v-chip>
+                                        </span>
+                                      </v-col>
+                                    </v-row>
                                   </v-expansion-panel-content>
                                 </v-expansion-panel>
                               </v-expansion-panels>
@@ -2089,20 +2105,25 @@
                         <v-row>
                           <v-col cols="12" md="12">
                             <!-- eslint-disable-next-line vue/no-v-html -->
-                            <v-tabs
-                              v-model="tab"
-                              color="deep-black accent-4"
-                            >
-                              <v-tab href="#intro">
-                                Intro
-                              </v-tab>
-                              <v-tab href="#itinerary">
-                                Itinerary
-                              </v-tab>
-                              <v-tab href="#notes">
-                                Notes
-                              </v-tab>
-                            </v-tabs>
+                            <v-row>
+                              <v-col cols="12" md="8" lg="6">
+                                <v-tabs
+                                  v-model="tab"
+                                  color="deep-black accent-4"
+                                  class="adventure-details-tabs"
+                                >
+                                  <v-tab href="#intro">
+                                    Intro
+                                  </v-tab>
+                                  <v-tab href="#itinerary">
+                                    Itinerary
+                                  </v-tab>
+                                  <v-tab href="#notes">
+                                    Notes
+                                  </v-tab>
+                                </v-tabs>
+                              </v-col>
+                            </v-row>
                             <v-tabs-items v-model="tab">
                               <v-tab-item :value="'intro'">
                                 <v-card flat>
@@ -4184,12 +4205,53 @@ export default {
   bottom: 2px;
   background-color: white;
 }
+
 .my-chip {
-  max-width: 100%; /* Set a maximum width if needed */
-}
-.text-truncate {
+  font-size: 14px !important;
+  white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  white-space: normal !important;
+  max-width: 100% !important;
 }
+
+.text-truncate {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 768px) {
+  .my-chip {
+    font-size: 8px !important;
+    padding: 2px 4px !important;
+    max-width: 90% !important;
+  }
+  .v-chip.v-size--large {
+    font-size: 7px !important;
+  }
+  .adventure-details-tabs .v-tab {
+    font-size: 9px !important;
+    padding: 1px !important;
+  }
+
+  .adventure-details-tabs .v-tabs-bar {
+    margin-bottom: 3px !important;
+  }
+  .v-tabs:not(.v-tabs--vertical) .v-tab {
+    white-space: nowrap !important;
+    text-overflow: ellipsis !important;
+    overflow: hidden !important;
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+  }
+  .v-tabs-bar {
+    margin-bottom: 5px !important;
+  }
+  .v-slide-group__prev .v-slide-group__prev--disabled {
+    margin-left: -50px !important;
+  }
+}
+
 </style>
