@@ -113,7 +113,7 @@
     <!-- slogans -->
     <div v-if="$route.name === 'hotels'" class="t-container">
       <div class="hed-txt-bg">
-        <h1 class="page-h1 _w-txt">
+        <h1 class="header-page-title _w-txt">
           Hotels
         </h1>
         <div class="page-subtitle-white">
@@ -126,7 +126,7 @@
     </div>
     <div v-if="$route.name === 'trips'" class="t-container">
       <div class="hed-txt-bg">
-        <h1 class="page-h1 _w-txt">
+        <h1 class="header-page-title _w-txt">
           Trips
         </h1>
         <div class="page-subtitle-white">
@@ -136,7 +136,7 @@
     </div>
     <div v-if="$route.name === 'adventures'" class="t-container">
       <div class="hed-txt-bg">
-        <h1 class="page-h1 _w-txt">
+        <h1 class="header-page-title _w-txt">
           Adventures
         </h1>
         <div class="page-subtitle-white">
@@ -146,7 +146,7 @@
     </div>
     <div v-if="$route.name === 'cruises'" class="t-container">
       <div class="hed-txt-bg">
-        <h1 class="page-h1 _w-txt">
+        <h1 class="header-page-title _w-txt">
           Nile Cruises
         </h1>
         <div class="page-subtitle-white">
@@ -376,4 +376,18 @@ width: 209px !important;
   padding-left: 10px;
 }
 
+.header-page-title {
+  font-size: 50px;
+  color : #fff;
+  font-weight: 400;
+  padding-top: 28px;
+}
+
+@media only screen and (max-width: 722px) {
+  .header-page-title {
+  font-size: 35px;
+  color : #fff;
+  font-weight: 400;
+}
+}
 </style>

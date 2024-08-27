@@ -14,9 +14,9 @@
           class="text-center"
           cols="12"
         >
-          <h1 class="text-h1 white--text font-weight-bold my-12 set-line-height-responsive" style="line-height: 12rem;">
+          <h3 class="text-h3 white--text font-weight-bold my-12 set-line-height-responsive" style="line-height: 12rem;">
             {{ tripsCity.CityName }} Adventures
-          </h1>
+          </h3>
         </v-col>
       </v-row>
     </v-img>
@@ -136,9 +136,9 @@
             <div class="mobile-version regular-version">
               <v-card class="" style="border-radius: 15px;">
                 <v-card-text>
-                  <h4 class="text-h4 black--text" color="black">
+                  <p class="no-of-guests black--text" color="black">
                     Number of guests
-                  </h4>
+                  </p>
                   <p class="font-weight-bold">
                     Adults Number
                     <span style="float: right;">
@@ -917,6 +917,10 @@ export default {
   margin-bottom: 40px;
   z-index: 2;
 }
+.no-of-guests {
+    font-size: 18px;
+    font-weight: bold;
+  }
 
 @media only screen and (max-width: 722px) {
   .set-line-height-responsive {
@@ -928,10 +932,17 @@ export default {
     width: 350px;
   }
 
+  .v-icon.v-icon {
+    font-size: 35px !important;
+  }
+
   .custom-select-height .v-input__control {
   height: 50px !important; /* Set the desired height */
 }
-
+.no-of-guests {
+    font-size: 14px;
+    font-weight: bold;
+  }
 .v-input__control {
   height: 50px !important;
 }

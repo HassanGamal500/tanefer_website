@@ -20,9 +20,9 @@
                     </h5>
                   </div>
                   <div class="black--text">
-                    <h5 class="text-h5 font-weight-bold">
+                    <p class="subtitle-1 font-weight-bold">
                       Start from ${{ adventure.activityPricePerPerson }} per person
-                    </h5>
+                    </p>
                   </div>
                 </div>
               </v-col>

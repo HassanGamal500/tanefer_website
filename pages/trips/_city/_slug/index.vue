@@ -32,6 +32,7 @@
         </v-col>
       </v-row>
       <v-btn
+        v-if="galleries.length > 0"
         rounded
         color="#4f3316"
         style="background-color: #4f3316;border: 1px solid #fff;color: #fff;"
@@ -69,7 +70,7 @@
         </template>
       </v-snackbar>
       <div style="" class="px-0 my-5">
-        <div>
+        <div class="package-overview-date">
           <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
             <v-row>
               <v-col cols="12" md="12">
@@ -94,6 +95,7 @@
                     ref="picker"
                     v-model="packageStartDay"
                     :allowed-dates="allowedDates"
+                    color="late"
                     @input="menu = false, formatDate(packageStartDay, 1, 'packageStartDay')"
                   />
                 </v-menu>
@@ -150,7 +152,7 @@
                                 <v-col cols="12" lg="4" md="8" sm="8" xs="12">
                                   <span style="float: right;">
                                     <v-row>
-                                      <v-col cols="2" v-if="packageDetails.activities[0].type !== 'adventure'">
+                                      <v-col v-if="packageDetails.activities[0].type !== 'adventure'" cols="2">
                                         <v-btn
                                           style="background-color: transparent; border: 1px solid #4f3316;"
                                           elevation="4"
@@ -158,6 +160,7 @@
                                           small
                                           @click="changeDayNumber(i, '-1')"
                                         >
+                                          <!-- check for missing + - days number here -->
                                           <v-icon color="#4f3316">
                                             mdi-minus
                                           </v-icon>
@@ -224,7 +227,9 @@
                                             <div v-if="adventures.adventrue">
                                               <v-row>
                                                 <v-col cols="10">
-                                                  <h4>{{ adventures.adventrue.activityTitle }}</h4>
+                                                  <p class="activity-title">
+                                                    {{ adventures.adventrue.activityTitle }}
+                                                  </p>
                                                 </v-col>
                                                 <v-col cols="2">
                                                   <v-menu offset-y>
@@ -845,9 +850,9 @@
               <v-card v-if="e1 === 1" class="" style="border-radius: 15px;">
                 <div v-if="checkHasCruise">
                   <v-card-text>
-                    <h4 class="text-h4 black--text" color="black">
+                    <p class="no-of-guests black--text" color="black">
                       Number of guests
-                    </h4>
+                    </p>
                     <p class="font-weight-bold">
                       Rooms
                       <span style="float: right;">
@@ -1068,9 +1073,9 @@
                 </div>
                 <div v-else>
                   <v-card-text>
-                    <h4 class="text-h4 black--text" color="black">
+                    <p class="no-of-guests black--text" color="black">
                       Number of guests
-                    </h4>
+                    </p>
                     <p class="font-weight-bold">
                       Adults
                       <span style="float: right;">
@@ -1166,9 +1171,9 @@
               </v-card>
               <v-card v-if="e1 === 2" class="" style="border-radius: 15px;">
                 <v-card-text>
-                  <h4 class="text-h4 black--text" color="black">
+                  <p class="no-of-guests black--text" color="black">
                     Number of guests
-                  </h4>
+                  </p>
                   <p class="font-weight-bold">
                     Rooms
                     <span style="float: right;">
@@ -4223,6 +4228,16 @@ export default {
   height: 350px;
   width: 250px;
 }
+  .non-visiable {
+    visibility: hidden;
+  }
+  .activity-title {
+    font-size: 16px;
+  }
+  .no-of-guests {
+    font-size: 18px;
+    font-weight: bold;
+  }
 @media (max-width: 768px) {
   .my-chip {
     font-size: 8px !important;
@@ -4258,6 +4273,16 @@ export default {
   }
   .non-visiable {
     visibility: hidden;
+  }
+  .activity-title {
+    font-size: 12px;
+  }
+  .no-of-guests {
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .package-overview-date {
+    margin-top: 70px;
   }
 }
 
