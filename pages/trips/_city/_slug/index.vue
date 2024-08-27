@@ -21,7 +21,7 @@
               'text-h1': $vuetify.breakpoint.mdAndUp,
               'text-h4': $vuetify.breakpoint.xs
             }"
-            class="white--text font-weight-bold my-4"
+            class="white--text font-weight-bold my-4 non-visiable"
             :style="{
               'line-height': $vuetify.breakpoint.mdAndUp ? '8rem' : '2rem'
             }"
@@ -1902,9 +1902,7 @@
                         <v-row class="">
                           <v-col v-if="adventure.activityImages.length" cols="12" md="4" class="pt-4">
                             <v-img
-                              max-height="350"
                               :src="adventure.activityImages[0][0]"
-                              max-width="250"
                               class="rounded-lg"
                             />
                           </v-col>
@@ -2223,7 +2221,7 @@
                               max-height="350"
                               :src="adventure.activityImages[0][0]"
                               max-width="250"
-                              class="rounded-lg"
+                              class="rounded-lg activity-img activity-img-mobile"
                             />
                           </v-col>
                           <v-col cols="10" :md="adventure.activityImages.length ? 6 : 10">
@@ -4221,7 +4219,10 @@ export default {
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
-
+.activity-img {
+  height: 350px;
+  width: 250px;
+}
 @media (max-width: 768px) {
   .my-chip {
     font-size: 8px !important;
@@ -4251,6 +4252,12 @@ export default {
   }
   .v-slide-group__prev .v-slide-group__prev--disabled {
     margin-left: -50px !important;
+  }
+  .activity-img-mobile {
+    max-width: 100% !important;
+  }
+  .non-visiable {
+    visibility: hidden;
   }
 }
 

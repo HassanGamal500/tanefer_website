@@ -40,7 +40,7 @@
           </v-btn>
         </template>
       </v-snackbar>
-      <div style="" class="px-0 my-5">
+      <div style="" class="px-0 my-1">
         <div>
           <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
             <v-row>
@@ -56,31 +56,6 @@
                   prepend-inner-icon="mdi-magnify-expand"
                 />
               </v-col>
-              <!-- <v-col cols="12" md="2">
-                <v-select
-                  ref="selectedCity"
-                  :items="cities"
-                  label="All Cities"
-                  outlined
-                  clearable
-                  item-text="CityName"
-                  item-value="CityID"
-                  prepend-inner-icon="mdi-map-marker"
-                ></v-select>
-              </v-col> -->
-              <!-- <v-col cols="12" md="4">
-                <v-select
-                  v-model="selectedPrice"
-                  :items="prices"
-                  label="All started prices per person"
-                  outlined
-                  clearable
-                  item-text="price"
-                  item-value="id"
-                  hide-details
-                  prepend-inner-icon="mdi-cash-multiple"
-                ></v-select>
-              </v-col> -->
               <v-col cols="12" md="3">
                 <v-select
                   v-model="selectedCategory"
@@ -102,6 +77,7 @@
                   outlined
                   clearable
                   prepend-inner-icon="mdi-calendar-range"
+                  class="custom-select-height"
                   @change="getDurations"
                 />
               </v-col>
@@ -114,6 +90,7 @@
                   clearable
                   item-text="duration"
                   item-value="duration"
+                  class="custom-select-height"
                   prepend-inner-icon="mdi-calendar-range"
                 />
               </v-col>
@@ -156,7 +133,7 @@
             </div>
           </v-col>
           <v-col cols="12" md="4" class="order-first order-md-last order-sm-first order-xs-first">
-            <div style="position: sticky;top: 1rem;margin-bottom: 40px;z-index: 2;">
+            <div class="mobile-version regular-version">
               <v-card class="" style="border-radius: 15px;">
                 <v-card-text>
                   <h4 class="text-h4 black--text" color="black">
@@ -325,10 +302,10 @@
               <v-row class="mt-4">
                 <v-col v-for="(item, index) in activitiesList" :key="index" cols="12" md="12">
                   <v-card color="#F5F5F5" class="rounded-xl">
-                    <v-card-title class="text-h5 black--text font-weight-bold">
-                      <v-icon class="black--text" x-large>
+                    <v-card-title class="subtitle-2 black--text font-weight-bold pa-2 ma-1">
+                      <!-- <v-icon class="black--text" x-large>
                         mdi-circle-small
-                      </v-icon>
+                      </v-icon> -->
                       {{ item.activityTitle }}
                       <v-row
                         align="center"
@@ -341,7 +318,7 @@
                           :loading="loadingDeleteItem"
                           @click="removeItemCart(item.activity_id)"
                         >
-                          <v-icon class="mx-2" style="color: red;">
+                          <v-icon class="mx-1" style="color: red;">
                             mdi-delete
                           </v-icon>
                           Delete
@@ -381,15 +358,13 @@
           <v-card-actions class="dialog-cart-footer">
             <v-row align="center" justify="center" class="px-5">
               <v-col cols="12" md="6">
-                <div>
-                  <h5 class="text-h5">
+                <div class="total-price-inline">
+                  <h6 class="text-h6">
                     Grand Total ({{ selectedAdventures.length }}) Adventures
-                  </h5>
-                </div>
-                <div>
-                  <h5 class="text-h5">
+                  </h6>
+                  <p class="font-weight-bold">
                     $ {{ totalPrice }}
-                  </h5>
+                  </p>
                 </div>
               </v-col>
               <v-col cols="12" md="6">
@@ -925,10 +900,49 @@ export default {
   background-color: #fbfbfb;
   border: 1px solid #e0e0e0;
 }
+.total-price-inline {
+  display: flex;
+  align-items: center; /* Vertically center the items */
+  justify-content: space-between; /* Space between title and price */
+}
+
+.total-price-inline h6,
+.total-price-inline p {
+  margin: 0; /* Remove default margin */
+}
+
+.regular-version {
+  position: sticky;
+  top: 1rem;
+  margin-bottom: 40px;
+  z-index: 2;
+}
 
 @media only screen and (max-width: 722px) {
   .set-line-height-responsive {
     line-height: unset !important;
   }
+  .mobile-version {
+    position: fixed;
+    z-index: 1200;
+    width: 350px;
+  }
+
+  .custom-select-height .v-input__control {
+  height: 50px !important; /* Set the desired height */
+}
+
+.v-input__control {
+  height: 50px !important;
+}
+
+.custom-select-height .v-select__slot {
+  height: 50px !important; /* Adjust the height of the select box */
+  line-height: 50px !important; /* Ensure the text is centered vertically */
+}
+
+.custom-select-height .v-input__slot {
+  height: 50px !important; /* Make the inner slot match the desired height */
+}
 }
 </style>

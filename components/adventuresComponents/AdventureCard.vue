@@ -8,10 +8,8 @@
             <v-row class="">
               <v-col v-if="adventure.activityImages.length" cols="12" md="4" class="pt-4">
                 <v-img
-                  max-height="350"
                   :src="adventure.activityImages[0][0]"
-                  max-width="250"
-                  class="rounded-lg"
+                  class="rounded-lg adventure-img adventure-img-mobile"
                 />
               </v-col>
               <v-col cols="10" :md="adventure.activityImages.length ? 6 : 10">
@@ -142,6 +140,7 @@
                   </template>
                   <v-date-picker
                     v-model="date"
+                    color="late"
                     :allowed-dates="allowedDates"
                     :min="new Date().toISOString().substr(0, 10)"
                     @input="menu = false"
@@ -320,13 +319,25 @@ export default {
 }
 </script>
 <style scoped>
+.non-visiable {
+  visibility: hidden;
+}
 .my-chip {
   max-width: 100%; /* Set a maximum width if needed */
 }
-
+.adventure-img {
+  height: 350px;
+  width: 250px;
+}
 .text-truncate {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: normal !important;
+}
+@media only screen and (max-width: 722px) {
+  .adventure-img-mobile {
+    width: 100%;
+    height: 250px;
+  }
 }
 </style>
