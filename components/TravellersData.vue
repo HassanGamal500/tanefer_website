@@ -21,7 +21,7 @@
       </p>
       <v-card class="pa-9 mb-5 rounded-xl" elevation="6">
         <v-row>
-          <v-col class="py-0" cols="12" sm="6" md="6">
+          <v-col class="py-0 py-sm-1 py-md-1" cols="12" sm="6" md="6">
             <v-text-field
               v-model="name"
               outlined
@@ -353,6 +353,9 @@ export default {
       const year = new Date().getFullYear()
       const min = today.setFullYear(year - 2)
       return new Date(min).toISOString().substr(0, 10)
+    },
+    isMobile () {
+      return window.innerWidth <= 768
     }
   },
   mounted () {
@@ -533,7 +536,9 @@ export default {
 
 @media (max-width: 768px) {
   .travellers-form {
-  max-width: 370px;
+  max-width: 100%;
+  width: 360px;
+  margin-left: 8px;
 }
  }
 </style>

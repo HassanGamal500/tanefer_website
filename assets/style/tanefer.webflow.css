@@ -7185,7 +7185,10 @@ img {
     border: 2px solid #4F3316;
     color: #4F3316;
   }
-
+  
+.v-tabs-bar .v-slide-group__prev {
+  display: none !important;
+}
   .custom-outline-button:hover {
     background-color: #4F3316;
     color: white;

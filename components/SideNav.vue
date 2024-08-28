@@ -3,7 +3,7 @@
     id="w-nav-overlay-0"
     class="w-nav-overlay"
     data-wf-ignore=""
-    style="height: 100%; display: block; width: 100%; z-index: 1001; background-color: rgba(0,0,0,0.2); top: 0;"
+    style="height: 100%; display: block; width: 100%; z-index: 1000; background-color: rgba(0,0,0,0.2); top: 0;"
     @click.self="$emit('close')"
   >
     <nav
@@ -55,6 +55,9 @@
               </NuxtLink>
               <NuxtLink to="/bookingHistory" exact active-class="w--current" class="nav-link w-nav-link">
                 Booking History
+              </NuxtLink>
+              <NuxtLink to="/change-password" exact active-class="w--current" class="nav-link w-nav-link">
+                Change Password
               </NuxtLink>
               <a exact active-class="w--current" class="nav-link w-nav-link" @click="logout">
                 Logout

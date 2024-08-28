@@ -339,5 +339,13 @@ export default {
     width: 100%;
     height: 250px;
   }
+
+.v-tabs-bar {
+  padding-left: 0 !important;
+}
+::v-deep .v-tabs:not(.v-tabs--vertical):not(.v-tabs--right) > .v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) .v-slide-group__prev {
+  display: none !important;
+}
+
 }
 </style>

@@ -132,7 +132,7 @@
               </div>
             </div>
           </v-col>
-          <v-col cols="12" md="4" class="order-first order-md-last order-sm-first order-xs-first">
+          <v-col :class="{'fixed-position-mobile': isFixed}" cols="12" md="4" class="order-first order-md-last order-sm-first order-xs-first">
             <div class="mobile-version regular-version">
               <v-card class="" style="border-radius: 15px;">
                 <v-card-text>
@@ -302,26 +302,20 @@
               <v-row class="mt-4">
                 <v-col v-for="(item, index) in activitiesList" :key="index" cols="12" md="12">
                   <v-card color="#F5F5F5" class="rounded-xl">
-                    <v-card-title class="subtitle-2 black--text font-weight-bold pa-2 ma-1">
-                      <!-- <v-icon class="black--text" x-large>
-                        mdi-circle-small
-                      </v-icon> -->
-                      {{ item.activityTitle }}
-                      <v-row
-                        align="center"
-                        justify="end"
-                        class="mr-1"
-                      >
+                    <v-card-title class="subtitle-2 black--text font-weight-bold pa-2 ma-1 d-flex align-center justify-space-between">
+                      <div class="d-flex align-center">
+                        <span class="title-truncate">{{ item.activityTitle }}</span>
+                      </div>
+                      <v-row align="center" justify="end" class="mr-1 my-1">
                         <a
                           class="float-right"
-                          style="font-size: small;color: black;"
+                          style="font-size: small; color: black;"
                           :loading="loadingDeleteItem"
                           @click="removeItemCart(item.activity_id)"
                         >
-                          <v-icon class="mx-1" style="color: red;">
+                          <v-icon class="mx-1 my-1" style="color: red; display: inline-block;">
                             mdi-delete
                           </v-icon>
-                          Delete
                         </a>
                       </v-row>
                     </v-card-title>
@@ -359,9 +353,9 @@
             <v-row align="center" justify="center" class="px-5">
               <v-col cols="12" md="6">
                 <div class="total-price-inline">
-                  <h6 class="text-h6">
+                  <p class="subtitle-2">
                     Grand Total ({{ selectedAdventures.length }}) Adventures
-                  </h6>
+                  </p>
                   <p class="font-weight-bold">
                     $ {{ totalPrice }}
                   </p>
@@ -446,7 +440,9 @@ export default {
         seo_title: null,
         seo_description: null,
         featured_image: null,
-        slug: null
+        slug: null,
+        isFixed: false,
+        scrollThreshold: 100
       }
       // selectedCity: null // Initially set to null or an initial selected city ID
     }
@@ -520,7 +516,22 @@ export default {
     await this.getMetaData()
     await this.getAdventures()
   },
+  mounted () {
+    window.addEventListener('scroll', this.handleScroll)
+  },
+  beforeDestroy () {
+    window.removeEventListener('scroll', this.handleScroll)
+  },
   methods: {
+    handleScroll () {
+      const scrollPosition = window.scrollY
+      const screenWidth = window.innerWidth
+      if (scrollPosition > this.scrollThreshold && screenWidth <= 768) {
+        this.isFixed = true
+      } else {
+        this.isFixed = false
+      }
+    },
     handleError (text, color) {
       this.snackbar = true
       this.color = color
@@ -921,19 +932,43 @@ export default {
     font-size: 18px;
     font-weight: bold;
   }
+  .fixed-position-mobile {
+  position: fixed;
+  bottom: 0; /* Make it fixed at the bottom of the screen */
+  width: 100%; /* Full width on mobile */
+ /* z-index: 1000; /* Ensure it stays on top */
+}
+
+.text-truncate {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
 
 @media only screen and (max-width: 722px) {
+  /* .fixed-position-mobile {
+    position: fixed; /* Keep the element static on larger screens */
+ /* } */
   .set-line-height-responsive {
     line-height: unset !important;
   }
-  .mobile-version {
-    position: fixed;
+  /* .mobile-version {
+    position: sticky;
     z-index: 1200;
     width: 350px;
-  }
+  } */
 
   .v-icon.v-icon {
-    font-size: 35px !important;
+    font-size: 25px !important;
   }
 
   .custom-select-height .v-input__control {

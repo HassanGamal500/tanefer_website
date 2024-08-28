@@ -71,8 +71,8 @@
       </v-snackbar>
       <div style="" class="px-0 my-5">
         <div class="package-overview-date">
-          <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
-            <v-row>
+          <v-card class="px-4 pt-7" style="border-radius: 15px;">
+            <v-row class="mt-1">
               <v-col cols="12" md="12">
                 <v-menu
                   v-model="menu"
@@ -169,7 +169,7 @@
                                       <v-col :cols="packageDetails.activities[0].type !== 'adventure' ? '6' : '12'" class="text-center">
                                         <span class="quantity text-center font-weight-bold">{{ activity.days_number }} days</span>
                                       </v-col>
-                                      <v-col cols="2" v-if="packageDetails.activities[0].type !== 'adventure'">
+                                      <v-col v-if="packageDetails.activities[0].type !== 'adventure'" cols="2">
                                         <v-btn
                                           style="background-color: #4f3316;"
                                           color="#4f3316"
@@ -199,7 +199,7 @@
                                   <v-card-title class="white--text" style="background-color: #4f3316;">
                                     <v-row>
                                       <v-col cols="12">
-                                        Day <span v-if="day.start_day !== null"> {{ day.start_day }}</span> <span v-if="packageStartDay !== null" class="ml-4">{{ day.start_text_day }}</span>
+                                        Day <span v-if="day.start_day !== null"> {{ day.start_day }}</span> <span v-if="packageStartDay !== null" class="ml-4 mp-3">{{ day.start_text_day }}</span>
                                         <v-btn
                                           text
                                           color="white"
@@ -1972,26 +1972,26 @@
                                   <v-expansion-panel-header>
                                     Includes
                                   </v-expansion-panel-header>
-                                  <!-- <v-expansion-panel-content>
-                                    <span v-for="(include, i) in adventure.activityIncludes" :key="i">
-                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
-                                        <span class="text-truncate">{{ include }}</span>
-                                      </v-chip>
-                                    </span>
-                                  </v-expansion-panel-content> -->
                                   <v-expansion-panel-content>
                                     <v-row>
                                       <v-col cols="12">
-                                        <span v-for="(include, i) in adventure.activityIncludes" :key="i">
-                                          <v-chip
-                                            dense
-                                            label
-                                            class="my-1 px-4 ma-2 py-2 text-truncate"
-                                            color="#F6F6F6"
-                                          >
-                                            <span class="text-xs">{{ include }}</span> <!-- Text size utility class -->
-                                          </v-chip>
-                                        </span>
+                                        <ul v-if="isMobile" class="list">
+                                          <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item">
+                                            {{ include }}
+                                          </li>
+                                        </ul>
+                                        <div v-else>
+                                          <span v-for="(include, i) in adventure.activityIncludes" :key="i">
+                                            <v-chip
+                                              dense
+                                              label
+                                              class="my-1 px-4 ma-2 py-2 text-truncate"
+                                              color="#F6F6F6"
+                                            >
+                                              <span class="text-xs">{{ include }}</span>
+                                            </v-chip>
+                                          </span>
+                                        </div>
                                       </v-col>
                                     </v-row>
                                   </v-expansion-panel-content>
@@ -2153,27 +2153,46 @@
                             <div class="trips-cityname" style="margin: 10px 0;">
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventureDetails.activityIncludes.length">
-                                  <v-expansion-panel-header>
-                                    Includes
-                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-header>Includes</v-expansion-panel-header>
                                   <v-expansion-panel-content>
-                                    <span v-for="(include, i) in adventureDetails.activityIncludes" :key="i">
-                                      <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ include }}</v-chip>
-                                    </span>
+                                    <v-row>
+                                      <v-col cols="12">
+                                        <ul v-if="isMobile" class="list">
+                                          <li v-for="(include, i) in adventureDetails.activityIncludes" :key="i" class="list-item">
+                                            - {{ include }}
+                                          </li>
+                                        </ul>
+                                        <div v-else>
+                                          <span v-for="(include, i) in adventureDetails.activityIncludes" :key="i">
+                                            <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ include }}</v-chip>
+                                          </span>
+                                        </div>
+                                      </v-col>
+                                    </v-row>
                                   </v-expansion-panel-content>
                                 </v-expansion-panel>
                               </v-expansion-panels>
                             </div>
+
                             <div>
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventureDetails.activityExcludes.length">
-                                  <v-expansion-panel-header>
-                                    Excludes
-                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-header>Excludes</v-expansion-panel-header>
                                   <v-expansion-panel-content>
-                                    <span v-for="(exclude, i) in adventureDetails.activityExcludes" :key="i">
-                                      <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ exclude }}</v-chip>
-                                    </span>
+                                    <v-row>
+                                      <v-col cols="12">
+                                        <ul v-if="isMobile" class="list">
+                                          <li v-for="(exclude, i) in adventureDetails.activityExcludes" :key="i" class="list-item">
+                                            - {{ exclude }}
+                                          </li>
+                                        </ul>
+                                        <div v-else>
+                                          <span v-for="(exclude, i) in adventureDetails.activityExcludes" :key="i">
+                                            <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ exclude }}</v-chip>
+                                          </span>
+                                        </div>
+                                      </v-col>
+                                    </v-row>
                                   </v-expansion-panel-content>
                                 </v-expansion-panel>
                               </v-expansion-panels>
@@ -2287,15 +2306,29 @@
                             <div class="trips-cityname" style="margin: 10px 0;">
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventure.activityIncludes.length">
-                                  <v-expansion-panel-header>
-                                    Includes
-                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-header>Includes test</v-expansion-panel-header>
                                   <v-expansion-panel-content>
-                                    <span v-for="(include, i) in adventure.activityIncludes" :key="i">
-                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
-                                        <span class="text-truncate">{{ include }}</span>
-                                      </v-chip>
-                                    </span>
+                                    <v-row>
+                                      <v-col cols="12">
+                                        <ul v-if="isMobile" class="list">
+                                          <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item">
+                                            - {{ include }}
+                                          </li>
+                                        </ul>
+                                        <div v-else>
+                                          <span v-for="(include, i) in adventure.activityIncludes" :key="i">
+                                            <v-chip
+                                              dense
+                                              label
+                                              class="my-1 px-4 ma-2 py-2 text-truncate"
+                                              color="#F6F6F6"
+                                            >
+                                              <span class="text-xs">{{ include }}</span>
+                                            </v-chip>
+                                          </span>
+                                        </div>
+                                      </v-col>
+                                    </v-row>
                                   </v-expansion-panel-content>
                                 </v-expansion-panel>
                               </v-expansion-panels>
@@ -2303,15 +2336,29 @@
                             <div>
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventure.activityExcludes.length">
-                                  <v-expansion-panel-header>
-                                    Excludes
-                                  </v-expansion-panel-header>
+                                  <v-expansion-panel-header>Excludes</v-expansion-panel-header>
                                   <v-expansion-panel-content>
-                                    <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
-                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
-                                        <span class="text-truncate">{{ exclude }}</span>
-                                      </v-chip>
-                                    </span>
+                                    <v-row>
+                                      <v-col cols="12">
+                                        <ul v-if="isMobile" class="list">
+                                          <li v-for="(exclude, i) in adventure.activityExcludes" :key="i" class="list-item">
+                                            - {{ exclude }}
+                                          </li>
+                                        </ul>
+                                        <div v-else>
+                                          <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
+                                            <v-chip
+                                              dense
+                                              label
+                                              class="my-1 px-4 ma-2 py-2 text-truncate"
+                                              color="#F6F6F6"
+                                            >
+                                              <span class="text-xs">{{ exclude }}</span>
+                                            </v-chip>
+                                          </span>
+                                        </div>
+                                      </v-col>
+                                    </v-row>
                                   </v-expansion-panel-content>
                                 </v-expansion-panel>
                               </v-expansion-panels>
@@ -2812,7 +2859,8 @@ export default {
       city_pax: '',
       country_pax: '',
       postal_code_pax: '',
-      dayActivities: []
+      dayActivities: [],
+      isMobile: false
     }
   },
   // async created () {
@@ -2928,7 +2976,17 @@ export default {
       return [{ _: 'All', Type: 'all' }, ...this.boards]
     }
   },
+  mounted () {
+    this.checkIfMobile()
+    window.addEventListener('resize', this.checkIfMobile)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.checkIfMobile)
+  },
   methods: {
+    checkIfMobile () {
+      this.isMobile = window.innerWidth <= 600
+    },
     formatDate (date, i, type, index) {
       if (!date) { return null }
       const [year, month, day] = date.split('-')
@@ -4238,6 +4296,24 @@ export default {
     font-size: 18px;
     font-weight: bold;
   }
+  .list {
+  padding: 0;
+  list-style-type: none;
+}
+
+.list-item {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+/* .list-item::before {
+  content: '●';
+  color: #4f3316;
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-size: 12px;
+  line-height: 14px;
+} */
 @media (max-width: 768px) {
   .my-chip {
     font-size: 8px !important;
@@ -4255,7 +4331,7 @@ export default {
   .adventure-details-tabs .v-tabs-bar {
     margin-bottom: 3px !important;
   }
-  .v-tabs:not(.v-tabs--vertical) .v-tab {
+  /* .v-tabs:not(.v-tabs--vertical) .v-tab {
     white-space: nowrap !important;
     text-overflow: ellipsis !important;
     overflow: hidden !important;
@@ -4267,7 +4343,7 @@ export default {
   }
   .v-slide-group__prev .v-slide-group__prev--disabled {
     margin-left: -50px !important;
-  }
+  } */
   .activity-img-mobile {
     max-width: 100% !important;
   }
@@ -4284,6 +4360,18 @@ export default {
   .package-overview-date {
     margin-top: 70px;
   }
+  .v-tabs-bar {
+  padding-left: 0 !important;
+}
+::v-deep .v-tabs:not(.v-tabs--vertical):not(.v-tabs--right) > .v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) .v-slide-group__prev {
+  display: none !important;
+}
+::v-deep .v-text-field.v-text-field--enclosed {
+  padding-bottom: 3px;
 }
 
+::v-deep .v-expansion-panel-content__wrap {
+  padding: 0px;
+}
+}
 </style>

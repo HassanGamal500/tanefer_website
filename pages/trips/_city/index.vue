@@ -38,7 +38,7 @@
                 </div>
               </div>
             </div>
-            <div data-w-id="19892d4d-59f2-17f4-e9b5-c0b1699f6aa6" class="serach-close" @click="showSearchForm = !showSearchForm">
+            <div data-w-id="19892d4d-59f2-17f4-e9b5-c0b1699f6aa6" class="serach-close" style="visibility: hidden;" @click="showSearchForm = !showSearchForm">
               Modify Search
             </div>
           </div>

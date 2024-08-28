@@ -33,9 +33,25 @@
                     <td>{{ booking.total | currency }}</td>
                     <td>{{ booking.status }}</td>
                     <td>
-                      <button class="details-btn" @click="fetchBookingDetails(booking.id)">
+                      <!-- <button class="details-btn" @click="fetchBookingDetails(booking.id)">
                         Get Details
-                      </button>
+                      </button> -->
+                      <v-btn
+                        v-if="!isMobile"
+                        class="details-btn"
+                        @click="fetchBookingDetails(booking.id)"
+                      >
+                        Get Details
+                      </v-btn>
+
+                      <a
+                        v-if="isMobile"
+                        href="#"
+                        class="details-link"
+                        @click.prevent="fetchBookingDetails(booking.id)"
+                      >
+                        Get Details
+                      </a>
                     </td>
                   </tr>
                 </tbody>
@@ -88,7 +104,10 @@ export default {
   computed: {
     ...mapGetters({
       user: 'auth/user'
-    })
+    }),
+    isMobile () {
+      return window.innerWidth <= 768
+    }
   },
   async mounted () {
     try {
@@ -123,7 +142,6 @@ export default {
         if (response.status === 200) {
           this.selectedBooking = response.data.data
         } else {
-        // Handle unexpected status codes
           // eslint-disable-next-line no-console
           console.error('Unexpected response status:', response.status)
           alert('Unexpected error occurred while fetching booking details.')
@@ -195,12 +213,17 @@ export default {
 }
 
 .details-btn {
-  margin-top: 10px;
-  padding: 10px;
-  background-color: #4F3316;
-  color: white;
+  background-color: #4f3316;
+  color: #fff;
   border: none;
+  padding: 10px 20px;
   cursor: pointer;
+  font-weight: 300;
+  border-radius: 3px;
+}
+
+.theme--light.v-btn.v-btn--has-bg {
+  background-color: #4f3316 !important;
 }
 
 .details-btn:hover {
@@ -221,8 +244,22 @@ export default {
     width: 100%;
     max-width: 100%;
   }
+  .v-card__text {
+    margin: 0px;
+    padding: 0px;
+    font-size: 8px;
+  }
 }
 tr {
   text-align: center;
+}
+.details-link {
+  color: brown;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.details-link:hover {
+  text-decoration: none;
 }
 </style>
