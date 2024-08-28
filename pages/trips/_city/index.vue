@@ -43,7 +43,7 @@
             </div>
           </div>
           <div class="filter-open" @click="showFilters">
-            <span>&lt; Filters</span>
+            <!-- <span>&lt; Filters</span> -->
           </div>
           <div class="flight-serch-result">
             <aside id="aside-filter-trip" data-w-id="1b2006bd-cf9d-42e1-d991-e4049c7b4038" class="aside-filter">

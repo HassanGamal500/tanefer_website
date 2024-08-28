@@ -1977,7 +1977,7 @@
                                       <v-col cols="12">
                                         <ul v-if="isMobile" class="list">
                                           <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item">
-                                            {{ include }}
+                                            - {{ include }}
                                           </li>
                                         </ul>
                                         <div v-else>
@@ -1997,8 +1997,39 @@
                                   </v-expansion-panel-content>
                                 </v-expansion-panel>
                               </v-expansion-panels>
-                            </div>
-                            <div>
+                              <div>
+                                <v-expansion-panels>
+                                  <v-expansion-panel v-if="adventure.activityExcludes.length">
+                                    <v-expansion-panel-header>
+                                      Excludes
+                                    </v-expansion-panel-header>
+                                    <v-expansion-panel-content>
+                                      <v-row>
+                                        <v-col cols="12">
+                                          <ul v-if="isMobile" class="list">
+                                            <li v-for="(exclude, i) in adventure.activityExcludes" :key="i" class="list-item">
+                                              - {{ exclude }}
+                                            </li>
+                                          </ul>
+                                          <div v-else>
+                                            <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
+                                              <v-chip
+                                                dense
+                                                label
+                                                class="my-1 px-4 ma-2 py-2 text-truncate"
+                                                color="#F6F6F6"
+                                              >
+                                                <span class="text-xs">{{ exclude }}</span>
+                                              </v-chip>
+                                            </span>
+                                          </div>
+                                        </v-col>
+                                      </v-row>
+                                    </v-expansion-panel-content>
+                                  </v-expansion-panel>
+                                </v-expansion-panels>
+                              </div>
+
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventure.activityExcludes.length">
                                   <v-expansion-panel-header>
