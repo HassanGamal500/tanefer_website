@@ -1919,7 +1919,7 @@
                                 </h5>
                               </div>
                               <div class="black--text">
-                                <h5 class="text-h5 font-weight-bold">
+                                <h5 class="subtitle-2 font-weight-bold">
                                   Start from ${{ adventure.activityPricePerPerson }} per person
                                 </h5>
                               </div>
@@ -1931,7 +1931,7 @@
                             <!-- eslint-disable-next-line vue/no-v-html -->
                             <v-tabs
                               v-model="tab"
-                              color="deep-black accent-4"
+                              color="font-weight-black accent-4"
                             >
                               <v-tab href="#intro">
                                 Intro
@@ -1976,7 +1976,7 @@
                                     <v-row>
                                       <v-col cols="12">
                                         <ul v-if="isMobile" class="list">
-                                          <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item">
+                                          <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item pl-2">
                                             - {{ include }}
                                           </li>
                                         </ul>
@@ -2007,7 +2007,7 @@
                                       <v-row>
                                         <v-col cols="12">
                                           <ul v-if="isMobile" class="list">
-                                            <li v-for="(exclude, i) in adventure.activityExcludes" :key="i" class="list-item">
+                                            <li v-for="(exclude, i) in adventure.activityExcludes" :key="i" class="list-item pl-2 ">
                                               - {{ exclude }}
                                             </li>
                                           </ul>
@@ -2029,21 +2029,6 @@
                                   </v-expansion-panel>
                                 </v-expansion-panels>
                               </div>
-
-                              <v-expansion-panels>
-                                <v-expansion-panel v-if="adventure.activityExcludes.length">
-                                  <v-expansion-panel-header>
-                                    Excludes
-                                  </v-expansion-panel-header>
-                                  <v-expansion-panel-content>
-                                    <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
-                                      <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
-                                        <span class="text-truncate">{{ exclude }}</span>
-                                      </v-chip>
-                                    </span>
-                                  </v-expansion-panel-content>
-                                </v-expansion-panel>
-                              </v-expansion-panels>
                             </div>
                           </v-col>
                         </v-row>
@@ -2143,7 +2128,7 @@
                               <v-col cols="12" md="8" lg="6">
                                 <v-tabs
                                   v-model="tab"
-                                  color="deep-black accent-4"
+                                  color="font-weight-black accent-4"
                                   class="adventure-details-tabs"
                                 >
                                   <v-tab href="#intro">
@@ -2189,7 +2174,7 @@
                                     <v-row>
                                       <v-col cols="12">
                                         <ul v-if="isMobile" class="list">
-                                          <li v-for="(include, i) in adventureDetails.activityIncludes" :key="i" class="list-item">
+                                          <li v-for="(include, i) in adventureDetails.activityIncludes" :key="i" class="list-item pl-2">
                                             - {{ include }}
                                           </li>
                                         </ul>
@@ -2213,7 +2198,7 @@
                                     <v-row>
                                       <v-col cols="12">
                                         <ul v-if="isMobile" class="list">
-                                          <li v-for="(exclude, i) in adventureDetails.activityExcludes" :key="i" class="list-item">
+                                          <li v-for="(exclude, i) in adventureDetails.activityExcludes" :key="i" class="list-item pl-2">
                                             - {{ exclude }}
                                           </li>
                                         </ul>
@@ -2299,7 +2284,7 @@
                             <!-- eslint-disable-next-line vue/no-v-html -->
                             <v-tabs
                               v-model="tab"
-                              color="deep-black accent-4"
+                              color="font-weight-black accent-4"
                             >
                               <v-tab href="#intro">
                                 Intro
@@ -2342,7 +2327,7 @@
                                     <v-row>
                                       <v-col cols="12">
                                         <ul v-if="isMobile" class="list">
-                                          <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item">
+                                          <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item pl-2">
                                             - {{ include }}
                                           </li>
                                         </ul>
@@ -2372,7 +2357,7 @@
                                     <v-row>
                                       <v-col cols="12">
                                         <ul v-if="isMobile" class="list">
-                                          <li v-for="(exclude, i) in adventure.activityExcludes" :key="i" class="list-item">
+                                          <li v-for="(exclude, i) in adventure.activityExcludes" :key="i" class="list-item pl-2">
                                             - {{ exclude }}
                                           </li>
                                         </ul>
@@ -4357,6 +4342,7 @@ export default {
   .adventure-details-tabs .v-tab {
     font-size: 9px !important;
     padding: 1px !important;
+    font-weight: 800 !important;
   }
 
   .adventure-details-tabs .v-tabs-bar {

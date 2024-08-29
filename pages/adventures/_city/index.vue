@@ -42,7 +42,7 @@
       </v-snackbar>
       <div style="" class="px-0 my-1">
         <div>
-          <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
+          <v-card class="px-7 pt-7 mt-11 pb-1" style="border-radius: 15px;">
             <v-row>
               <v-col cols="12" md="3">
                 <v-text-field

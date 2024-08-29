@@ -170,6 +170,13 @@ img {
   background-image: url('../images/trip-bg.jpg');
 }
 
+@media only screen and (max-width: 600px) {
+  .page-head, .page-head.trip-bg {
+      min-height: auto;
+      background-size: cover;
+      background-position: center center;
+  }
+}
 .t-container {
   max-width: 1200px;
   margin-right: auto;

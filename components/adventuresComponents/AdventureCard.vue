@@ -38,7 +38,7 @@
                 <!-- <div class="mb-3" v-html="adventure.activityOverview" /> -->
                 <v-tabs
                   v-model="tab"
-                  color="deep-black accent-4"
+                  color="font-weight-black accent-4"
                 >
                   <v-tab href="#intro">
                     Intro
@@ -80,18 +80,35 @@
                         Includes
                       </v-expansion-panel-header>
                       <v-expansion-panel-content>
-                        <span v-for="(include, i) in adventure.activityIncludes" :key="i">
-                          <!-- <v-col v-for="(include, i) in adventure.activityIncludes" :key="i" cols="12" md="4"> -->
-                          <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
-                            <!-- {{ include }} -->
-                            <span class="text-truncate">{{ include }}</span>
-                          </v-chip>
-                        <!-- </v-col> -->
-                        </span>
+                        <v-row>
+                          <v-col cols="12">
+                            <!-- Show list on mobile -->
+                            <ul v-if="isMobile" class="list">
+                              <li v-for="(include, i) in adventure.activityIncludes" :key="i" class="list-item pl-2">
+                                - {{ include }}
+                              </li>
+                            </ul>
+                            <!-- Show chips on larger screens -->
+                            <div v-else>
+                              <span v-for="(include, i) in adventure.activityIncludes" :key="i">
+                                <v-chip
+                                  dense
+                                  label
+                                  large
+                                  color="#F6F6F6"
+                                  class="my-1 px-4 ma-2 py-2 text-truncate"
+                                >
+                                  <span class="text-xs">{{ include }}</span>
+                                </v-chip>
+                              </span>
+                            </div>
+                          </v-col>
+                        </v-row>
                       </v-expansion-panel-content>
                     </v-expansion-panel>
                   </v-expansion-panels>
                 </div>
+
                 <div>
                   <v-expansion-panels>
                     <v-expansion-panel v-if="adventure.activityExcludes.length">
@@ -99,12 +116,29 @@
                         Excludes
                       </v-expansion-panel-header>
                       <v-expansion-panel-content>
-                        <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
-                          <v-chip dense label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2 my-chip">
-                            <!-- {{ exclude }} -->
-                            <span class="text-truncate">{{ exclude }}</span>
-                          </v-chip>
-                        </span>
+                        <v-row>
+                          <v-col cols="12">
+                            <!-- Show list on mobile -->
+                            <ul v-if="isMobile" class="list">
+                              <li v-for="(exclude, i) in adventure.activityExcludes" :key="i" class="list-item pl-2">
+                                - {{ exclude }}
+                              </li>
+                            </ul>
+                            <div v-else>
+                              <span v-for="(exclude, i) in adventure.activityExcludes" :key="i">
+                                <v-chip
+                                  dense
+                                  label
+                                  large
+                                  color="#F6F6F6"
+                                  class="my-1 px-4 ma-2 py-2 text-truncate"
+                                >
+                                  <span class="text-xs">{{ exclude }}</span>
+                                </v-chip>
+                              </span>
+                            </div>
+                          </v-col>
+                        </v-row>
                       </v-expansion-panel-content>
                     </v-expansion-panel>
                   </v-expansion-panels>
@@ -202,11 +236,23 @@ export default {
       selected: this.selectedStatusFalse,
       tab: null,
       availabilityId: null,
-      loadingSelectedAdventure: false
+      loadingSelectedAdventure: false,
+      isMobile: false
       // selectedDates: this.selectedAdventures
     }
   },
+  mounted () {
+    this.checkIfMobile()
+    window.addEventListener('resize', this.checkIfMobile)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.checkIfMobile)
+  },
+
   methods: {
+    checkIfMobile () {
+      this.isMobile = window.innerWidth <= 600
+    },
     allowedDates (val) {
       const date = new Date(val.replaceAll('-', '/'))
       // const today = new Date()
@@ -333,6 +379,15 @@ export default {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: normal !important;
+}
+.list {
+  padding: 0;
+  list-style-type: none;
+}
+
+.list-item {
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 @media only screen and (max-width: 722px) {
   .adventure-img-mobile {

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="padding-top: 110px;">
     <p v-if="$fetchState.error">
       error: {{ $fetchState.error.message }}
     </p>
@@ -19,7 +19,7 @@
             <v-card
               class="ma-4"
               height="200"
-              width="300"
+              width="224"
               elevation="0"
               @click="toggle"
             >
@@ -34,9 +34,10 @@
                     class="white--text align-center"
                     gradient="to top, rgba(0,0,0,.1), rgba(0,0,0,.5)"
                     height="200px"
+                    width="224px"
                     :alt="city.cityImageAlt"
                   >
-                    <div class="text-h4 align-center text-center mx-auto pa-5 font-weight-bold" style="height: 200px; background-color: rgba(0, 0, 0, 0.3);" @click="submit(city)" v-text="city.CityName" />
+                    <div class="text-h4 align-center text-center mx-auto pa-5 font-weight-bold" style="height: 200px; width: 224px; background-color: rgba(0, 0, 0, 0.3);" @click="submit(city)" v-text="city.CityName" />
                     <span class="d-none">{{ city.cityImageCaption }}</span>
                   </v-img>
                 </v-scale-transition>

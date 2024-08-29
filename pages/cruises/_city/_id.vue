@@ -74,7 +74,7 @@
                 </v-btn>
               </v-card>
             </v-col>
-            <v-col cols="12" md="9">
+            <v-col cols="12" md="9" class="mobile-version-frame">
               <v-card class="pa-3">
                 <v-row>
                   <v-col cols="12" md="6">
@@ -596,5 +596,23 @@ export default {
 }
 .hidden {
     display: none;
+}
+@media (max-width: 768px) {
+  ::v-deep .v-slide-group__wrapper {
+    contain: content;
+    display: list-item;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+.v-image__image--cover {
+    background-size: contain;
+}
+.mobile-version-frame {
+   margin: 0px;
+   padding: 0px;
+}
+.v-application .pa-3 {
+    padding: 3px !important;
+}
 }
 </style>
