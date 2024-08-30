@@ -73,10 +73,10 @@
                     </v-card>
                   </v-tab-item>
                 </v-tabs-items>
-                <div class="trips-cityname" style="margin: 10px 0;">
+                <div style="margin: 10px 0;">
                   <v-expansion-panels>
                     <v-expansion-panel v-if="adventure.activityIncludes.length">
-                      <v-expansion-panel-header>
+                      <v-expansion-panel-header class="text-subtitle-2">
                         Includes
                       </v-expansion-panel-header>
                       <v-expansion-panel-content>
@@ -112,7 +112,7 @@
                 <div>
                   <v-expansion-panels>
                     <v-expansion-panel v-if="adventure.activityExcludes.length">
-                      <v-expansion-panel-header>
+                      <v-expansion-panel-header class="text-subtitle-2">
                         Excludes
                       </v-expansion-panel-header>
                       <v-expansion-panel-content>
@@ -388,6 +388,7 @@ export default {
 .list-item {
   margin-bottom: 10px;
   font-size: 14px;
+  font-weight: bold;
 }
 @media only screen and (max-width: 722px) {
   .adventure-img-mobile {

@@ -20,11 +20,11 @@
         <v-card v-for="item in cruises" :key="item.id" max-width="1200" class="mb-5 px-3 mx-auto">
           <v-row>
             <v-col cols="12" md="5">
-              <v-img :src="item.master_image" height="270" class="rounded" />
+              <v-img :src="item.master_image" height="270" class="rounded" contain/>
             </v-col>
             <v-col cols="12" md="7" class="d-flex flex-column justify-space-between">
               <v-card-title class="d-flex justify-space-between flex-wrap align-cener px-0 py-0">
-                {{ item.name }}
+                {{ item.name }} test
                 <v-rating
                   background-color="green lighten-2"
                   color="warning"
@@ -114,7 +114,7 @@
                 :src="item.image"
                 height="70"
                 width="70"
-                class="rounded ma-1 gallery-image"
+                class="rounded ma-1 gallery-image "
                 @click="image = item.image"
               />
             </v-col>
@@ -148,9 +148,9 @@
           </div> -->
           <div v-if="cruise.includes.length">
             <p class="text-h6">
-              Includes
+              Includes test test
             </p>
-            <v-chip v-for="(item, i) in cruise.includes" :key="i" class="ma-1">
+            <v-chip v-for="(item, i) in cruise.includes" :key="i" class="ma-1 mobile-chip-font">
               {{ item }}
             </v-chip>
           </div>
@@ -158,7 +158,7 @@
             <p class="text-h6">
               Excludes
             </p>
-            <v-chip v-for="(item, i) in cruise.excludes" :key="i" class="ma-1">
+            <v-chip v-for="(item, i) in cruise.excludes" :key="i" class="ma-1 mobile-chip-font">
               {{ item }}
             </v-chip>
           </div>
@@ -166,7 +166,7 @@
             <p class="text-h6">
               Facilities
             </p>
-            <v-chip v-for="(item, i) in cruise.facilities" :key="i" class="ma-1">
+            <v-chip v-for="(item, i) in cruise.facilities" :key="i" class="ma-1 mobile-chip-font">
               {{ item }}
             </v-chip>
           </div>
@@ -174,7 +174,7 @@
             <p class="text-h6">
               Policies
             </p>
-            <v-chip v-for="(item, i) in cruise.policies" :key="i" class="ma-1">
+            <v-chip v-for="(item, i) in cruise.policies" :key="i" class="ma-1 mobile-chip-font">
               {{ item }}
             </v-chip>
           </div>
@@ -182,7 +182,7 @@
             <p class="text-h6">
               Start Days
             </p>
-            <v-chip v-for="(item, i) in cruise.start_days" :key="i" class="ma-1">
+            <v-chip v-for="(item, i) in cruise.start_days" :key="i" class="ma-1 mobile-chip-font">
               {{ item }}
             </v-chip>
           </div>
@@ -403,5 +403,33 @@ export default {
 .more-text {
   height: 44px;
   overflow: hidden;
+}
+@media (max-width: 768px) {
+  /* ::v-deep .v-slide-group__wrapper {
+    contain: content;
+    display: list-item;
+    flex: 1 1 auto;
+    overflow: hidden;
+} */
+::v-deep .v-slide-group__wrapper {
+    contain: content;
+    /* display: flex; */
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+/* ::deep .v-image__image--cover {
+    background-size: contain !important;
+} */
+.mobile-version-frame {
+   margin: 0px;
+   padding: 0px;
+}
+.v-application .pa-3 {
+    padding: 3px !important;
+}
+
+.mobile-chip-font {
+  font-size: 11px !important;
+}
 }
 </style>

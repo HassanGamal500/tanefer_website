@@ -1497,6 +1497,7 @@
                 v-for="(gallery,i) in galleries"
                 :key="i"
                 :src="gallery.src"
+                contain
               />
             </v-carousel>
           </v-card-text>
@@ -1966,10 +1967,10 @@
                                 </v-card>
                               </v-tab-item>
                             </v-tabs-items>
-                            <div class="trips-cityname" style="margin: 10px 0;">
+                            <div style="margin: 10px 0;">
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventure.activityIncludes.length">
-                                  <v-expansion-panel-header>
+                                  <v-expansion-panel-header class="text-subtitle-2">
                                     Includes
                                   </v-expansion-panel-header>
                                   <v-expansion-panel-content>
@@ -2000,7 +2001,7 @@
                               <div>
                                 <v-expansion-panels>
                                   <v-expansion-panel v-if="adventure.activityExcludes.length">
-                                    <v-expansion-panel-header>
+                                    <v-expansion-panel-header class="text-subtitle-2">
                                       Excludes
                                     </v-expansion-panel-header>
                                     <v-expansion-panel-content>
@@ -2114,7 +2115,7 @@
                                 </h5>
                               </div>
                               <div class="black--text">
-                                <h5 class="text-h5 font-weight-bold">
+                                <h5 class="text-subtitle-2 font-weight-bold">
                                   Start from ${{ adventureDetails.activityPricePerPerson }} per person
                                 </h5>
                               </div>
@@ -2166,10 +2167,12 @@
                                 </v-card>
                               </v-tab-item>
                             </v-tabs-items>
-                            <div class="trips-cityname" style="margin: 10px 0;">
+                            <div style="margin: 10px 0;">
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventureDetails.activityIncludes.length">
-                                  <v-expansion-panel-header>Includes</v-expansion-panel-header>
+                                  <v-expansion-panel-header class="text-subtitle-2">
+                                    Includes
+                                  </v-expansion-panel-header>
                                   <v-expansion-panel-content>
                                     <v-row>
                                       <v-col cols="12">
@@ -2193,7 +2196,7 @@
                             <div>
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventureDetails.activityExcludes.length">
-                                  <v-expansion-panel-header>Excludes</v-expansion-panel-header>
+                                  <v-expansion-panel-header class="text-subtitle-2">Excludes</v-expansion-panel-header>
                                   <v-expansion-panel-content>
                                     <v-row>
                                       <v-col cols="12">
@@ -2272,7 +2275,7 @@
                                 </h5>
                               </div>
                               <div class="black--text">
-                                <h5 class="text-h5 font-weight-bold">
+                                <h5 class="text-subtitle-2 font-weight-bold">
                                   Start from ${{ adventure.activityPricePerPerson }} per person
                                 </h5>
                               </div>
@@ -2319,10 +2322,12 @@
                                 </v-card>
                               </v-tab-item>
                             </v-tabs-items>
-                            <div class="trips-cityname" style="margin: 10px 0;">
+                            <div style="margin: 10px 0;">
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventure.activityIncludes.length">
-                                  <v-expansion-panel-header>Includes test</v-expansion-panel-header>
+                                  <v-expansion-panel-header class="text-subtitle-2">
+                                    Includes
+                                  </v-expansion-panel-header>
                                   <v-expansion-panel-content>
                                     <v-row>
                                       <v-col cols="12">
@@ -2352,7 +2357,9 @@
                             <div>
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventure.activityExcludes.length">
-                                  <v-expansion-panel-header>Excludes</v-expansion-panel-header>
+                                  <v-expansion-panel-header
+                                  class="text-subtitle-2"
+                                  >Excludes</v-expansion-panel-header>
                                   <v-expansion-panel-content>
                                     <v-row>
                                       <v-col cols="12">
@@ -2488,7 +2495,7 @@
                       </div>
                     </div>
                     <div v-if="cruiseDetails.includes.length">
-                      <p class="text-h6">
+                      <p class="text-subtitle-2">
                         Includes
                       </p>
                       <v-chip v-for="(item, i) in cruiseDetails.includes" :key="i" class="ma-1">
@@ -2496,7 +2503,7 @@
                       </v-chip>
                     </div>
                     <div v-if="cruiseDetails.excludes.length">
-                      <p class="text-h6">
+                      <p class="text-subtitle-2">
                         Excludes
                       </p>
                       <v-chip v-for="(item, i) in cruiseDetails.excludes" :key="i" class="ma-1">
@@ -4340,7 +4347,7 @@ export default {
     font-size: 7px !important;
   }
   .adventure-details-tabs .v-tab {
-    font-size: 9px !important;
+    font-size: 12px !important;
     padding: 1px !important;
     font-weight: 800 !important;
   }
@@ -4384,7 +4391,7 @@ export default {
   display: none !important;
 }
 ::v-deep .v-text-field.v-text-field--enclosed {
-  padding-bottom: 3px;
+  padding-bottom: 20px;
 }
 
 ::v-deep .v-expansion-panel-content__wrap {

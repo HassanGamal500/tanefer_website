@@ -78,7 +78,7 @@
               <v-card class="pa-3">
                 <v-row>
                   <v-col cols="12" md="6">
-                    <v-img :src="image" height="230" class="rounded" />
+                    <v-img :src="image" height="230" class="rounded" contain />
                   </v-col>
                   <v-col cols="12" md="6" class="d-flex flex-wrap">
                     <v-img
@@ -122,7 +122,7 @@
                   <p class="text-h6">
                     Includes
                   </p>
-                  <v-chip v-for="(item, i) in cruise.includes" :key="i" class="ma-1">
+                  <v-chip v-for="(item, i) in cruise.includes" :key="i" class="ma-1 mobile-chip-font">
                     {{ item }}
                   </v-chip>
                 </div>
@@ -130,7 +130,7 @@
                   <p class="text-h6">
                     Excludes
                   </p>
-                  <v-chip v-for="(item, i) in cruise.excludes" :key="i" class="ma-1">
+                  <v-chip v-for="(item, i) in cruise.excludes" :key="i" class="ma-1 mobile-chip-font">
                     {{ item }}
                   </v-chip>
                 </div>
@@ -138,7 +138,7 @@
                   <p class="text-h6">
                     Facilities
                   </p>
-                  <v-chip v-for="(item, i) in cruise.facilities" :key="i" class="ma-1">
+                  <v-chip v-for="(item, i) in cruise.facilities" :key="i" class="ma-1 mobile-chip-font">
                     {{ item }}
                   </v-chip>
                 </div>
@@ -146,7 +146,7 @@
                   <p class="text-h6">
                     Policies
                   </p>
-                  <v-chip v-for="(item, i) in cruise.policies" :key="i" class="ma-1">
+                  <v-chip v-for="(item, i) in cruise.policies" :key="i" class="ma-1 mobile-chip-font">
                     {{ item }}
                   </v-chip>
                 </div>
@@ -154,7 +154,7 @@
                   <p class="text-h6">
                     Start Days
                   </p>
-                  <v-chip v-for="(item, i) in cruise.start_days" :key="i" class="ma-1">
+                  <v-chip v-for="(item, i) in cruise.start_days" :key="i" class="ma-1 mobile-chip-font">
                     {{ item }}
                   </v-chip>
                 </div>
@@ -177,18 +177,16 @@
                 <v-card-title class="pa-0 pb-3 brown--text">
                   Room {{ (i+1) }}
                 </v-card-title>
-                <v-slide-group
-                  show-arrows
-                >
+                <v-slide-group>
                   <v-slide-item
                     v-for="(room, j) in item[`room_${i+1}`]"
                     :key="j"
                   >
                     <v-card
-                      class="mx-5 my-1"
+                      class="mx-1 my-1"
                       width="350"
                     >
-                      <v-card-title class="body-1 late--text d-flex flex-wrap justify-space-between">
+                      <v-card-title class="body-1 late--text d-flex flex-wrap justify-space-between mobile-wrap">
                         <div>{{ room.type }}, {{ room.occupancy }}</div>
                         <v-icon v-if="isRoomSelected(room.id, i)" color="success">
                           mdi-check-circle
@@ -203,7 +201,7 @@
                           <p class="text-h6">
                             Includes
                           </p>
-                          <v-chip v-for="inc in room.inclusions" :key="inc" class="ma-1">
+                          <v-chip v-for="inc in room.inclusions" :key="inc" class="ma-1 mobile-chip-font">
                             {{ inc }}
                           </v-chip>
                         </div>
@@ -211,7 +209,7 @@
                           <p class="text-h6">
                             Amenities
                           </p>
-                          <v-chip v-for="amen in room.amenities" :key="amen" class="ma-1">
+                          <v-chip v-for="amen in room.amenities" :key="amen" class="ma-1 mobile-chip-font">
                             {{ amen }}
                           </v-chip>
                         </div>
@@ -370,7 +368,10 @@ export default {
     }
   },
   computed: {
-    ...mapState(['cruiseRoomsResults', 'cruiseChosenDate'])
+    ...mapState(['cruiseRoomsResults', 'cruiseChosenDate']),
+    isMobile () {
+      return window.innerWidth <= 768
+    }
   },
   methods: {
     clearData () {
@@ -599,14 +600,15 @@ export default {
 }
 @media (max-width: 768px) {
   ::v-deep .v-slide-group__wrapper {
-    contain: content;
-    display: list-item;
-    flex: 1 1 auto;
-    overflow: hidden;
+    display: block !important;
+    margin-left: 0 !important;
+    flex-direction: column !important;
+    margin-left: -20px;
 }
-.v-image__image--cover {
-    background-size: contain;
-}
+  }
+/* ::deep .v-image__image--cover {
+    background-size: contain !important;
+} */
 .mobile-version-frame {
    margin: 0px;
    padding: 0px;
@@ -614,5 +616,8 @@ export default {
 .v-application .pa-3 {
     padding: 3px !important;
 }
+.mobile-chip-font {
+  font-size: 11px !important;
 }
+
 </style>

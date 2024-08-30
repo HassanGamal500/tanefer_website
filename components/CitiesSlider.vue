@@ -31,13 +31,15 @@
                 <v-scale-transition>
                   <v-img
                     :src="city.cityImage"
-                    class="white--text align-center"
+                    class="white--text align-center city-image"
                     gradient="to top, rgba(0,0,0,.1), rgba(0,0,0,.5)"
                     height="200px"
                     width="224px"
+                    contain
+                    :style="{ marginLeft : '-8px '}"
                     :alt="city.cityImageAlt"
                   >
-                    <div class="text-h4 align-center text-center mx-auto pa-5 font-weight-bold" style="height: 200px; width: 224px; background-color: rgba(0, 0, 0, 0.3);" @click="submit(city)" v-text="city.CityName" />
+                    <div class="text-h4 align-center text-center mx-auto pa-5 font-weight-bold" style="height: 200px; width: 250px; background-color: rgba(0, 0, 0, 0.3);" @click="submit(city)" v-text="city.CityName" />
                     <span class="d-none">{{ city.cityImageCaption }}</span>
                   </v-img>
                 </v-scale-transition>
@@ -122,4 +124,11 @@ export default {
       -moz-box-shadow: 0px -1px 17px 1px rgba(184,110,31,0.43); */
       border: 5px solid #fff;
     }
+    .city-image {
+      margin-left: -10px;
+    }
+    ::v-deep .v-image__image--contain {
+      margin-left: -8px !important;
+    }
+
 </style>
