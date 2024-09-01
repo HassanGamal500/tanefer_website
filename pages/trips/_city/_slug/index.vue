@@ -69,11 +69,11 @@
           </v-btn>
         </template>
       </v-snackbar>
-      <div style="" class="px-0 my-5">
+      <div style="" class="px-0 my-2">
         <div class="package-overview-date">
           <v-card class="px-4 pt-7" style="border-radius: 15px;">
-            <v-row class="mt-1">
-              <v-col cols="12" md="12">
+            <v-row>
+              <v-col class="pa-1" cols="12" md="12" >
                 <v-menu
                   v-model="menu"
                   :close-on-content-click="false"
@@ -4390,12 +4390,17 @@ export default {
 ::v-deep .v-tabs:not(.v-tabs--vertical):not(.v-tabs--right) > .v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-slide-group--has-affixes) .v-slide-group__prev {
   display: none !important;
 }
-::v-deep .v-text-field.v-text-field--enclosed {
-  padding-bottom: 20px;
-}
+
+/* ::v-deep .v-text-field.v-text-field--enclosed {
+ padding-bottom: 20px;
+} */
 
 ::v-deep .v-expansion-panel-content__wrap {
   padding: 0px;
 }
+}
+
+::v-deep .v-text-field.v-text-field--enclosed .v-text-field__details {
+  margin-bottom: 0px;
 }
 </style>

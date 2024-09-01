@@ -40,76 +40,157 @@
           </v-btn>
         </template>
       </v-snackbar>
-      <div style="" class="px-0 my-1">
-        <div>
-          <v-card class="px-7 pt-7 mt-11 pb-1" style="border-radius: 15px;">
-            <v-row>
-              <v-col cols="12" md="3">
-                <v-text-field
-                  v-model="selectedSearchText"
-                  class="mx-1"
-                  auto-select-first
-                  clearable
-                  outlined
-                  label="Search"
-                  hide-details
-                  prepend-inner-icon="mdi-magnify-expand"
-                />
-              </v-col>
-              <v-col cols="12" md="3">
-                <v-select
-                  v-model="selectedCategory"
-                  :items="categories"
-                  label="Categories"
-                  outlined
-                  clearable
-                  hide-details
-                  prepend-inner-icon="mdi-apps"
-                />
-              </v-col>
-              <!-- </v-row>
-            <v-row> -->
-              <v-col cols="12" md="2">
-                <v-select
-                  v-model="selectedDurationType"
-                  :items="durationTypeList"
-                  label="Duration Type"
-                  outlined
-                  clearable
-                  prepend-inner-icon="mdi-calendar-range"
-                  class="custom-select-height"
-                  @change="getDurations"
-                />
-              </v-col>
-              <v-col cols="12" md="2">
-                <v-select
-                  v-model="selectedDuration"
-                  :items="durations"
-                  label="All Durations"
-                  outlined
-                  clearable
-                  item-text="duration"
-                  item-value="duration"
-                  class="custom-select-height"
-                  prepend-inner-icon="mdi-calendar-range"
-                />
-              </v-col>
-              <v-col cols="12" md="2" class="mb-4">
-                <v-btn
-                  class="white--text text-capitalize"
-                  color="#575757"
-                  elevation="6"
-                  x-large
-                  block
-                  raised
-                  rounded-lg
-                  @click="applyFilter"
-                >
-                  Apply Filter
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card>
+      <div class="mt-12 mb-2">
+        <v-expansion-panels v-if="isMobile">
+          <v-expansion-panel>
+            <v-expansion-panel-header>
+              Show Filter Options
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <div class="px-0 my-1">
+                <div>
+                  <v-card class="px-7 pb-1" style="border-radius: 15px;">
+                    <v-row>
+                      <v-col cols="12" md="3">
+                        <v-text-field
+                          v-model="selectedSearchText"
+                          class="mx-1"
+                          auto-select-first
+                          clearable
+                          outlined
+                          label="Search"
+                          hide-details
+                          prepend-inner-icon="mdi-magnify-expand"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="3">
+                        <v-select
+                          v-model="selectedCategory"
+                          :items="categories"
+                          label="Categories"
+                          outlined
+                          clearable
+                          hide-details
+                          prepend-inner-icon="mdi-apps"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-select
+                          v-model="selectedDurationType"
+                          :items="durationTypeList"
+                          label="Duration Type"
+                          outlined
+                          clearable
+                          prepend-inner-icon="mdi-calendar-range"
+                          class="custom-select-height"
+                          @change="getDurations"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="2">
+                        <v-select
+                          v-model="selectedDuration"
+                          :items="durations"
+                          label="All Durations"
+                          outlined
+                          clearable
+                          item-text="duration"
+                          item-value="duration"
+                          class="custom-select-height"
+                          prepend-inner-icon="mdi-calendar-range"
+                        />
+                      </v-col>
+                      <v-col cols="12" md="2" class="mb-4">
+                        <v-btn
+                          class="white--text text-capitalize"
+                          color="#575757"
+                          elevation="6"
+                          x-large
+                          block
+                          raised
+                          rounded-lg
+                          @click="applyFilter"
+                        >
+                          Apply Filter
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </div>
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+        <div v-else>
+          <div class="px-0 my-1">
+            <div>
+              <v-card class="px-7 pt-7 mt-11 pb-1" style="border-radius: 15px;">
+                <v-row>
+                  <v-col cols="12" md="3">
+                    <v-text-field
+                      v-model="selectedSearchText"
+                      class="mx-1"
+                      auto-select-first
+                      clearable
+                      outlined
+                      label="Search"
+                      hide-details
+                      prepend-inner-icon="mdi-magnify-expand"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="3">
+                    <v-select
+                      v-model="selectedCategory"
+                      :items="categories"
+                      label="Categories"
+                      outlined
+                      clearable
+                      hide-details
+                      prepend-inner-icon="mdi-apps"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="2">
+                    <v-select
+                      v-model="selectedDurationType"
+                      :items="durationTypeList"
+                      label="Duration Type"
+                      outlined
+                      clearable
+                      prepend-inner-icon="mdi-calendar-range"
+                      class="custom-select-height"
+                      @change="getDurations"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="2">
+                    <v-select
+                      v-model="selectedDuration"
+                      :items="durations"
+                      label="All Durations"
+                      outlined
+                      clearable
+                      item-text="duration"
+                      item-value="duration"
+                      class="custom-select-height"
+                      prepend-inner-icon="mdi-calendar-range"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="2" class="mb-4">
+                    <v-btn
+                      class="white--text text-capitalize"
+                      color="#575757"
+                      elevation="6"
+                      x-large
+                      block
+                      raised
+                      rounded-lg
+                      @click="applyFilter"
+                    >
+                      Apply Filter
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </div>
+          </div>
         </div>
       </div>
       <div v-if="!$fetchState.pending && adventures.length">
@@ -442,7 +523,8 @@ export default {
         featured_image: null,
         slug: null,
         isFixed: false,
-        scrollThreshold: 100
+        scrollThreshold: 100,
+        isMobile: false
       }
       // selectedCity: null // Initially set to null or an initial selected city ID
     }
@@ -518,9 +600,12 @@ export default {
   },
   mounted () {
     window.addEventListener('scroll', this.handleScroll)
+    this.checkIfMobile()
+    window.addEventListener('resize', this.checkIfMobile)
   },
   beforeDestroy () {
     window.removeEventListener('scroll', this.handleScroll)
+    window.removeEventListener('resize', this.checkIfMobile)
   },
   methods: {
     handleScroll () {
@@ -536,6 +621,9 @@ export default {
       this.snackbar = true
       this.color = color
       this.text = text
+    },
+    checkIfMobile () {
+      this.isMobile = window.innerWidth <= 768
     },
     addSelectedAdventure (adventure) {
       // const body = {
@@ -925,7 +1013,7 @@ export default {
 .regular-version {
   position: sticky;
   top: 1rem;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
   z-index: 2;
 }
 .no-of-guests {
@@ -990,5 +1078,10 @@ export default {
 .custom-select-height .v-input__slot {
   height: 50px !important; /* Make the inner slot match the desired height */
 }
+}
+.mobile-filter {
+    margin-top: 50px;
+    margin-bottom: 10px;
+
 }
 </style>

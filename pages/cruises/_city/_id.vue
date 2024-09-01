@@ -183,8 +183,8 @@
                     :key="j"
                   >
                     <v-card
-                      class="mx-1 my-1"
-                      width="350"
+                      class="ml-1 my-1"
+                      :style="{ width: isMobile ? '270px' : '400px' }"
                     >
                       <v-card-title class="body-1 late--text d-flex flex-wrap justify-space-between mobile-wrap">
                         <div>{{ room.type }}, {{ room.occupancy }}</div>
@@ -201,17 +201,47 @@
                           <p class="text-h6">
                             Includes
                           </p>
-                          <v-chip v-for="inc in room.inclusions" :key="inc" class="ma-1 mobile-chip-font">
-                            {{ inc }}
-                          </v-chip>
+                          <ul v-if="isMobile" class="mobile-inclusions-list">
+                            <li v-for="inc in room.inclusions" :key="inc" class="ma-1 mobile-chip-font">
+                              {{ inc }}
+                            </li>
+                          </ul>
+                          <div v-else>
+                            <v-chip
+                              v-for="inc in room.inclusions"
+                              :key="inc"
+                              class="ma-1 mobile-chip-font"
+                            >
+                              {{ inc }}
+                            </v-chip>
+                          </div>
                         </div>
-                        <div v-if="room.amenities.length">
+                        <!-- <div v-if="room.amenities.length">
                           <p class="text-h6">
                             Amenities
                           </p>
                           <v-chip v-for="amen in room.amenities" :key="amen" class="ma-1 mobile-chip-font">
                             {{ amen }}
                           </v-chip>
+                        </div> -->
+                        <div>
+                          <p class="text-h6">
+                            Amenities
+                          </p>
+                          <ul v-if="isMobile" class="mobile-amenities-list">
+                            <li v-for="amen in room.amenities" :key="amen" class="ma-1 mobile-chip-font">
+                              {{ amen }}
+                            </li>
+                          </ul>
+                          <div v-else>
+                            <v-chip
+                              v-for="amen in room.amenities"
+                              :key="amen"
+                              class="ma-1 mobile-chip-font"
+                            >
+                              {{ amen }}
+                            </v-chip>
+                          </div>
                         </div>
                       </v-card-text>
                       <v-card-actions>
@@ -341,7 +371,8 @@ export default {
       color: '',
       showAlertBar: false,
       alertText: '',
-      initialPrice: 0
+      initialPrice: 0,
+      isMobile: false
     }
   },
   // watch: {
@@ -368,10 +399,14 @@ export default {
     }
   },
   computed: {
-    ...mapState(['cruiseRoomsResults', 'cruiseChosenDate']),
-    isMobile () {
-      return window.innerWidth <= 768
-    }
+    ...mapState(['cruiseRoomsResults', 'cruiseChosenDate'])
+  },
+  mounted () {
+    this.checkIfMobile()
+    window.addEventListener('resize', this.checkIfMobile)
+  },
+  beforeDestroy () {
+    window.removeEventListener('resize', this.checkIfMobile)
   },
   methods: {
     clearData () {
@@ -578,6 +613,9 @@ export default {
         this.text = 'Something went wrong'
         this.loaded = false
       }
+    },
+    checkIfMobile () {
+      this.isMobile = window.innerWidth <= 768
     }
   }
 }
@@ -606,6 +644,12 @@ export default {
     margin-left: -20px;
 }
   }
+::v-deep div.v-slide-group__wrapper {
+    display: block !important;
+    margin-left: 0 !important;
+    flex-direction: column !important;
+    margin-left: -20px;
+}
 /* ::deep .v-image__image--cover {
     background-size: contain !important;
 } */
