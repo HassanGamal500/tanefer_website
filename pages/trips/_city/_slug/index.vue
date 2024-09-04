@@ -73,7 +73,7 @@
         <div class="package-overview-date">
           <v-card class="px-4 pt-7" style="border-radius: 15px;">
             <v-row>
-              <v-col class="pa-1" cols="12" md="12" >
+              <v-col class="pa-1" cols="12" md="12">
                 <v-menu
                   v-model="menu"
                   :close-on-content-click="false"
@@ -151,38 +151,71 @@
                                 </v-col>
                                 <v-col cols="12" lg="4" md="8" sm="8" xs="12">
                                   <span style="float: right;">
-                                    <v-row>
-                                      <v-col v-if="packageDetails.activities[0].type !== 'adventure'" cols="2">
-                                        <v-btn
-                                          style="background-color: transparent; border: 1px solid #4f3316;"
-                                          elevation="4"
-                                          icon
-                                          small
-                                          @click="changeDayNumber(i, '-1')"
-                                        >
-                                          <!-- check for missing + - days number here -->
-                                          <v-icon color="#4f3316">
-                                            mdi-minus
-                                          </v-icon>
-                                        </v-btn>
-                                      </v-col>
-                                      <v-col :cols="packageDetails.activities[0].type !== 'adventure' ? '6' : '12'" class="text-center">
-                                        <span class="quantity text-center font-weight-bold">{{ activity.days_number }} days</span>
-                                      </v-col>
-                                      <v-col v-if="packageDetails.activities[0].type !== 'adventure'" cols="2">
-                                        <v-btn
-                                          style="background-color: #4f3316;"
-                                          color="#4f3316"
-                                          elevation="4"
-                                          icon
-                                          small
-                                          @click="changeDayNumber(i, '1')"
-                                        >
-                                          <v-icon color="#FFF">
-                                            mdi-plus
-                                          </v-icon>
-                                        </v-btn>
-                                      </v-col>
+                                    <v-row class="align-center">
+                                      <!-- Conditional to hide the + days - section when the current or next activity is a cruise -->
+                                      <template v-if="activity.type !== 'cruise' && (packageDetails.activities[i + 1] ? packageDetails.activities[i + 1].type !== 'cruise' : true)">
+                                        <v-col cols="auto" class="d-inline-flex align-center">
+                                          <v-btn
+                                            style="background-color: transparent; border: 1px solid #4f3316;"
+                                            elevation="4"
+                                            icon
+                                            small
+                                            class="d-none d-sm-flex"
+                                            @click="changeDayNumber(i, '-1')"
+                                          >
+                                            <v-icon color="#4f3316">
+                                              mdi-minus
+                                            </v-icon>
+                                          </v-btn>
+                                          <v-btn
+                                            style="background-color: transparent; border: 1px solid #4f3316; font-size: 0.8em;"
+                                            elevation="4"
+                                            icon
+                                            small
+                                            class="d-flex d-sm-none"
+                                            @click="changeDayNumber(i, '-1')"
+                                          >
+                                            <v-icon color="#4f3316">
+                                              mdi-minus
+                                            </v-icon>
+                                          </v-btn>
+                                        </v-col>
+
+                                        <v-col class="d-inline-flex align-center px-2">
+                                          <span class="quantity text-center font-weight-bold" :style="{ fontSize: $vuetify.breakpoint.xsOnly ? '0.8em' : '1em' }">
+                                            {{ activity.days_number }} days
+                                          </span>
+                                        </v-col>
+
+                                        <v-col cols="auto" class="d-inline-flex align-center">
+                                          <v-btn
+                                            style="background-color: #4f3316;"
+                                            color="#4f3316"
+                                            elevation="4"
+                                            icon
+                                            small
+                                            class="d-none d-sm-flex"
+                                            @click="changeDayNumber(i, '1')"
+                                          >
+                                            <v-icon color="#FFF">
+                                              mdi-plus
+                                            </v-icon>
+                                          </v-btn>
+                                          <v-btn
+                                            style="background-color: #4f3316; font-size: 0.8em;"
+                                            color="#4f3316"
+                                            elevation="4"
+                                            icon
+                                            small
+                                            class="d-flex d-sm-none"
+                                            @click="changeDayNumber(i, '1')"
+                                          >
+                                            <v-icon color="#FFF">
+                                              mdi-plus
+                                            </v-icon>
+                                          </v-btn>
+                                        </v-col>
+                                      </template>
                                     </v-row>
                                   </span>
                                 </v-col>
@@ -2358,7 +2391,7 @@
                               <v-expansion-panels>
                                 <v-expansion-panel v-if="adventure.activityExcludes.length">
                                   <v-expansion-panel-header
-                                  class="text-subtitle-2"
+                                    class="text-subtitle-2"
                                   >Excludes</v-expansion-panel-header>
                                   <v-expansion-panel-content>
                                     <v-row>
