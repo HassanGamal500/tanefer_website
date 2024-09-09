@@ -18,7 +18,7 @@
           >
             <v-card
               class="ma-4"
-              height="200"
+              height="96px"
               width="224"
               elevation="0"
               @click="toggle"
@@ -32,14 +32,14 @@
                   <v-img
                     :src="city.cityImage"
                     class="white--text align-center city-image"
-                    gradient="to top, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                    height="200px"
+                    gradient="to top,rgba(245, 245, 220, 0.4) , rgba(210, 180, 140, 1)"
+                    height="96px"
                     width="224px"
                     contain
                     :style="{ marginLeft : '-8px '}"
                     :alt="city.cityImageAlt"
                   >
-                    <div class="text-h4 align-center text-center mx-auto pa-5 font-weight-bold" style="height: 200px; width: 250px; " @click="submit(city)" v-text="city.CityName" />
+                    <div class="text-h5 align-center text-center mx-auto pa-5 font-weight-bold" style="height: 96px; width: 250px; color: #6C4C33; " @click="submit(city)" v-text="city.CityName" />
                     <span class="d-none">{{ city.cityImageCaption }}</span>
                   </v-img>
                 </v-scale-transition>
@@ -130,5 +130,20 @@ export default {
     ::v-deep .v-image__image--contain {
       margin-left: -8px !important;
     }
+
+::v-deep  .v-slide-group-item:hover {
+  box-shadow: none !important;
+}
+
+::v-deep  .v-slide-group-item--active {
+  box-shadow: none !important;
+}
+
+::v-deep  .v-slide-group-item:focus {
+  box-shadow: none !important;
+}
+.v-ripple__container {
+    display:none !important;
+}
 
 </style>

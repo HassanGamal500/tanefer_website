@@ -6,12 +6,6 @@
         <v-card class="mb-5" style="border-radius: 15px;">
           <v-card-text>
             <v-row class="">
-              <v-col v-if="adventure.activityImages.length" cols="12" md="4" class="pt-4">
-                <v-img
-                  :src="adventure.activityImages[0][0]"
-                  class="rounded-lg adventure-img adventure-img-mobile"
-                />
-              </v-col>
               <v-col cols="10" :md="adventure.activityImages.length ? 6 : 10">
                 <div class="cruise-result-trip justify-space-between pt-4">
                   <div>
@@ -26,6 +20,16 @@
                   </div>
                 </div>
               </v-col>
+              <v-col v-if="adventure.activityImages.length" cols="12" md="6" class="pt-4">
+                <v-img
+                  :src="adventure.activityImages[0][0]"
+                  contain="true"
+                  aspect-ratio="1/1"
+                  width="100%"
+                  class="rounded-lg adventure-img adventure-img-mobile"
+                />
+              </v-col>
+
               <!-- <v-col cols="2" md="2">
                   <div class="rounded-circle mt-6" style="border: 2px solid #757575;width: 50px;height: 50px;line-height: 50px;text-align: center;">
                     <v-icon style="font-size: 33px;">mdi-heart-outline</v-icon>

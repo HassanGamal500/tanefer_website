@@ -3,6 +3,7 @@
     <v-img
       :src="tripsCity.cityImage ? tripsCity.cityImage : require(`~/assets/images/${getCityImage(tripsCity.CityName)}`)"
       alt="img"
+      :contain="true"
       class="image-fit"
       max-height="400"
     >
