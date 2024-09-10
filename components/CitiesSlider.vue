@@ -15,6 +15,7 @@
             v-for="city in cities"
             :key="city.id"
             v-slot="{ toggle }"
+            ripple="false"
           >
             <v-card
               class="ma-4"
@@ -32,7 +33,7 @@
                   <v-img
                     :src="city.cityImage"
                     class="white--text align-center city-image"
-                    gradient="to top,rgba(245, 245, 220, 0.4) , rgba(210, 180, 140, 1)"
+                    gradient="to top,rgba(245, 245, 220, 0.5),  rgba(210, 180, 140, 1)"
                     height="96px"
                     width="224px"
                     contain
@@ -131,18 +132,7 @@ export default {
       margin-left: -8px !important;
     }
 
-::v-deep  .v-slide-group-item:hover {
-  box-shadow: none !important;
-}
-
-::v-deep  .v-slide-group-item--active {
-  box-shadow: none !important;
-}
-
-::v-deep  .v-slide-group-item:focus {
-  box-shadow: none !important;
-}
-.v-ripple__container {
+::v-deep .v-ripple__container {
     display:none !important;
 }
 

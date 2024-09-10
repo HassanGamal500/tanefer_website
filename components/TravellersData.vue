@@ -460,7 +460,7 @@ export default {
         passengerFirstName: this.passengerFirstName,
         passengerLastName: this.passengerLastName,
         date_of_birth: this.getYmdFormat(this.dateOfBirthText),
-        passport_number: parseInt(this.passNum),
+        passport_number: this.passNum,
         passport_expire_date: this.getYmdFormat(this.passExpireDateText),
         passport_issue_country: this.issueCountry
         // contact_phone: `${this.code}${this.phone}`
