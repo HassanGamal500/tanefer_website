@@ -48,6 +48,9 @@ export default {
   getGtaCountries () {
     return clientAPI(baseURL).get('/packages/gta-get-country')
   },
+  getAllZones () {
+    return clientAPI(baseURL).get('/packages/search-zones')
+  },
   getGtaCatalogues () {
     return clientAPI(baseURL).get('/packages/gta-get-hotel-catalogues')
   },
@@ -68,6 +71,9 @@ export default {
   },
   getGtaHotels (id) {
     return clientAPI(baseURL).get(`/packages/gta-get-hotel?city_id=${id}`)
+  },
+  getGtaHotelsPerZone (id) {
+    return clientAPI(baseURL).get(`/packages/gta-get-hotel?zone_id=${id}`)
   },
   checkHotelAvailabilities (payload) {
     return clientAPI(baseURL).post('/packages/get-availability', payload)

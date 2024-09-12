@@ -301,7 +301,7 @@ export default {
 <style scoped>
 .main-content {
   padding: 20px;
-  margin-left: -40px;
+  margin-left: -15px;
 
 }
 

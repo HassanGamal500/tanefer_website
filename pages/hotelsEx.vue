@@ -5,7 +5,7 @@
   </div>
   <div v-else>
     <LoadingScreen v-if="isLoading" />
-    <v-container class="lighten-5" fluid style="margin-top: -7rem;">
+    <v-container class="lighten-5" style="margin-top: 10rem;">
       <v-snackbar
         v-model="snackbar"
         :timeout="3000"
@@ -29,50 +29,42 @@
         <div>
           <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
             <v-row>
-              <v-col cols="12" md="4">
-                <v-menu
-                  v-model="menu"
-                  :close-on-content-click="false"
-                  :nudge-width="0"
-                  transition="scale-transition"
-                  offset-y
-                  max-height="300"
-                  :activator="null"
+              <v-col cols="12" md="3">
+                <v-select
+                  v-model="selectedCountry"
+                  :items="gtaCountries"
+                  label="All Countries"
+                  outlined
+                  clearable
+                  item-text="name"
+                  item-value="code"
+                  prepend-inner-icon="mdi-map-marker"
+                  @input="getGtaCities()"
                 >
-                  <template #activator="{ on, attrs }">
-                    <v-text-field
-                      v-model="query"
-                      prepend-inner-icon="mdi-map-marker"
-                      label="Destination"
-                      placeholder="Search for zones..."
-                      solo
-                      outlined
-                      hide-details="auto"
-                      v-bind="attrs"
-                      v-on="on"
-                      @input="handleInput"
-                    />
-                  </template>
-
-                  <v-list style="overflow-y: auto; max-height: 300px;">
-                    <v-list-item
-                      v-for="zone in filteredZones"
-                      :key="zone.id"
-                      @click="handleZoneSelection(zone)"
-                    >
+                  <template v-slot:prepend-item>
+                    <v-list-item>
                       <v-list-item-content>
-                        <v-list-item-title>{{ zone.name }}</v-list-item-title>
-                        <v-list-item-subtitle v-if="zone.parent_name">
-                          {{ zone.parent_name }}
-                          <span v-if="zone.grandparent_name">, {{ zone.grandparent_name }}</span>
-                        </v-list-item-subtitle>
+                        <v-text-field v-model="searchTerm" placeholder="Search" @input="searchCountries"></v-text-field>
                       </v-list-item-content>
                     </v-list-item>
-                  </v-list>
-                </v-menu>
+                    <v-divider class="mt-2"></v-divider>
+                  </template>
+                </v-select>
               </v-col>
-
-              <v-col cols="12" md="2">
+              <v-col cols="12" md="3">
+                <v-select
+                  v-model="selectedCity"
+                  :items="gtaCities"
+                  label="All Cities"
+                  outlined
+                  clearable
+                  item-text="name"
+                  item-value="id"
+                  prepend-inner-icon="mdi-map-marker"
+                  @input="getGtaHotels(index)"
+                />
+              </v-col>
+              <v-col cols="12" md="3">
                 <v-menu
                   v-model="menuStartDate"
                   :close-on-content-click="false"
@@ -92,13 +84,12 @@
                   </template>
                   <v-date-picker
                     ref="picker"
-                    color="late"
                     v-model="hotelStartDate"
                     @input="menuStartDate = false, formatDate(hotelStartDate, 1, 'hotelStartDate')"
                   />
                 </v-menu>
               </v-col>
-              <v-col cols="12" md="2">
+              <v-col cols="12" md="3">
                 <v-menu
                   v-model="menuEndDate"
                   :close-on-content-click="false"
@@ -119,41 +110,40 @@
                   <v-date-picker
                     ref="picker"
                     v-model="hotelEndDate"
-                    color="late"
                     @input="menuEndDate = false, formatDate(hotelEndDate, 1, 'hotelEndDate')"
                   />
                 </v-menu>
               </v-col>
               <v-col cols="12" md="4">
-                <rooms-and-guests @save="setGuests" />
+                <v-text-field
+                  v-model="selectedHotelName"
+                  class=""
+                  auto-select-first
+                  clearable
+                  outlined
+                  label="Hotel Name"
+                  hide-details
+                  prepend-inner-icon="mdi-magnify-expand"
+                />
               </v-col>
-            </v-row>
-            <div>
-              <v-btn class="transparent-btn pa-1 mb-2" @click="toggleOptions">
-                {{ showMoreOptions ? 'Less Options' : 'More Options' }}
-                <v-icon class="ml-2">
-                  {{ showMoreOptions ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                </v-icon>
-              </v-btn>
-
-              <v-row v-if="showMoreOptions">
-                <v-col cols="12" md="4">
-                  <v-text-field
-                    v-model="selectedHotelName"
-                    class=""
-                    auto-select-first
-                    clearable
-                    outlined
-                    label="Hotel Name"
-                    hide-details
-                    prepend-inner-icon="mdi-magnify-expand"
-                  />
-                </v-col>
-                <v-col cols="12" md="4">
+              <v-col cols="12" md="4">
+                <v-select
+                  v-model="selectedHotelCategory"
+                  :items="gtaHotelCatgories"
+                  label="All Hotel Categories"
+                  outlined
+                  clearable
+                  item-text="name"
+                  item-value="type"
+                  hide-details
+                  prepend-inner-icon="mdi-cash-multiple"
+                />
+              </v-col>
+              <!-- <v-col cols="12" md="4">
                   <v-select
-                    v-model="selectedHotelCategory"
-                    :items="gtaHotelCatgories"
-                    label="All Hotel Categories"
+                    v-model="selectedHotelTypeCategory"
+                    :items="gtaHotelTypeCatgories"
+                    label="All Hotel Type Categories"
                     outlined
                     clearable
                     item-text="name"
@@ -161,10 +151,36 @@
                     hide-details
                     prepend-inner-icon="mdi-cash-multiple"
                   />
-                </v-col>
-              </v-row>
-            </div>
-            <v-row>
+                </v-col> -->
+              <!-- <v-col cols="12" md="4">
+                  <v-select
+                    v-model="selectedCategory"
+                    :items="gtaCatgories"
+                    label="All Room Categories"
+                    outlined
+                    clearable
+                    item-text="name"
+                    item-value="type"
+                    hide-details
+                    prepend-inner-icon="mdi-cash-multiple"
+                  />
+                </v-col> -->
+              <!-- <v-col cols="12" md="4">
+                  <v-select
+                    v-model="selectedBoard"
+                    :items="gtaBoards"
+                    label="All Boards"
+                    outlined
+                    clearable
+                    item-text="name"
+                    item-value="type"
+                    hide-details
+                    prepend-inner-icon="mdi-cash-multiple"
+                  />
+                </v-col> -->
+              <v-col cols="12" md="4">
+                <rooms-and-guests @save="setGuests" />
+              </v-col>
               <v-col cols="12" md="12" class="mb-4">
                 <v-btn
                   class="white--text text-capitalize"
@@ -218,30 +234,30 @@
                           </h6>
                         </div>
                         <div class="black--text">
-                          <p v-if="hotel.HotelInfo.Name" class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.Name">
                             <strong>Hotel Name:</strong> {{ hotel.HotelInfo.Name }}
                           </p>
-                          <p v-if="hotel.HotelInfo.Address" class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.Address">
                             <strong>Address:</strong> {{ hotel.HotelInfo.Address }}
                           </p>
-                          <p v-if="hotel.HotelInfo.HotelCategory" class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.HotelCategory">
                             <strong>Category:</strong> {{ hotel.HotelInfo.HotelCategory._ }}
                           </p>
-                          <p v-if="hotel.HotelInfo.HotelType" class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.HotelType">
                             <strong>Type:</strong> {{ hotel.HotelInfo.HotelType._ }}
                           </p>
-                          <p v-if="hotel.HotelOptions.HotelOption.Board" class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelOptions.HotelOption.Board">
                             <strong>Board:</strong> {{ hotel.HotelOptions.HotelOption.Board._ }}
                           </p>
-                          <p v-if="hotel.HotelInfo.Description" class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelInfo.Description">
                             <strong>Description:</strong> {{ hotel.HotelInfo.Description }}
                           </p>
-                          <p v-if="hotel.HotelOptions.HotelOption.Prices" class="" style="font-size: 15px;margin: 2px 0;">
+                          <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotel.HotelOptions.HotelOption.Prices">
                             <strong>Price:</strong> {{ hotel.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotel.HotelOptions.HotelOption.Prices.Price.Currency }}
                           </p>
                           <!-- <a class="" style="font-size: 15px;margin: 2px 0;" @click="showHotels(h)">Change Hotel</a> <v-icon class="mx-2" style="color: black;">
-                            mdi-swap-horizontal
-                          </v-icon> <a class="" style="font-size: 15px;margin: 2px 0;" @click="showRooms(h)">Select Room</a> -->
+                              mdi-swap-horizontal
+                            </v-icon> <a class="" style="font-size: 15px;margin: 2px 0;" @click="showRooms(h)">Select Room</a> -->
                           <v-btn
                             color="primary"
                             class="float-right justify-space-between"
@@ -299,7 +315,7 @@
                                     <span v-if="gta.HotelRooms && gta.HotelRooms.HotelRoom">{{ gta.HotelRooms.HotelRoom.Name }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Adults">- Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Children">- Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}</span>
                                   </span>
                                 </div>
-                                <p v-if="gta.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
+                                <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gta.Prices.Price">
                                   <strong>Prices:</strong> {{ gta.Prices.Price.TotalFixAmounts.Nett }} {{ gta.Prices.Price.Currency }}
                                 </p>
                               </div>
@@ -595,13 +611,13 @@
                         </h6>
                       </div>
                       <div class="black--text">
-                        <p v-if="hotelAvails.HotelInfo.Description" class="" style="font-size: 15px;margin: 2px 0;">
+                        <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelAvails.HotelInfo.Description">
                           <strong>Hotel Description:</strong> {{ hotelAvails.HotelInfo.Description }}
                         </p>
-                        <p v-if="hotelAvails.HotelInfo.Address" class="" style="font-size: 15px;margin: 2px 0;">
+                        <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelAvails.HotelInfo.Address">
                           <strong>Address:</strong> {{ hotelAvails.HotelInfo.Address }}
                         </p>
-                        <p v-if="hotelAvails.HotelInfo.HotelCategory" class="" style="font-size: 15px;margin: 2px 0;">
+                        <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelAvails.HotelInfo.HotelCategory">
                           <strong>Category:</strong> {{ hotelAvails.HotelInfo.HotelCategory._ }}
                         </p>
                         <v-btn
@@ -621,12 +637,12 @@
                             view
                           </v-btn>
                           <!-- <v-btn
-                            color="primary"
-                            class="float-right"
-                            @click="selectHotel(hotelAvails.JPCode, hotelAvails.HotelInfo.Name)"
-                          >
-                            Select Hotel
-                          </v-btn> -->
+                              color="primary"
+                              class="float-right"
+                              @click="selectHotel(hotelAvails.JPCode, hotelAvails.HotelInfo.Name)"
+                            >
+                              Select Hotel
+                            </v-btn> -->
                         </div>
                       </div>
                     </div>
@@ -667,7 +683,7 @@
                                     <span v-if="gta.HotelRooms && gta.HotelRooms.HotelRoom">{{ gta.HotelRooms.HotelRoom.Name }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Adults">- Adults: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Adults }}</span> <span v-if="gta.HotelRooms.HotelRoom.RoomOccupancy && gta.HotelRooms.HotelRoom.RoomOccupancy.Children">- Children: {{ gta.HotelRooms.HotelRoom.RoomOccupancy.Children }}</span>
                                   </span>
                                 </div>
-                                <p v-if="gta.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
+                                <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gta.Prices.Price">
                                   <strong>Prices:</strong> {{ gta.Prices.Price.TotalFixAmounts.Nett }} {{ gta.Prices.Price.Currency }}
                                 </p>
                               </div>
@@ -1055,21 +1071,21 @@
                       </v-row>
                     </div>
                     <div class="black--text">
-                      <p v-if="gtaHotelDetails.Address.Address" class="" style="font-size: 15px;margin: 2px 0;">
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.Address.Address">
                         <strong>Address:</strong> {{ gtaHotelDetails.Address.Address }}
                       </p>
-                      <p v-if="gtaHotelDetails.Address && gtaHotelDetails.Address.PostalCode" class="" style="font-size: 15px;margin: 2px 0;">
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.Address && gtaHotelDetails.Address.PostalCode">
                         <strong>Postal Code:</strong> {{ gtaHotelDetails.Address.PostalCode }}
                       </p>
-                      <p v-if="gtaHotelDetails.HotelCategory" class="" style="font-size: 15px;margin: 2px 0;">
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.HotelCategory">
                         <strong>Category:</strong> {{ gtaHotelDetails.HotelCategory._ }}
                       </p>
-                      <p v-if="gtaHotelDetails.HotelType" class="" style="font-size: 15px;margin: 2px 0;">
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelDetails.HotelType">
                         <strong>Type:</strong> {{ gtaHotelDetails.HotelType._ }}
                       </p>
                       <!-- <p class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Hotel Chain:</strong> {{ gtaHotelDetails.HotelChain.Name }}
-                      </p> -->
+                          <strong>Hotel Chain:</strong> {{ gtaHotelDetails.HotelChain.Name }}
+                        </p> -->
                       <p class="" style="font-size: 15px;margin: 2px 0;">
                         <strong>Descriptions:</strong>
                         <span v-if="Array.isArray(gtaHotelDetails.Descriptions.Description)">
@@ -1083,7 +1099,7 @@
                           {{ gtaHotelDetails.Descriptions.Description._ }}
                         </span>
                       </p>
-                      <div v-if="gtaHotelDetails.Features" class="trips-cityname" style="margin: 10px 0;">
+                      <div class="trips-cityname" style="margin: 10px 0;" v-if="gtaHotelDetails.Features">
                         <v-expansion-panels>
                           <v-expansion-panel v-if="gtaHotelDetails.Features.Feature.length">
                             <v-expansion-panel-header>
@@ -1098,9 +1114,9 @@
                         </v-expansion-panels>
                       </div>
                       <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelAvailDetails.HotelOptions && gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price">
-                        <strong>Price:</strong> {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }}  {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.Currency }}
-                      </p> -->
-                      <p v-if="gtaHotelAvailDetails.HotelOptions.HotelOption.CancellationPolicy" class="" style="font-size: 15px;margin: 2px 0;">
+                          <strong>Price:</strong> {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }}  {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.Currency }}
+                        </p> -->
+                      <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelAvailDetails.HotelOptions.HotelOption.CancellationPolicy">
                         <strong>Cancellation Policy:</strong> {{ gtaHotelAvailDetails.HotelOptions.HotelOption.CancellationPolicy.Description }}
                       </p>
                     </div>
@@ -1162,9 +1178,9 @@
                                 </span>
                               </p>
                               <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">
-                                <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
-                              </p> -->
+                                  <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
+                                  <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
+                                </p> -->
                               <p v-if="hotelOption.AdditionalElements && hotelOption.AdditionalElements.HotelOffers" class="" style="font-size: 18px;margin: 2px 0;">
                                 <strong>Hotel Offer:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
                                 <strong>Hotel Offer Description:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
@@ -1349,20 +1365,15 @@
   </div>
 </template>
 <script>
-import _ from 'lodash'
-// import axios from 'axios'
-import clientAPI from '../../services/axiosConfig'
 import LoadingScreen from '~/components/LoadingScreen.vue'
 import hotelsServices from '~/services/HotelsServices'
-
 export default {
   components: {
     LoadingScreen
   },
   data () {
     return {
-      comingSoon: true,
-      showMoreOptions: false,
+      comingSoon: false,
       metaData: {
         page_name: null,
         seo_title: null,
@@ -1411,7 +1422,7 @@ export default {
       selectedCity: null,
       gtaHotels: [],
       gtaZones: [],
-      // selectedZone: null,
+      selectedZone: null,
       gtaHotelName: '',
       gtaHotelCatgories: [],
       gtaHotelTypeCatgories: [],
@@ -1489,13 +1500,7 @@ export default {
       searchTerm: '',
       gtaCountriesCopy: [],
       listGtaHotelDetails: [],
-      gtaHotelAvailDetails: '',
-      query: '',
-      results: [],
-      filteredZones: [],
-      menu: false,
-      selectedZone: null,
-      perZoneHotels: []
+      gtaHotelAvailDetails: ''
     }
   },
   head () {
@@ -1565,11 +1570,6 @@ export default {
       return [{ _: 'All', Type: 'all' }, ...this.boards]
     }
   },
-  watch: {
-    query (newQuery) {
-      this.handleInput()
-    }
-  },
   mounted () {
     this.gtaCountriesCopy = [...this.gtaCountries]
   },
@@ -1583,49 +1583,7 @@ export default {
     await this.getGtaBoards()
   },
   methods: {
-
-    handleInput: _.debounce(function () {
-      if (this.query.length >= 3) {
-        this.searchZones()
-        this.menu = true
-      } else {
-        this.filteredZones = []
-        this.menu = false
-      }
-    }, 300),
-
-    async searchZones () {
-      try {
-        const response = await clientAPI('https://api.tanefer.com/api/v2').get('/packages/search-zones', {
-          params: {
-            query: this.query
-          }
-        })
-        this.filteredZones = response.data
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error)
-      }
-    },
-    handleZoneSelection (zone) {
-      this.selectZone(zone)
-      // const testZoneId = 1
-      // this.getGtaHotelsPerZone(testZoneId)
-
-      this.getGtaHotelsPerZone(zone.id)
-
-      alert(zone.id)
-    },
-    selectZone (zone) {
-      this.selectedZone = zone
-      this.query = zone.name
-      this.menu = false
-    },
-    toggleOptions () {
-      this.showMoreOptions = !this.showMoreOptions
-    },
     setGuests (rooms) {
-      // eslint-disable-next-line no-console
       console.log(rooms)
       this.room_count = rooms.length
       // Assuming rooms is an array of objects
@@ -1743,51 +1701,19 @@ export default {
         this.loaded = false
       }
     },
-    // async getGtaHotels (index) {
-    //   // console.log(index)
-    //   const cityId = this.selectedCity
-    //   try {
-    //     const promise = hotelsServices.getGtaHotels(cityId)
-    //     const response = await promise
-    //     const results = response.data
-    //     if (results.status === 200) {
-    //       // this.$set(this.gtaHotels, index, results.data)
-    //       this.gtaHotels = results.data
-    //     }
-    //   } catch (error) {
-    //     this.loaded = false
-    //   }
-    // },
-    async getGtaHotelsPerZone (zoneId) {
+    async getGtaHotels (index) {
+      // console.log(index)
+      const cityId = this.selectedCity
       try {
-        const response = await hotelsServices.getGtaHotelsPerZone(zoneId) // Use zoneId instead of cityId
+        const promise = hotelsServices.getGtaHotels(cityId)
+        const response = await promise
         const results = response.data
         if (results.status === 200) {
-          this.gtaHotels = results.data // Store the retrieved hotels
+          // this.$set(this.gtaHotels, index, results.data)
+          this.gtaHotels = results.data
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching hotels:', error)
-      }
-    },
-
-    async searchHotelsByZone () {
-      if (this.selectedZone) {
-        try {
-          // Make an API request to search hotels by zone
-          const response = await this.clientAPI('https://api.tanefer.com/api/v2').get('/api/hotels/search-by-zone', {
-            params: { jpd_code: this.selectedZone.jpd_code }
-          })
-
-          // Assign the returned hotels to the data property
-          this.hotels = response.data.perZoneHotels
-        } catch (error) {
-        // eslint-disable-next-line no-console
-          console.error('Error fetching hotels:', error)
-        }
-      } else {
-        // eslint-disable-next-line no-console
-        console.error('No zone selected')
+        this.loaded = false
       }
     },
     async showHotelDetailsObject (hotelIndex) {
@@ -2479,33 +2405,22 @@ export default {
 }
 </script>
 
-<style scoped>
-  .coming-soon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    text-align: center;
-  }
+  <style scoped>
+    .coming-soon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+    }
 
-  .coming-soon h1 {
-    font-size: 3em;
-    margin-bottom: 0.5em;
-  }
+    .coming-soon h1 {
+      font-size: 3em;
+      margin-bottom: 0.5em;
+    }
 
-  .coming-soon p {
-    font-size: 1.5em;
-  }
-
-  .transparent-btn {
-  background-color: transparent !important;
-  color: #000;
-  box-shadow: none !important;
-  text-transform: none;
-}
-
-.v-btn:hover {
-  border: 1px solid rgba(0, 0, 0, 0.1) !important;
-}
-</style>
+    .coming-soon p {
+      font-size: 1.5em;
+    }
+  </style>
