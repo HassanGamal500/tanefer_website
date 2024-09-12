@@ -1609,25 +1609,17 @@ export default {
     },
     handleZoneSelection (zone) {
       this.selectZone(zone)
-
-      // this.getGtaHotelsPerZone(zone.id)
-      // alert(zone.id)
-
       if (zone.area_type === 'CTY') {
-        // Search by city if the area_type is "CTY"
         this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
           this.getGtaHotelsPerCity(cityId)
         })
       } else if (zone.area_type === 'REG') {
-        // Search using the REG area_type logic (address-based search)
         this.searchHotelsByAddress(zone.name)
       } else {
-        // Default search using zone_id
         this.getGtaHotelsPerZone(zone.id)
       }
     },
     async getCityIdByJpdCode (jpdCode) {
-      // Fetch the city ID using the jpd_code in gta_cities table
       try {
         const response = await hotelsServices.getCityByJpdCode(jpdCode)
         return response.data.city_id
@@ -1638,7 +1630,6 @@ export default {
     },
 
     async getGtaHotelsPerCity (cityId) {
-      // Fetch hotels by city_id in gta_hotel_portfolios
       try {
         const response = await hotelsServices.getGtaHotelsByCity(cityId)
         this.gtaHotels = response.data.data
@@ -1649,7 +1640,6 @@ export default {
     },
 
     async searchHotelsByAddress (addressFragment) {
-      // Fetch hotels based on address matching (for REG area_type)
       try {
         const response = await hotelsServices.searchHotelsByAddress(addressFragment)
         this.gtaHotels = response.data.data
@@ -1660,7 +1650,6 @@ export default {
     },
 
     async getGtaHotelsPerZone (zoneId) {
-      // Default search using zone_id
       try {
         const response = await hotelsServices.getGtaHotelsPerZone(zoneId)
         this.gtaHotels = response.data.data
