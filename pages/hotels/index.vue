@@ -1361,7 +1361,7 @@ export default {
   },
   data () {
     return {
-      comingSoon: true,
+      comingSoon: false,
       showMoreOptions: false,
       metaData: {
         page_name: null,
@@ -1609,12 +1609,65 @@ export default {
     },
     handleZoneSelection (zone) {
       this.selectZone(zone)
-      // const testZoneId = 1
-      // this.getGtaHotelsPerZone(testZoneId)
 
-      this.getGtaHotelsPerZone(zone.id)
+      // this.getGtaHotelsPerZone(zone.id)
+      // alert(zone.id)
 
-      alert(zone.id)
+      if (zone.area_type === 'CTY') {
+        // Search by city if the area_type is "CTY"
+        this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
+          this.getGtaHotelsPerCity(cityId)
+        })
+      } else if (zone.area_type === 'REG') {
+        // Search using the REG area_type logic (address-based search)
+        this.searchHotelsByAddress(zone.name)
+      } else {
+        // Default search using zone_id
+        this.getGtaHotelsPerZone(zone.id)
+      }
+    },
+    async getCityIdByJpdCode (jpdCode) {
+      // Fetch the city ID using the jpd_code in gta_cities table
+      try {
+        const response = await hotelsServices.getCityByJpdCode(jpdCode)
+        return response.data.city_id
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching city ID:', error)
+      }
+    },
+
+    async getGtaHotelsPerCity (cityId) {
+      // Fetch hotels by city_id in gta_hotel_portfolios
+      try {
+        const response = await hotelsServices.getGtaHotelsByCity(cityId)
+        this.gtaHotels = response.data.data
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching hotels by city:', error)
+      }
+    },
+
+    async searchHotelsByAddress (addressFragment) {
+      // Fetch hotels based on address matching (for REG area_type)
+      try {
+        const response = await hotelsServices.searchHotelsByAddress(addressFragment)
+        this.gtaHotels = response.data.data
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching hotels by address:', error)
+      }
+    },
+
+    async getGtaHotelsPerZone (zoneId) {
+      // Default search using zone_id
+      try {
+        const response = await hotelsServices.getGtaHotelsPerZone(zoneId)
+        this.gtaHotels = response.data.data
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching hotels by zone:', error)
+      }
     },
     selectZone (zone) {
       this.selectedZone = zone
@@ -1758,38 +1811,38 @@ export default {
     //     this.loaded = false
     //   }
     // },
-    async getGtaHotelsPerZone (zoneId) {
-      try {
-        const response = await hotelsServices.getGtaHotelsPerZone(zoneId) // Use zoneId instead of cityId
-        const results = response.data
-        if (results.status === 200) {
-          this.gtaHotels = results.data // Store the retrieved hotels
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching hotels:', error)
-      }
-    },
+    // async getGtaHotelsPerZone (zoneId) {
+    //   try {
+    //     const response = await hotelsServices.getGtaHotelsPerZone(zoneId) // Use zoneId instead of cityId
+    //     const results = response.data
+    //     if (results.status === 200) {
+    //       this.gtaHotels = results.data // Store the retrieved hotels
+    //     }
+    //   } catch (error) {
+    //     // eslint-disable-next-line no-console
+    //     console.error('Error fetching hotels:', error)
+    //   }
+    // },
 
-    async searchHotelsByZone () {
-      if (this.selectedZone) {
-        try {
-          // Make an API request to search hotels by zone
-          const response = await this.clientAPI('https://api.tanefer.com/api/v2').get('/api/hotels/search-by-zone', {
-            params: { jpd_code: this.selectedZone.jpd_code }
-          })
+    // async searchHotelsByZone () {
+    //   if (this.selectedZone) {
+    //     try {
+    //       // Make an API request to search hotels by zone
+    //       const response = await this.clientAPI('https://api.tanefer.com/api/v2').get('/api/hotels/search-by-zone', {
+    //         params: { jpd_code: this.selectedZone.jpd_code }
+    //       })
 
-          // Assign the returned hotels to the data property
-          this.hotels = response.data.perZoneHotels
-        } catch (error) {
-        // eslint-disable-next-line no-console
-          console.error('Error fetching hotels:', error)
-        }
-      } else {
-        // eslint-disable-next-line no-console
-        console.error('No zone selected')
-      }
-    },
+    //       // Assign the returned hotels to the data property
+    //       this.hotels = response.data.perZoneHotels
+    //     } catch (error) {
+    //     // eslint-disable-next-line no-console
+    //       console.error('Error fetching hotels:', error)
+    //     }
+    //   } else {
+    //     // eslint-disable-next-line no-console
+    //     console.error('No zone selected')
+    //   }
+    // },
     async showHotelDetailsObject (hotelIndex) {
       const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
       try {
@@ -1844,16 +1897,10 @@ export default {
         formData.append('hotel_name', this.selectedHotelName)
         formData.append('hotel_category', this.selectedHotelCategory)
         formData.append('hotel_type_category', this.selectedHotelTypeCategory)
-        const hotels = this.gtaHotels
+        const hotels = this.gtaHotels || []
         for (let i = 0; i < hotels.length; i++) {
           formData.append('hotels[' + i + ']', hotels[i].Jpd_code)
         }
-        // if (hotels.length > 1) {
-        //   formData.append('hotels[' + 0 + ']', 'JP046300')
-        //   formData.append('hotels[' + 1 + ']', 'JP077424')
-        // } else {
-        // formData.append('hotels[' + 0 + ']', 'JP046300')
-        // }
         formData.append('adults', this.travellers)
         formData.append('children', this.children)
         if (this.ageSelects.length > 0) {

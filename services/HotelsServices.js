@@ -75,6 +75,23 @@ export default {
   getGtaHotelsPerZone (id) {
     return clientAPI(baseURL).get(`/packages/gta-get-hotel?zone_id=${id}`)
   },
+  // hotelsServices.js
+  getCityByJpdCode (jpdCode) {
+    return clientAPI(baseURL).get('/packages/city-by-jpd-code', { params: { jpd_code: jpdCode } })
+  },
+
+  getGtaHotelsByCity (cityId) {
+    return clientAPI(baseURL).get('/packages/gta-get-hotel', { params: { city_id: cityId } })
+  },
+
+  searchHotelsByAddress (addressFragment) {
+    return clientAPI(baseURL).get('/packages/search-hotels-by-address', { params: { address_fragment: addressFragment } })
+  },
+
+  // getGtaHotelsPerZone(zoneId) {
+  //   return clientAPI.get(`/packages/gta-get-hotel`, { params: { zone_id: zoneId } });
+  // }
+
   checkHotelAvailabilities (payload) {
     return clientAPI(baseURL).post('/packages/get-availability', payload)
   },
