@@ -1801,7 +1801,7 @@ export default {
           }
         }
         try {
-          const promise = hotelsServices.checkHotelAvailabilities(formData)
+          const promise = hotelsServices.checkHotelAvailabilitiesEx(formData)
           const response = await promise
           // console.log(response)
           const results = response.data.AvailabilityRS

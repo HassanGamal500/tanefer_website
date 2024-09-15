@@ -1,3 +1,4 @@
+<!-- eslint-disable indent -->
 <template>
   <div v-if="comingSoon" class="coming-soon">
     <h1>Coming Soon</h1>
@@ -92,8 +93,8 @@
                   </template>
                   <v-date-picker
                     ref="picker"
-                    color="late"
                     v-model="hotelStartDate"
+                    color="late"
                     @input="menuStartDate = false, formatDate(hotelStartDate, 1, 'hotelStartDate')"
                   />
                 </v-menu>
@@ -267,7 +268,7 @@
               <v-card
                 class="mb-12"
               >
-                <div id="selectedRoomtargetDiv"></div>
+                <div id="selectedRoomtargetDiv" />
                 <div v-for="(gta, g) in selectedRoomGtaArray" :key="g">
                   <v-row class="" style="border: 3px solid #4F3316;padding: 5px;margin: 10px 0;border-radius: 10px;">
                     <v-col cols="12" md="12" class="pt-4">
@@ -1041,7 +1042,7 @@
                         {{ gtaHotelDetails.HotelName }}
                       </h6>
                     </div>
-                    <div v-if="gtaHotelDetails.Images && gtaHotelDetails.Images.Image.length > 0" >
+                    <div v-if="gtaHotelDetails.Images && gtaHotelDetails.Images.Image.length > 0">
                       <v-row>
                         <v-col cols="12" md="7">
                           <v-carousel hide-delimiters height="200">
@@ -1613,7 +1614,7 @@ export default {
         this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
           this.getGtaHotelsPerCity(cityId)
         })
-      } else if (zone.area_type === 'REG') {
+      } else if (zone.area_type === 'REG' || zone.area_type === 'LOC') {
         this.searchHotelsByAddress(zone.name)
       } else {
         this.getGtaHotelsPerZone(zone.id)
@@ -1850,109 +1851,293 @@ export default {
         this.isLoading = false
       }
     },
+    // async checkHotelAvailability () {
+    //   if (this.travellers === 0) {
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'Please select Number of Adult'
+    //     this.loaded = false
+    //   } else if (this.hotelStartDate === null || this.hotelEndDate === null) {
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'Please select Start Date and End Date'
+    //     this.loaded = false
+    //   } else {
+    //     this.isLoading = true
+    //     this.hotelAvailsArray = []
+    //     this.hotelAvails = null
+    //     this.selectedRoomGtaArray = []
+    //     this.getRatePlanCodeArray = []
+    //     this.selectedHotelCodeArray = []
+    //     this.selectedHotelJPCodeArray = []
+    //     this.selectedHotelJPDCodeArray = []
+    //     this.selectedRoomGta = null
+    //     this.getRatePlanCode = null
+    //     this.hotelPrices = null
+    //     this.selectedHotelCode = null
+    //     this.selectedHotelJPCode = null
+    //     this.selectedHotelJPDCode = null
+    //     this.getbookingRuleArray = []
+    //     this.confirmedSelectedRoom = false
+
+    //     const formData = new FormData()
+    //     formData.append('start_date', this.hotelStartDate)
+    //     formData.append('end_date', this.hotelEndDate)
+    //     formData.append('board', this.selectedBoard)
+    //     formData.append('hotel_name', this.selectedHotelName)
+    //     formData.append('hotel_category', this.selectedHotelCategory)
+    //     formData.append('hotel_type_category', this.selectedHotelTypeCategory)
+    //     const hotels = this.gtaHotels || []
+    //     for (let i = 0; i < hotels.length; i++) {
+    //       formData.append('hotels[' + i + ']', hotels[i].Jpd_code)
+    //     }
+    //     formData.append('adults', this.travellers)
+    //     formData.append('children', this.children)
+    //     if (this.ageSelects.length > 0) {
+    //       for (let x = 0; x < this.ageSelects.length; x++) {
+    //         formData.append('ages[' + x + ']', this.ageSelects[x].age)
+    //       }
+    //     }
+    //     if (this.rooms.length > 0) {
+    //       for (let r = 0; r < this.rooms.length; r++) {
+    //         formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+    //         formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+    //         if (this.rooms[r].ageSelects.length > 0) {
+    //           for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+    //             formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx])
+    //           }
+    //         }
+    //         // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+    //         formData.append('rooms[' + r + '][category]', this.selectedCategory)
+    //       }
+    //     }
+    //     // try {
+    //     //   const promise = hotelsServices.checkHotelAvailabilities(formData)
+    //     //   const response = await promise
+    //     //   // console.log(response)
+    //     //   const results = response.data.AvailabilityRS
+    //     //   if (results.Errors !== undefined) {
+    //     //     this.snackbar = true
+    //     //     this.color = 'error'
+    //     //     this.text = results.Errors.Error.Text
+    //     //     this.loaded = false
+    //     //     this.checkResponseCode = false
+    //     //     this.isLoading = false
+    //     //   } else {
+    //     //     this.isAvailable = true
+    //     //     const hotelResults = results.Results.HotelResult
+    //     //     // console.log(hotelResults)
+    //     //     if (hotelResults.length > 1) {
+    //     //       for (let index = 0; index < hotelResults.length; index++) {
+    //     //         this.hotelAvailsArray.push(hotelResults[index])
+    //     //         // this.listGtaHotelDetails.push(hotelResults[index])
+    //     //         this.selectedHotelStartDate = this.hotelStartDate
+    //     //         this.selectedHotelEndDate = this.hotelEndDate
+    //     //       }
+    //     //       // console.log('hotelResults')
+    //     //       // console.log(hotelResults)
+    //     //       this.listGtaHotelDetails = hotelResults
+    //     //       this.hotelAvails = hotelResults[0]
+    //     //     } else {
+    //     //       this.hotelAvails = hotelResults
+    //     //     }
+    //     //     this.checkResponseCode = true
+    //     //     this.isLoading = false
+    //     //   }
+    //     // } catch (error) {
+    //     //   this.snackbar = true
+    //     //   this.color = 'error'
+    //     //   this.text = 'Something went wrong'
+    //     //   this.loaded = false
+    //     //   this.checkResponseCode = false
+    //     //   this.isLoading = false
+    //     // }
+    //     try {
+    //       // Initialize page and page size
+    //       let page = 1
+    //       const pageSize = 500 // Adjust based on your needs
+    //       let totalPages = 1
+
+    //       do {
+    //         const promise = hotelsServices.checkHotelAvailabilities(formData, page, pageSize) // Pass page and pageSize
+    //         const response = await promise
+
+    //         const results = response.data.AvailabilityRS
+    //         if (results.Errors !== undefined) {
+    //           this.snackbar = true
+    //           this.color = 'error'
+    //           this.text = results.Errors.Error.Text
+    //           this.loaded = false
+    //           this.checkResponseCode = false
+    //           this.isLoading = false
+    //           break
+    //         } else {
+    //           this.isAvailable = true
+    //           const hotelResults = results.Results.HotelResult
+
+    //           if (hotelResults.length > 1) {
+    //             for (let index = 0; index < hotelResults.length; index++) {
+    //               this.hotelAvailsArray.push(hotelResults[index])
+    //             }
+    //             this.selectedHotelStartDate = this.hotelStartDate
+    //             this.selectedHotelEndDate = this.hotelEndDate
+    //             this.listGtaHotelDetails = [...this.listGtaHotelDetails, ...hotelResults] // Append results to the array
+    //           } else {
+    //             this.hotelAvails = hotelResults
+    //           }
+
+    //           // Assuming the backend response has a total page count
+    //           totalPages = results.Pagination?.total_pages || 1
+    //         }
+
+    //         // Increment page number to fetch the next set of results
+    //         page++
+
+    //         // Stop loading if this was the last page
+    //         if (page > totalPages) {
+    //           this.checkResponseCode = true
+    //           this.isLoading = false
+    //         }
+    //       } while (page <= totalPages)
+    //     } catch (error) {
+    //       // eslint-disable-next-line no-console
+    //       console.error(error)
+    //       this.snackbar = true
+    //       this.color = 'error'
+    //       this.text = 'An error occurred while fetching availability.'
+    //       this.loaded = false
+    //       this.checkResponseCode = false
+    //       this.isLoading = false
+    //     }
+    //   }
+    // },
     async checkHotelAvailability () {
       if (this.travellers === 0) {
         this.snackbar = true
         this.color = 'error'
-        this.text = 'Please select Number of Adult'
+        this.text = 'Please select Number of Adults'
         this.loaded = false
+        return
       } else if (this.hotelStartDate === null || this.hotelEndDate === null) {
         this.snackbar = true
         this.color = 'error'
         this.text = 'Please select Start Date and End Date'
         this.loaded = false
-      } else {
-        this.isLoading = true
-        this.hotelAvailsArray = []
-        this.hotelAvails = null
-        this.selectedRoomGtaArray = []
-        this.getRatePlanCodeArray = []
-        this.selectedHotelCodeArray = []
-        this.selectedHotelJPCodeArray = []
-        this.selectedHotelJPDCodeArray = []
-        this.selectedRoomGta = null
-        this.getRatePlanCode = null
-        this.hotelPrices = null
-        this.selectedHotelCode = null
-        this.selectedHotelJPCode = null
-        this.selectedHotelJPDCode = null
-        this.getbookingRuleArray = []
-        this.confirmedSelectedRoom = false
+        return
+      }
 
-        const formData = new FormData()
-        formData.append('start_date', this.hotelStartDate)
-        formData.append('end_date', this.hotelEndDate)
-        formData.append('board', this.selectedBoard)
-        formData.append('hotel_name', this.selectedHotelName)
-        formData.append('hotel_category', this.selectedHotelCategory)
-        formData.append('hotel_type_category', this.selectedHotelTypeCategory)
-        const hotels = this.gtaHotels || []
-        for (let i = 0; i < hotels.length; i++) {
-          formData.append('hotels[' + i + ']', hotels[i].Jpd_code)
+      this.isLoading = true
+      this.hotelAvailsArray = []
+      this.hotelAvails = null
+      this.selectedRoomGtaArray = []
+      this.getRatePlanCodeArray = []
+      this.selectedHotelCodeArray = []
+      this.selectedHotelJPCodeArray = []
+      this.selectedHotelJPDCodeArray = []
+      this.selectedRoomGta = null
+      this.getRatePlanCode = null
+      this.hotelPrices = null
+      this.selectedHotelCode = null
+      this.selectedHotelJPCode = null
+      this.selectedHotelJPDCode = null
+      this.getbookingRuleArray = []
+      this.confirmedSelectedRoom = false
+
+      const formData = new FormData()
+      formData.append('start_date', this.hotelStartDate)
+      formData.append('end_date', this.hotelEndDate)
+      formData.append('board', this.selectedBoard || '')
+      formData.append('hotel_name', this.selectedHotelName || '')
+      formData.append('hotel_category', this.selectedHotelCategory || '')
+      formData.append('hotel_type_category', this.selectedHotelTypeCategory || '')
+
+      const hotels = this.gtaHotels || []
+      for (let i = 0; i < hotels.length; i++) {
+        formData.append(`hotels[${i}]`, hotels[i].Jpd_code)
+      }
+
+      formData.append('adults', this.travellers)
+      formData.append('children', this.children || 0)
+
+      if (this.ageSelects.length > 0) {
+        for (let x = 0; x < this.ageSelects.length; x++) {
+          formData.append(`ages[${x}]`, this.ageSelects[x].age)
         }
-        formData.append('adults', this.travellers)
-        formData.append('children', this.children)
-        if (this.ageSelects.length > 0) {
-          for (let x = 0; x < this.ageSelects.length; x++) {
-            formData.append('ages[' + x + ']', this.ageSelects[x].age)
-          }
-        }
-        if (this.rooms.length > 0) {
-          for (let r = 0; r < this.rooms.length; r++) {
-            formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-            formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-            if (this.rooms[r].ageSelects.length > 0) {
-              for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-                formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx])
-              }
+      }
+
+      if (this.rooms && this.rooms.length > 0) {
+        for (let r = 0; r < this.rooms.length; r++) {
+          formData.append(`rooms[${r}][travellers]`, this.rooms[r].travelers || 1)
+          formData.append(`rooms[${r}][children]`, this.rooms[r].children || 0)
+          if (this.rooms[r].ageSelects && this.rooms[r].ageSelects.length > 0) {
+            for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+              formData.append(`rooms[${r}][ages][${rx}]`, this.rooms[r].ageSelects[rx])
             }
-            // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-            formData.append('rooms[' + r + '][category]', this.selectedCategory)
           }
+          formData.append(`rooms[${r}][category]`, this.selectedCategory || '')
         }
-        try {
-          const promise = hotelsServices.checkHotelAvailabilities(formData)
+      }
+
+      try {
+        let page = 1
+        const pageSize = 500
+        let totalPages = 1
+
+        do {
+          const promise = hotelsServices.checkHotelAvailabilities(formData, page, pageSize)
           const response = await promise
-          // console.log(response)
-          const results = response.data.AvailabilityRS
-          if (results.Errors !== undefined) {
+
+          // Log the full response to ensure structure is as expected
+          // eslint-disable-next-line no-console
+          console.log('Full Response:', response.data)
+
+          // Access AvailabilityRS correctly
+          const availabilityRS = response?.data?.data?.AvailabilityRS
+
+          // Check if availabilityRS exists and handle errors
+          if (!availabilityRS || availabilityRS?.Errors !== undefined) {
+          // eslint-disable-next-line no-console
+            console.log('Error in availabilityRS:', availabilityRS?.Errors)
             this.snackbar = true
             this.color = 'error'
-            this.text = results.Errors.Error.Text
+            this.text = availabilityRS?.Errors?.Error?.Text || 'An error occurred while fetching availability.'
             this.loaded = false
             this.checkResponseCode = false
             this.isLoading = false
+            break
           } else {
             this.isAvailable = true
-            const hotelResults = results.Results.HotelResult
-            // console.log(hotelResults)
-            if (hotelResults.length > 1) {
-              for (let index = 0; index < hotelResults.length; index++) {
-                this.hotelAvailsArray.push(hotelResults[index])
-                // this.listGtaHotelDetails.push(hotelResults[index])
-                this.selectedHotelStartDate = this.hotelStartDate
-                this.selectedHotelEndDate = this.hotelEndDate
-              }
-              // console.log('hotelResults')
-              // console.log(hotelResults)
-              this.listGtaHotelDetails = hotelResults
-              this.hotelAvails = hotelResults[0]
-            } else {
-              this.hotelAvails = hotelResults
+
+            // Access Results and HotelResult safely
+            const results = availabilityRS?.Results?.HotelResult || []
+
+            if (results.length > 0) {
+              this.hotelAvailsArray.push(...results) // Append results safely
+              this.listGtaHotelDetails = [...this.listGtaHotelDetails, ...results] // Avoid duplicates
             }
+
+            totalPages = availabilityRS?.pagination?.total_pages || 1 // Fix totalPages access
+          }
+
+          page++ // Increment the page
+
+          if (page > totalPages) {
             this.checkResponseCode = true
             this.isLoading = false
           }
-        } catch (error) {
-          this.snackbar = true
-          this.color = 'error'
-          this.text = 'Something went wrong'
-          this.loaded = false
-          this.checkResponseCode = false
-          this.isLoading = false
-        }
+        } while (page <= totalPages)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching availability:', error)
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'An error occurred while fetching availability.'
+        this.loaded = false
+        this.checkResponseCode = false
+        this.isLoading = false
       }
     },
+
     showHotelDetails (hotelIndex) {
       this.gtaHotelDetails = this.listGtaHotelDetails[hotelIndex]
       this.showHotelGtaDetails = true

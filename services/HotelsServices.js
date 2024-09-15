@@ -92,7 +92,12 @@ export default {
   //   return clientAPI.get(`/packages/gta-get-hotel`, { params: { zone_id: zoneId } });
   // }
 
-  checkHotelAvailabilities (payload) {
+  checkHotelAvailabilitiesEx (payload) {
+    return clientAPI(baseURL).post('/packages/get-availability', payload)
+  },
+  checkHotelAvailabilities (payload, page = 1, pageSize = 500) {
+    payload.page = page
+    payload.page_size = pageSize
     return clientAPI(baseURL).post('/packages/get-availability', payload)
   },
   getGtaHotelDetails (jpdCode) {
