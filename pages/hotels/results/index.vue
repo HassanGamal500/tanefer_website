@@ -70,9 +70,14 @@
                   </div>
                 </div>
 
-                <!-- Hotel Rating moved to top-right above the price -->
+                <!-- Hotel Description (with adjusted padding to avoid overlap) -->
+                <div class="grey--text text-justify description">
+                  Helnan Palace Hotel - Adults Only features a seasonal outdoor swimming pool, garden, terrace, and restaurant in Alexandria. <!-- Replace with dynamic hotel description -->
+                </div>
+
+                <!-- Price and Rating moved to top-right above the description -->
                 <div class="price-wrapper text-right">
-                  <v-rating value="4" color="green" dense readonly /> <!-- Replace with dynamic rating -->
+                  <v-rating value="4" color="gold" dense readonly /> <!-- Gold rating -->
                   <small class="grey--text">6.0 - Good</small>
                   <br>
                   <small class="grey--text">Best stay price</small>
@@ -80,30 +85,25 @@
                     $935.20
                   </div> <!-- Replace with dynamic price -->
                 </div>
-
-                <!-- Hotel Description -->
-                <div class="grey--text text-justify mb-2">
-                  Helnan Palace Hotel - Adults Only features a seasonal outdoor swimming pool, garden, terrace, and restaurant in Alexandria. <!-- Replace with dynamic hotel description -->
-                </div>
               </v-col>
             </v-row>
 
-            <!-- Buttons (Info, Compare, Share) at the bottom -->
+            <!-- Buttons (Info, Compare, Share) at the bottom with brown color -->
             <v-row no-gutters>
               <v-col cols="12" class="pa-3">
                 <div class="mt-2 d-flex justify-space-between align-center">
                   <div>
-                    <v-btn small outlined color="primary" class="mr-2">
+                    <v-btn small outlined color="brown" class="mr-2 no-wrap">
                       Info
                     </v-btn>
-                    <v-btn small outlined color="primary" class="mr-2">
+                    <v-btn small outlined color="brown" class="mr-2 no-wrap">
                       Compare
                     </v-btn>
-                    <v-btn small outlined icon class="mr-2">
+                    <v-btn small outlined icon color="brown" class="mr-2 no-wrap">
                       <v-icon>mdi-share-variant</v-icon>
                     </v-btn>
                   </div>
-                  <v-btn small color="primary">
+                  <v-btn small color="brown">
                     Options
                   </v-btn>
                 </div>
@@ -197,6 +197,10 @@ export default {
   font-weight: 600 !important;
 }
 
+.description {
+  margin-right: 140px; /* Add margin to the right to avoid overlapping with the price */
+}
+
 .mb-0 {
   margin-bottom: 0 !important;
 }
@@ -216,4 +220,23 @@ export default {
 .text-justify {
   text-align: justify;
 }
+
+/* Styling for brown buttons */
+.v-btn {
+  background-color: #8B4513 !important; /* Brown color */
+  color: white !important;
+}
+
+.v-btn:hover {
+  background-color: #A0522D !important; /* Lighter brown on hover */
+}
+
+.v-icon {
+  color: #fff !important; /* Ensure icon inside button matches brown color */
+}
+
+.no-wrap {
+  border: none !important;
+}
+
 </style>
