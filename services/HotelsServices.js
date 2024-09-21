@@ -95,7 +95,7 @@ export default {
   checkHotelAvailabilitiesEx (payload) {
     return clientAPI(baseURL).post('/packages/get-availability', payload)
   },
-  checkHotelAvailabilities (payload, page = 1, pageSize = 500) {
+  checkHotelAvailabilities (payload, page = 1, pageSize = 100) {
     payload.page = page
     payload.page_size = pageSize
     return clientAPI(baseURL).post('/packages/get-availability', payload)
