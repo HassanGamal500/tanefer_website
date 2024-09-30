@@ -46,7 +46,7 @@
       </v-carousel-item>
     </v-carousel>
 
-    <v-dialog v-model="imageDialog" max-width="800px" z-index="10000">
+    <v-dialog v-model="imageDialog" max-width="800px" z-index="600">
       <v-img :src="dialogImage" @click.stop />
     </v-dialog>
 
@@ -67,8 +67,10 @@
               </v-col>
               <v-col cols="12" md="6">
                 <v-card-text>
-                  <p>{{ room.Description || 'Room description not available' }}</p>
-                  <v-btn color="primary" @click="bookRoom(room.Code)">
+                  <p class="grey--text justify-center">
+                    {{ room.Description || 'Room description not available' }}
+                  </p>
+                  <v-btn class="float-right v-btn-brown justify-end" @click="bookRoom(room.Code)">
                     Book
                   </v-btn>
                 </v-card-text>
@@ -118,7 +120,8 @@
         </p>
         <p>
           <strong>Cancellation Policy:</strong>
-          {{ gtaHotelDetails?.HotelOptions?.HotelOption[0]?.CancellationPolicy?.Description || 'Policy not available' }}
+          <!-- {{ gtaHotelDetails?.HotelOptions?.HotelOption[0]?.CancellationPolicy?.Description || 'Policy not available' }} -->
+          {{ cancellationPolicy }}
         </p>
       </v-card-text>
     </v-card>
@@ -133,11 +136,13 @@ export default {
     return {
       gtaHotelDetails: null,
       imageDialog: false,
-      dialogImage: ''
+      dialogImage: '',
+      cancellationPolicy: null
     }
   },
   async mounted () {
     const hotelCode = this.$route.query.hotelCode
+    this.cancellationPolicy = this.$route.query.cancellationPolicy
     if (hotelCode) {
       try {
         const response = await hotelsServices.getGtaHotelDetails(hotelCode)
@@ -179,5 +184,13 @@ export default {
 } */
 ::v-deep .v-application .primary--text {
   color: gold !important;
+}
+.v-btn-brown {
+  background-color: #8B4513 !important; /* Brown color */
+  color: white !important;
+}
+
+.v-btn-brown:hover {
+  background-color: #A0522D !important; /* Lighter brown on hover */
 }
 </style>

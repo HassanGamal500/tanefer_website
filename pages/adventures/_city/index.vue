@@ -1,9 +1,9 @@
 <template>
   <div>
     <v-img
-      :src="tripsCity.cityImage ? tripsCity.cityImage : require(`~/assets/images/${getCityImage(tripsCity.CityName)}`)"
+      :src="tripsCity.cityImage ? normalizeUrl(tripsCity.cityImage) : require(`~/assets/images/${getCityImage(tripsCity.CityName)}`)"
       alt="img"
-      :contain="true"
+      contain
       class="image-fit"
       max-height="400"
     >
@@ -506,7 +506,7 @@ export default {
       durations: [],
       selectedDuration: null,
       selectedSearchText: null,
-      ageSelect: [],
+      // ageSelect: [],
       showAgesSelects: false,
       selectedDates: [],
       prices: [],
@@ -517,15 +517,15 @@ export default {
       loadingDeleteItem: false,
       selectedStatusFalse: false,
       openProceed: false,
+      isMobile: false,
+      isFixed: false,
       metaData: {
         page_name: null,
         seo_title: null,
         seo_description: null,
         featured_image: null,
         slug: null,
-        isFixed: false,
-        scrollThreshold: 100,
-        isMobile: false
+        scrollThreshold: 100
       }
       // selectedCity: null // Initially set to null or an initial selected city ID
     }
@@ -617,6 +617,9 @@ export default {
       } else {
         this.isFixed = false
       }
+    },
+    normalizeUrl (url) {
+      return url.replace(/([^:]\/)\/+/g, '$1')
     },
     handleError (text, color) {
       this.snackbar = true

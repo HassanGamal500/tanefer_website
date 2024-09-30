@@ -23,7 +23,7 @@
               <v-col v-if="adventure.activityImages.length" cols="12" md="6" class="pt-4">
                 <v-img
                   :src="adventure.activityImages[0][0]"
-                  contain="true"
+                  contain
                   aspect-ratio="1/1"
                   width="100%"
                   class="rounded-lg adventure-img adventure-img-mobile"
