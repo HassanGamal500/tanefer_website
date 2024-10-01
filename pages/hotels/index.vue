@@ -169,18 +169,18 @@
                 </v-row>
               </div>
               <v-row>
-                <v-col cols="12" md="12" class="mb-4">
+                <v-col cols="12" md="9" class="mb-4" />
+                <v-col cols="12" md="3" class="mb-4 justify-end">
                   <v-btn
-                    class="white--text text-capitalize v-btn-brown"
+                    class="white--text text-capitalize justify-center v-btn-brown"
                     color="#575757"
-                    elevation="6"
-                    x-large
+                    elevation="4"
                     block
                     raised
                     rounded-lg
                     @click="checkHotelAvailability"
                   >
-                    Check Availability
+                    Search
                   </v-btn>
                 </v-col>
               </v-row>
@@ -291,7 +291,7 @@
               <v-card class="pa-3">
                 <h3>Available Hotels</h3>
                 <div v-for="(hotel, h) in listGtaHotelDetails" :key="h">
-                  <v-card class="hotel-card mb-2" max-width="100%" elevation="2">
+                  <v-card class="hotel-card mb-2" max-width="100%" height="255px" elevation="2">
                     <v-row no-gutters>
                       <!-- Hotel Image -->
                       <v-col cols="5">
@@ -313,16 +313,37 @@
                             <v-icon color="red" class="">
                               mdi-map-marker
                             </v-icon>
-                            <span class="grey--text text-justify">
+                            <span class="grey--text text-caption text-justify">
                               <span v-html="formatAddress(hotel.HotelInfo.Address) || 'Location'" /> - <a href="#">Map</a>
                             </span>
                           </div>
                         </div>
 
                         <!-- Hotel Description -->
-                        <div class="grey--text text-justify description">
-                          {{ hotel.HotelInfo.Description || 'Hotel Description' }}
+                        <div class="grey--text text-justify font-italic description mb-2">
+                          {{ truncatedDescriptions[h] }}
                         </div>
+                        <v-row no-gutters>
+                          <v-col cols="12" class="pa-3">
+                            <div class="mt-2 d-flex justify-space-between align-center">
+                              <div>
+                                <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
+                                  Info
+                                </v-btn>
+                                <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown">
+                                  Compare
+                                </v-btn>
+                                <v-btn small outlined icon color="brown" class="mr-2 no-wrap v-btn-brown">
+                                  <v-icon>mdi-share-variant</v-icon>
+                                </v-btn>
+                              </div>
+                              <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown" @click="toggleRoomDetails(h)">
+                                Options
+                              </v-btn>
+                            </div>
+                          </v-col>
+                        </v-row>
+
                         <!-- Price and Rating -->
                         <div class="price-wrapper text-right">
                           <v-rating
@@ -334,9 +355,6 @@
                           <small class="grey--text"> {{ hotel.HotelInfo.HotelCategory._ }} </small>
                           <br>
                           <small class="grey--text">Average price</small>
-                          <!-- <div class="font-weight-bold text-h5">
-                            {{ hotel.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett || '$0.00' }}
-                          </div> -->
                           <div class="font-weight-bold text-subtitle-1">
                             $ {{
                               (Array.isArray(hotel.HotelOptions.HotelOption)
@@ -348,27 +366,31 @@
                       </v-col>
                     </v-row>
 
-                    <!-- Buttons at the bottom -->
-                    <v-row no-gutters>
-                      <v-col cols="12" class="pa-3">
-                        <div class="mt-2 d-flex justify-space-between align-center">
-                          <div>
-                            <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
-                              Info
-                            </v-btn>
-                            <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown">
-                              Compare
-                            </v-btn>
-                            <v-btn small outlined icon color="brown" class="mr-2 no-wrap v-btn-brown">
-                              <v-icon>mdi-share-variant</v-icon>
-                            </v-btn>
-                          </div>
-                          <v-btn class="no-wrap v-btn-brown" small color="brown">
-                            Options
-                          </v-btn>
-                        </div>
-                      </v-col>
-                    </v-row>
+                    <!-- Collapsible Room Details -->
+                    <v-expand-transition>
+                      <v-card v-if="activeRoomIndex === h" class="mt-2" elevation="2">
+                        <v-card-text>
+                          <v-row v-for="(roomOption, index) in hotel.HotelOptions.HotelOption" :key="index">
+                            <v-col cols="12">
+                              <h5>{{ roomOption.HotelRoom?.Name || 'Room Name Not Available' }}</h5>
+                              <p>{{ roomOption.HotelRoom?.Description || 'No description available' }}</p>
+                              <p>
+                                <strong>Price:</strong>
+                                {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                {{ roomOption.Prices?.Price?.Currency || '' }}
+                              </p>
+                              <p>
+                                <strong>Cancellation Policy:</strong>
+                                {{ roomOption.CancellationPolicy?.Description || 'No cancellation policy available' }}
+                              </p>
+                              <v-btn small color="primary">
+                                Book
+                              </v-btn>
+                            </v-col>
+                          </v-row>
+                        </v-card-text>
+                      </v-card>
+                    </v-expand-transition>
                   </v-card>
                 </div>
               </v-card>
@@ -746,6 +768,7 @@ export default {
         { text: '4 Stars', value: 4 },
         { text: '5 Stars', value: 5 }
       ],
+      selectedPointOfInterest: null,
       showSearch: true,
       comingSoon: false,
       showMoreOptions: false,
@@ -892,7 +915,8 @@ export default {
       hotelName: '', // Hotel name input
       pointsOfInterest: ['city1', 'city2', 'city3'], // Example POIs
       categories: ['Luxury', 'Budget', 'Family', 'Business'], // Example categories
-      selectedCategories: []
+      selectedCategories: [],
+      activeRoomIndex: null
     }
   },
   head () {
@@ -960,6 +984,12 @@ export default {
     boardsWithAll () {
       // Create a new array with an "All" option
       return [{ _: 'All', Type: 'all' }, ...this.boards]
+    },
+    truncatedDescriptions () {
+      return this.listGtaHotelDetails.map((hotel) => {
+        const description = hotel.HotelInfo.Description || 'Hotel Description'
+        return description.length > 100 ? description.substring(0, 100) + '...' : description
+      })
     }
   },
   watch: {
@@ -977,6 +1007,10 @@ export default {
     await this.getGtaBoards()
   },
   methods: {
+    toggleRoomDetails (index) {
+      alert('it works')
+      this.activeRoomIndex = this.activeRoomIndex === index ? null : index
+    },
     getRatingFromCategory (category) {
       const categoryRatings = {
         '1 Star': 1,
@@ -2094,6 +2128,15 @@ export default {
 
 ::v-deep button.primary--text {
   color: gold !important;
+}
+
+.truncated {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-clamp: 3;
 }
 
 </style>
