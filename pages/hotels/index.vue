@@ -253,7 +253,7 @@
                 />
 
                 <!-- Price Range Slider -->
-                <v-slider
+                <!-- <v-slider
                   v-model="priceRange"
                   :min="0"
                   :max="1000"
@@ -267,7 +267,7 @@
                   <template #label="{ value }">
                     ${{ value }}
                   </template>
-                </v-slider>
+                </v-slider> -->
 
                 <!-- Rating Checkboxes -->
                 <div>
@@ -291,7 +291,7 @@
               <v-card class="pa-3">
                 <h3>Available Hotels</h3>
                 <div v-for="(hotel, h) in listGtaHotelDetails" :key="h">
-                  <v-card class="hotel-card mb-2" max-width="100%" height="255px" elevation="2">
+                  <v-card class="hotel-card mb-2" max-width="100%" height="100%" elevation="2">
                     <v-row no-gutters>
                       <!-- Hotel Image -->
                       <v-col cols="5">
@@ -320,24 +320,24 @@
                         </div>
 
                         <!-- Hotel Description -->
-                        <div class="grey--text text-justify font-italic description mb-2">
+                        <div class="grey--text text-justify text-body-2 font-italic description mb-2">
                           {{ truncatedDescriptions[h] }}
                         </div>
                         <v-row no-gutters>
                           <v-col cols="12" class="pa-3">
                             <div class="mt-2 d-flex justify-space-between align-center">
                               <div>
-                                <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
+                                <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
                                   Info
                                 </v-btn>
-                                <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown">
+                                <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown">
                                   Compare
                                 </v-btn>
-                                <v-btn small outlined icon color="brown" class="mr-2 no-wrap v-btn-brown">
+                                <v-btn small outlined icon color="sienna" class="mr-2 no-wrap v-btn-brown">
                                   <v-icon>mdi-share-variant</v-icon>
                                 </v-btn>
                               </div>
-                              <v-btn small outlined color="brown" class="mr-2 no-wrap v-btn-brown" @click="toggleRoomDetails(h)">
+                              <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown" @click="toggleRoomDetails(h)">
                                 Options
                               </v-btn>
                             </div>
@@ -365,32 +365,49 @@
                         </div>
                       </v-col>
                     </v-row>
-
-                    <!-- Collapsible Room Details -->
-                    <v-expand-transition>
-                      <v-card v-if="activeRoomIndex === h" class="mt-2" elevation="2">
-                        <v-card-text>
-                          <v-row v-for="(roomOption, index) in hotel.HotelOptions.HotelOption" :key="index">
-                            <v-col cols="12">
-                              <h5>{{ roomOption.HotelRoom?.Name || 'Room Name Not Available' }}</h5>
-                              <p>{{ roomOption.HotelRoom?.Description || 'No description available' }}</p>
-                              <p>
-                                <strong>Price:</strong>
-                                {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
-                                {{ roomOption.Prices?.Price?.Currency || '' }}
-                              </p>
-                              <p>
-                                <strong>Cancellation Policy:</strong>
-                                {{ roomOption.CancellationPolicy?.Description || 'No cancellation policy available' }}
-                              </p>
-                              <v-btn small color="primary">
-                                Book
-                              </v-btn>
-                            </v-col>
-                          </v-row>
-                        </v-card-text>
-                      </v-card>
-                    </v-expand-transition>
+                    <v-row>
+                      <v-col cols="12">
+                        <div>
+                          <!-- Collapsible Room Details (Unconditionally Rendered) -->
+                          <v-expand-transition>
+                            <v-card v-if="activeRoomIndex === h" class="mt-2" elevation="2">
+                              <v-card-text>
+                                <v-row v-for="(roomOption, index) in hotel.HotelOptions.HotelOption" :key="index">
+                                  <v-col cols="12">
+                                    <v-row justify="space-between">
+                                      <v-col cols="12" md="6">
+                                        <h4 class="mb-0 brown--text">
+                                          {{ roomOption.HotelRooms.HotelRoom?.Name || 'Room Name Not Available' }}
+                                        </h4>
+                                      </v-col>
+                                      <v-col cols="12" md="6" class="text-right">
+                                        <p class="mb-0 font-weight-medium">
+                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                        </p>
+                                      </v-col>
+                                    </v-row>
+                                    <p>
+                                      {{ roomOption.HotelRoom?.Description || '' }}
+                                    </p>
+                                    <p>
+                                      <strong>Cancellation Policy:</strong>
+                                      <br>
+                                      <span class="grey--text" v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                                    </p>
+                                    <div class="d-flex justify-end">
+                                      <v-btn small color="brown" outlined>
+                                        Book
+                                      </v-btn>
+                                    </div>
+                                    <hr class="my-2" color="tan">
+                                  </v-col>
+                                </v-row>
+                              </v-card-text>
+                            </v-card>
+                          </v-expand-transition>
+                        </div>
+                      </v-col>
+                    </v-row>
                   </v-card>
                 </div>
               </v-card>
@@ -950,6 +967,7 @@ export default {
     countries () {
       return this.$store.state.countries
     },
+
     isButtonEnabledFormValidation () {
       const getPhone = this.phone
       const checkPhoneExist = getPhone !== null ? getPhone.formattedNumber : null
@@ -1007,8 +1025,30 @@ export default {
     await this.getGtaBoards()
   },
   methods: {
+    formatCancellationPolicy (description) {
+    // Check if the description is a valid string
+      if (typeof description !== 'string') {
+        return 'No cancellation policy available'
+      }
+
+      return description
+        .replace(/\*/g, '') // Remove asterisks
+        .split('\n') // Split into an array by line breaks
+        .map((line) => {
+        // Regex to capture the text after the last colon
+          const colonIndex = line.lastIndexOf(':')
+          if (colonIndex !== -1) {
+            const beforeColon = line.slice(0, colonIndex + 1) // Include the colon
+            const afterColon = line.slice(colonIndex + 1).trim() // Text after the colon
+
+            // Format the line with red color for the part after the colon
+            return `${beforeColon} <span style="color: red; margin-left: 10px;">${afterColon}</span>`
+          }
+          return line // Return the line unchanged if no formatting is applied
+        })
+        .join('<br>') // Join back into a string with <br>
+    },
     toggleRoomDetails (index) {
-      alert('it works')
       this.activeRoomIndex = this.activeRoomIndex === index ? null : index
     },
     getRatingFromCategory (category) {
@@ -2107,7 +2147,7 @@ export default {
 /* } */
 
 .v-btn-brown {
-  background-color: #8B4513 !important; /* Brown color */
+  background-color: sienna !important; /* Brown color */
   color: white !important;
 }
 
