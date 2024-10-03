@@ -24,20 +24,21 @@
       </div>
     </div>
 
-    <v-carousel hide-delimiters height="200" show-arrows>
+    <v-carousel hide-delimiters height="100%" show-arrows>
       <v-carousel-item
-        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], 4)"
+        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], 2)"
         :key="index"
       >
         <v-row>
           <v-col
             v-for="(img, imgIndex) in imageGroup"
             :key="imgIndex"
-            cols="3"
+            cols="6"
           >
             <v-img
               :src="img.FileName || 'https://source.unsplash.com/user/c_v_r/1900x800'"
-              height="200"
+              height="500px"
+              width="100%"
               contain
               @click="openImageModal(img.FileName)"
             />
@@ -45,11 +46,9 @@
         </v-row>
       </v-carousel-item>
     </v-carousel>
-
     <v-dialog v-model="imageDialog" max-width="800px" z-index="600">
       <v-img :src="dialogImage" @click.stop />
     </v-dialog>
-
     <v-card class="mt-4">
       <v-card-title>
         <h3>Room Options</h3>
@@ -60,16 +59,12 @@
             <v-card-title>{{ room.Name || 'Room Name' }}</v-card-title>
             <v-row>
               <v-col cols="12" md="6">
-                <v-img
-                  :src="room.Images?.[0]?.FileName || 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'"
-                  height="150px"
-                />
+                <p class="grey--text justify-center ma-1">
+                  Occupancy: {{ room.RoomOccupancy.MaxAdults }} Adults, {{ room.RoomOccupancy.MaxChildren }} Children
+                </p>
               </v-col>
               <v-col cols="12" md="6">
                 <v-card-text>
-                  <p class="grey--text justify-center">
-                    {{ room.Description || 'Room description not available' }}
-                  </p>
                   <v-btn class="float-right v-btn-brown justify-end" @click="bookRoom(room.Code)">
                     Book
                   </v-btn>
@@ -118,11 +113,6 @@
         <p>
           <strong>Rating:</strong> {{ gtaHotelDetails?.Rating || 'Rating not available' }}
         </p>
-        <p>
-          <strong>Cancellation Policy:</strong>
-          <!-- {{ gtaHotelDetails?.HotelOptions?.HotelOption[0]?.CancellationPolicy?.Description || 'Policy not available' }} -->
-          {{ cancellationPolicy }}
-        </p>
       </v-card-text>
     </v-card>
   </v-container>
@@ -147,7 +137,8 @@ export default {
       try {
         const response = await hotelsServices.getGtaHotelDetails(hotelCode)
         this.gtaHotelDetails = response.data.ContentRS.Contents.HotelContent
-
+        // eslint-disable-next-line no-console
+        console.log(this.gtaHotelDetails)
         if (this.gtaHotelDetails.Images && this.gtaHotelDetails.Images.Image) {
           this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'BIG')
         }

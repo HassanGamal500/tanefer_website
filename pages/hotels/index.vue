@@ -1359,13 +1359,12 @@ export default {
     showHotelDetailsObject (hotelIndex) {
       const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
       const hotelCode = getHotelGtaDetails.Code
-      const cancellationPolicy = getHotelGtaDetails.HotelOptions.HotelOption[0]?.CancellationPolicy?.Description || 'No cancellation policy available.'
+      // const cancellationPolicy = getHotelGtaDetails.HotelOptions.HotelOption[0]?.CancellationPolicy?.Description || 'No cancellation policy available.'
 
       const url = this.$router.resolve({
         path: '/hotels/hotelInfo',
         query: {
-          hotelCode,
-          cancellationPolicy
+          hotelCode
         }
       }).href
 
