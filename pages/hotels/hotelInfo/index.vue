@@ -51,28 +51,25 @@
     </v-dialog>
     <v-card class="mt-4">
       <v-card-title>
-        <h3>Room Options</h3>
+        <h3>All Room Options</h3>
       </v-card-title>
       <v-card-text>
-        <v-col v-for="(room, index) in gtaHotelDetails?.HotelRooms?.HotelRoom || []" :key="index" cols="12">
-          <v-card class="mb-3">
-            <v-card-title>{{ room.Name || 'Room Name' }}</v-card-title>
-            <v-row>
-              <v-col cols="12" md="6">
-                <p class="grey--text justify-center ma-1">
-                  Occupancy: {{ room.RoomOccupancy.MaxAdults }} Adults, {{ room.RoomOccupancy.MaxChildren }} Children
-                </p>
-              </v-col>
-              <v-col cols="12" md="6">
-                <v-card-text>
-                  <v-btn class="float-right v-btn-brown justify-end" @click="bookRoom(room.Code)">
-                    Book
-                  </v-btn>
-                </v-card-text>
-              </v-col>
-            </v-row>
-          </v-card>
-        </v-col>
+        <v-row>
+          <v-col v-for="(room, index) in gtaHotelDetails?.HotelRooms?.HotelRoom || []" :key="index" cols="12" md="6">
+            <v-card class="mb-3">
+              <v-card-title class="body-1 late--text d-flex flex-wrap justify-space-between">
+                {{ room.Name || 'Room Name' }}
+              </v-card-title>
+              <v-row>
+                <v-col cols="12">
+                  <p class="grey--text justify-center ma-1">
+                    Occupancy: {{ room.RoomOccupancy?.MaxAdults }} Adults, {{ room.RoomOccupancy?.MaxChildren }} Children
+                  </p>
+                </v-col>
+              </v-row>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-card-text>
     </v-card>
 
@@ -83,7 +80,7 @@
       <v-card-text>
         <p>
           <strong>Description:</strong>
-          <span>{{ gtaHotelDetails?.Descriptions?.Description[0]?. _ || 'Description not available' }}</span>
+          <span>{{ gtaHotelDetails?.Descriptions?.Description[0]?. _ || gtaHotelDetails?.Descriptions?.Description?. _ || 'Description not available' }}</span>
         </p>
       </v-card-text>
     </v-card>
@@ -111,7 +108,9 @@
       </v-card-title>
       <v-card-text>
         <p>
-          <strong>Rating:</strong> {{ gtaHotelDetails?.Rating || 'Rating not available' }}
+          <strong>Contact Information:</strong> <br>
+          <v-icon>mdi-cellphone-basic</v-icon> Phone: {{ gtaHotelDetails?.ContactInfo?.PhoneNumbers?.PhoneNumber?._ || 'Currently not available' }} <br>
+          <v-icon>mdi-mail</v-icon>Email: {{ gtaHotelDetails?.ContactInfo?.Emails?.Email?._ || 'Currently not available' }}
         </p>
       </v-card-text>
     </v-card>

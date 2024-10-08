@@ -244,7 +244,7 @@
                   class="my-2"
                 />
                 <div v-if="hotelName">
-                  <v-btn color="brown" @click="applyFilters">
+                  <v-btn class="v-btn-brown" @click="applyHotelNameFilter">
                     Apply
                   </v-btn>
                   <v-btn text @click="clearFilters">
@@ -262,7 +262,7 @@
                   class="my-2"
                 />
                 <div v-if="selectedPointOfInterest">
-                  <v-btn color="brown" @click="applyFilters">
+                  <v-btn class="v-btn-brown" @click="applyPointOfInterestFilter">
                     Apply
                   </v-btn>
                   <v-btn text @click="clearFilters">
@@ -271,55 +271,100 @@
                 </div>
 
                 <!-- Price Range Slider -->
-                <v-slider
-                  v-model="priceRange"
-                  :min="0"
-                  :max="1000"
-                  step="10"
-                  ticks
-                  thumb-label
-                  range
-                  class="my-2"
-                  color="brown"
-                >
-                  <template #label="{ value }">
-                    ${{ value }}
-                  </template>
-                </v-slider>
-                <div v-if="priceRange[0] !== 0 || priceRange[1] !== 1000">
-                  <v-btn color="brown" @click="applyFilters">
+                <v-card class="pa-3 mb-2" outlined>
+                  <p class="text-subtitle-2 mb-2">
+                    Price Range
+                  </p>
+
+                  <!-- Slider -->
+                  <v-range-slider
+                    v-model="priceRange"
+                    :min="10"
+                    :max="5000"
+                    :step="10"
+                    thumb-label="always"
+                    class="mt-10"
+                  />
+
+                  <v-row>
+                    <v-col cols="6">
+                      <v-text-field
+                        v-model="priceRange[0]"
+                        label="Min $"
+                        type="number"
+                        min="10"
+                        max="5000"
+                        hide-details
+                        dense
+                      />
+                    </v-col>
+                    <v-col cols="6">
+                      <v-text-field
+                        v-model="priceRange[1]"
+                        label="Max $"
+                        type="number"
+                        min="10"
+                        max="5000"
+                        hide-details
+                        dense
+                      />
+                    </v-col>
+                  </v-row>
+
+                  <v-btn  class="mt-2 v-btn-brown" @click="applyPriceFilter">
                     Apply
                   </v-btn>
-                  <v-btn text @click="clearFilters">
+                  <v-btn text class="mt-2" @click="clearPriceFilter">
                     Clear
                   </v-btn>
-                </div>
+                </v-card>
 
-                <!-- Rating Checkboxes -->
-                <div>
-                  <h6 class="text-h6">
-                    Rating
-                  </h6>
-                  <v-checkbox
-                    v-for="rating in ratings"
-                    :key="rating.value"
-                    v-model="selectedRatings"
-                    :label="rating.text"
-                    :value="rating.value"
-                    class="my-1"
-                  />
-                  <div v-if="selectedRatings.length > 0">
-                    <v-btn color="brown" @click="applyFilters">
-                      Apply
-                    </v-btn>
-                    <v-btn text @click="clearFilters">
-                      Clear
-                    </v-btn>
+                <v-card class="pa-3">
+                  <p class="text-subtitle-2">
+                    Specify a Category:
+                  </p>
+                  <div>
+                    <v-col
+                      v-for="rating in ratingOptions"
+                      :key="rating.value"
+                      cols="6"
+                    >
+                      <v-checkbox
+                        v-model="selectedRatings"
+                        :value="rating.value"
+                        class="my-1"
+                        dense
+                      >
+                        <template #label>
+                          <span class="rating-stars">
+                            <v-rating
+                              v-if="typeof rating.value === 'number'"
+                              :value="rating.value"
+                              dense
+                              empty-icon="mdi-star-outline"
+                              full-icon="mdi-star"
+                              readonly
+                              small
+                            />
+                            <span v-else style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                              {{ rating.label }}
+                            </span>
+                          </span>
+                        </template>
+                      </v-checkbox>
+                    </v-col>
+                    <div v-if="selectedRatings.length > 0">
+                      <v-btn color="brown" @click="applyRatingFilter">
+                        Apply
+                      </v-btn>
+                      <v-btn text @click="clearFilters">
+                        Clear
+                      </v-btn>
+                    </div>
                   </div>
-                </div>
+                </v-card>
               </v-card>
             </v-col>
-
             <!-- Main Content (col-8) -->
             <v-col cols="12" md="9">
               <v-card class="pa-3">
@@ -826,12 +871,18 @@ export default {
   data () {
     return {
       selectedRatings: [],
-      ratings: [
-        { text: '1 Star', value: 1 },
-        { text: '2 Stars', value: 2 },
-        { text: '3 Stars', value: 3 },
-        { text: '4 Stars', value: 4 },
-        { text: '5 Stars', value: 5 }
+      ratingOptions: [
+        { value: 1, label: '1 Star' },
+        { value: 2, label: '2 Stars' },
+        { value: 3, label: '3 Stars' },
+        { value: 4, label: '4 Stars' },
+        { value: 5, label: '5 Stars' },
+        { value: 'Superior Apartment', label: 'Superior Apartment' },
+        { value: 'Deluxe Villas', label: 'Deluxe Villas' },
+        { value: 'Deluxe Apartment', label: 'Deluxe Apartment' },
+        { value: 'Standard Apartment', label: 'Standard Apartment' },
+        { value: 'Residence', label: 'Residence' },
+        { value: 'Bungalow', label: 'Bungalow' }
       ],
       selectedPointOfInterest: null,
       showSearch: true,
@@ -971,15 +1022,16 @@ export default {
       selectedZone: null,
       perZoneHotels: [],
       filters: [],
-      destination: '', // Destination passed dynamically (e.g., from route)
-      selectedDate: '', // Date input
-      // rooms: 1, // Number of rooms
-      roomOccupancy: '', // Room occupancy
-      priceRange: [100, 500], // Default price range
-      selectedPOI: null, // Selected Point of Interest
-      hotelName: '', // Hotel name input
-      pointsOfInterest: ['city1', 'city2', 'city3'], // Example POIs
-      categories: ['Luxury', 'Budget', 'Family', 'Business'], // Example categories
+      destination: '',
+      selectedDate: '',
+      // rooms: 1,
+      roomOccupancy: '',
+      priceRange: [10, 5000],
+      defaultPriceRange: [10, 5000],
+      selectedPOI: null,
+      hotelName: '',
+      pointsOfInterest: ['city1', 'city2', 'city3'],
+      categories: ['Luxury', 'Budget', 'Family', 'Business'],
       selectedCategories: [],
       activeRoomIndex: null,
       filteredHotels: [],
@@ -1100,26 +1152,50 @@ export default {
       // eslint-disable-next-line no-console
       console.log('Selected Nationality:', nationality)
     },
-    applyFilters () {
-      alert('Filters applied')
+    applyHotelNameFilter () {
       this.filteredHotels = this.listGtaHotelDetails.filter((hotel) => {
-        const matchesHotelName = hotel.HotelInfo.Name.toLowerCase().includes(this.hotelName.toLowerCase())
-        const matchesPointOfInterest = !this.selectedPointOfInterest || hotel.PointsOfInterest.includes(this.selectedPointOfInterest)
-        const matchesPrice = hotel.HotelOptions.HotelOption.some((option) => {
-          const price = Array.isArray(option.Prices.Price.TotalFixAmounts)
-            ? option.Prices.Price.TotalFixAmounts[0].Gross
-            : option.Prices.Price.TotalFixAmounts.Gross
-          return price >= this.priceRange[0] && price <= this.priceRange[1]
-        })
-        const matchesRating = this.selectedRatings.length === 0 || this.selectedRatings.includes(hotel.HotelInfo.HotelCategory._)
+        return hotel.HotelInfo.Name.toLowerCase().includes(this.hotelName.toLowerCase())
+      })
+    },
 
-        return matchesHotelName && matchesPointOfInterest && matchesPrice && matchesRating
+    applyPointOfInterestFilter () {
+      this.filteredHotels = this.listGtaHotelDetails.filter((hotel) => {
+        return !this.selectedPointOfInterest || hotel.PointsOfInterest.includes(this.selectedPointOfInterest)
+      })
+    },
+
+    applyPriceFilter () {
+      this.filteredHotels = this.listGtaHotelDetails.filter((hotel) => {
+        const hotelPrice = Array.isArray(hotel.HotelOptions.HotelOption)
+          ? hotel.HotelOptions.HotelOption[0]?.Prices.Price.TotalFixAmounts.Gross
+          : hotel.HotelOptions.HotelOption?.Prices.Price.TotalFixAmounts.Gross
+
+        return hotelPrice >= this.priceRange[0] && hotelPrice <= this.priceRange[1]
+      })
+    },
+    // clearPriceFilter () {
+    //   this.priceRange = [...this.defaultPriceRange] // Reset to default min and max values
+    //   this.filteredHotels = this.listGtaHotelDetails // Reset the filtered list
+    // },
+    extractNumericRating (category) {
+      const match = category.match(/(\d)/)
+      return match ? parseInt(match[1], 10) : null
+    },
+    applyRatingFilter () {
+      this.filteredHotels = this.listGtaHotelDetails.filter((hotel) => {
+        const hotelCategory = hotel?.HotelInfo?.HotelCategory?._
+        const numericRating = this.extractNumericRating(hotelCategory)
+        const matchesNumericRating = numericRating && this.selectedRatings.includes(numericRating)
+        const matchesDescriptiveCategory = this.selectedRatings.includes(hotelCategory)
+        const matchesRating = this.selectedRatings.length === 0 || matchesNumericRating || matchesDescriptiveCategory
+
+        return matchesRating
       })
     },
     clearFilters () {
       this.hotelName = ''
       this.selectedPointOfInterest = null
-      this.priceRange = [0, 1000]
+      this.priceRange = [...this.defaultPriceRange]
       this.selectedRatings = []
       this.filteredHotels = this.listGtaHotelDetails
     },
