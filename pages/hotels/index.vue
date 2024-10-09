@@ -197,7 +197,7 @@
         <!-- temp commented till deploy end -->
 
         <!-- new results start -->
-        <v-container v-if="!showSearch" fluid>
+        <v-container v-if="!showSearch && confirmedSelectedRoom === false" fluid>
           <!-- First Row -->
           <v-row class="mt-10 pt-10">
             <!-- Left Column: "Hotels in *Destination*" -->
@@ -311,10 +311,10 @@
                     </v-col>
                   </v-row>
 
-                  <v-btn  class="mt-2 v-btn-brown" @click="applyPriceFilter">
+                  <v-btn class="mt-2 v-btn-brown" @click="applyPriceFilter">
                     Apply
                   </v-btn>
-                  <v-btn text class="mt-2" @click="clearPriceFilter">
+                  <v-btn text class="mt-2" @click="clearFilters">
                     Clear
                   </v-btn>
                 </v-card>
@@ -354,7 +354,7 @@
                       </v-checkbox>
                     </v-col>
                     <div v-if="selectedRatings.length > 0">
-                      <v-btn color="brown" @click="applyRatingFilter">
+                      <v-btn class="v-btn-brown" @click="applyRatingFilter">
                         Apply
                       </v-btn>
                       <v-btn text @click="clearFilters">
@@ -854,6 +854,316 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+
+      <!-- the booking confirmation card  -->
+      <v-row>
+        <!-- Left Column (Booking Form + Additional Information) -->
+        <v-col cols="12" md="8">
+          <!-- Additional Information Card -->
+          <v-card v-if="confirmedSelectedRoom && !isChoiceConfirmed" class="pa-4 mt-4" elevation="6">
+            <v-row>
+              <v-col cols="12">
+                <p class="text-h6 late--text font-weight-bold">
+                  Important Information:
+                </p>
+                <p class="text-body-1" v-html="formattedComment" />
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+        <!-- Right Column (Booking Confirmation) -->
+        <v-col cols="12" md="4">
+          <v-card v-if="confirmedSelectedRoom && !isChoiceConfirmed" class="pa-4 mb-12" elevation="6">
+            <!-- Hotel Name -->
+            <v-row>
+              <v-col cols="12">
+                <p class="text-h5 font-weight-bold">
+                  {{ selectedHotelOption.PriceInformation.HotelContent.HotelName }}
+                </p>
+                <p class="text-subtitle-1 grey--text">
+                  <v-rating
+                    v-if="selectedHotelOption.PriceInformation.HotelContent.HotelCategory._"
+                    :value="parseInt(selectedHotelOption.PriceInformation.HotelContent.HotelCategory._)"
+                    readonly
+                    empty-icon="mdi-star-outline"
+                    full-icon="mdi-star"
+                  />
+                </p>
+              </v-col>
+            </v-row>
+
+            <!-- Address and Contact Info -->
+            <v-row>
+              <v-col cols="12">
+                <p class="text-subtitle-1 font-weight-bold grey--text">
+                  <v-icon small color="red">
+                    mdi-map-marker
+                  </v-icon>
+                  {{ selectedHotelOption.PriceInformation.HotelContent.Address.Address }}
+                </p>
+              </v-col>
+            </v-row>
+
+            <!-- Room Names -->
+            <v-row>
+              <v-col cols="12">
+                <ul>
+                  <li v-for="(room, index) in groupedRooms" :key="index" class="text-subtitle-1">
+                    {{ room.name }} <span v-if="room.count > 1">x{{ room.count }}</span>
+                  </li>
+                </ul>
+              </v-col>
+            </v-row>
+
+            <!-- Price Information -->
+            <v-row>
+              <v-col cols="12">
+                <p class="text-body-1">
+                  <span class="font-weight-bold">Board Type:</span>
+                  <span class="ml-3" style="color: gray;">{{ selectedHotelOption.PriceInformation.Board._ || '' }}</span>
+                  <br>
+                  <span class="font-weight-bold">Total Price:</span>
+                  <span class="ml-3" style="color: gray;">$ {{ selectedHotelOption.PriceInformation.Prices.Price.TotalFixAmounts.Gross || '' }}</span>
+                </p>
+              </v-col>
+            </v-row>
+
+            <!-- Confirm Button -->
+            <v-row>
+              <v-col cols="12" class="text-right">
+                <v-btn color="primary" @click="confirmChoice">
+                  Confirm my Choice
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+      </v-row>
+      <v-row class="d-flex justify-center">
+        <v-col cols="10" md="10" justify="center" class="d-flex justify-center">
+          <!-- Booking Form -->
+          <v-card v-if="isChoiceConfirmed" class="pa-4 mb-4" elevation="6" justify="center">
+            <v-row>
+              <v-col cols="12">
+                <p class="text-h5 font-weight-bold late--text">
+                  Booking Holder Information
+                </p>
+                <p class="text-caption grey--text">
+                  Insert contact information to receive communications.
+                </p>
+              </v-col>
+
+              <!-- Title, Name, Surname -->
+              <v-col cols="12" sm="2">
+                <v-combobox
+                  v-model="title"
+                  :items="['Mr', 'Mrs', 'Ms', 'Miss']"
+                  label="Title"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                />
+              </v-col>
+              <v-col cols="12" sm="5">
+                <v-text-field
+                  v-model="name"
+                  label="Name*"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                  :rules="[v => (!!v && v.length > 2) || 'Name is required at least 3 characters']"
+                />
+              </v-col>
+              <v-col cols="12" sm="5">
+                <v-text-field
+                  v-model="surname"
+                  label="Surname*"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                  :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters']"
+                />
+              </v-col>
+              <v-col cols="12" sm="6" md="4">
+                <v-text-field
+                  v-model="age"
+                  outlined
+                  label="Age"
+                  required
+                  dense
+                  color="blue"
+                  class="rounded-lg"
+                />
+              </v-col>
+
+              <!-- Phone, Email -->
+              <v-col cols="12" sm="4">
+                <mobile-input @update="assignPhone" />
+              </v-col>
+              <v-col cols="12" sm="4">
+                <v-text-field
+                  v-model="email"
+                  label="E-mail*"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                  :rules="emailRules"
+                />
+              </v-col>
+
+              <!-- ID / Passport, Issuing Country -->
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="identification_document_pax"
+                  label="ID / Passport Number"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-autocomplete
+                  v-model="issueCountry"
+                  :items="countries"
+                  item-text="name"
+                  item-value="code"
+                  label="Issuing Country"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                />
+              </v-col>
+
+              <!-- Address, City, Country, Postal Code -->
+              <!-- <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="address_pax"
+                  label="Address"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                />
+              </v-col>
+              <v-col cols="12" sm="6">
+                <v-text-field
+                  v-model="postal_code_pax"
+                  label="Postal Code"
+                  outlined
+                  color="blue"
+                  dense
+                  class="rounded-lg"
+                  :rules="[v => (v.length <= 12) || 'Maximum Postal Code is 12 digits']"
+                />
+              </v-col> -->
+
+              <!-- Travellers Section -->
+              <v-col v-for="(traveller, t) in otherTravellers" :key="t" cols="12">
+                <p class="text-subtitle-2 grey--text">
+                  ADULT {{ traveller.id }}
+                </p>
+                <v-row>
+                  <v-col cols="12" md="4" sm="4">
+                    <v-text-field
+                      v-model="bNames[t]"
+                      label="Name"
+                      outlined
+                      color="blue"
+                      dense
+                      class="rounded-lg"
+                      :rules="[v => (!!v && v.length > 2) || 'Name is required at least 3 characters']"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="4">
+                    <v-text-field
+                      v-model="bSurnames[t]"
+                      label="Surname"
+                      outlined
+                      color="blue"
+                      dense
+                      class="rounded-lg"
+                      :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters']"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="4">
+                    <v-text-field
+                      v-model="bAges[t]"
+                      label="Age"
+                      outlined
+                      color="blue"
+                      dense
+                      class="rounded-lg"
+                    />
+                  </v-col>
+                </v-row>
+              </v-col>
+
+              <!-- Children Section -->
+              <v-col v-for="(children, c) in otherChildren" :key="c" cols="12">
+                <p class="text-subtitle-2 grey--text">
+                  CHILD {{ children.id }}
+                </p>
+                <v-row>
+                  <v-col cols="12" md="4" sm="4">
+                    <v-text-field
+                      v-model="bNamesChild[c]"
+                      label="Name"
+                      outlined
+                      color="blue"
+                      dense
+                      class="rounded-lg"
+                      :rules="[v => (!!v && v.length > 2) || 'Name is required at least 3 characters']"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="4">
+                    <v-text-field
+                      v-model="bSurnamesChild[c]"
+                      label="Surname"
+                      outlined
+                      color="blue"
+                      dense
+                      class="rounded-lg"
+                      :rules="[v => (!!v && v.length > 2) || 'Surname is required at least 3 characters']"
+                    />
+                  </v-col>
+                  <v-col cols="12" md="4" sm="4">
+                    <v-text-field
+                      v-model="bAgesChild[c]"
+                      label="Age"
+                      outlined
+                      color="blue"
+                      dense
+                      class="rounded-lg"
+                    />
+                  </v-col>
+                </v-row>
+              </v-col>
+
+              <!-- Book Button -->
+              <v-col cols="12">
+                <v-btn
+                  class="white--text"
+                  color="#4f3316"
+                  elevation="6"
+                  large
+                  block
+                  :disabled="!isButtonEnabledFormValidation || isBooked"
+                  @click="finalBookHotel"
+                >
+                  <span v-if="!isBooked">Complete Booking</span>
+                  <span v-else>Booked Successfully</span>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -1035,7 +1345,9 @@ export default {
       selectedCategories: [],
       activeRoomIndex: null,
       filteredHotels: [],
-      selectedNationality: ''
+      selectedNationality: '',
+      selectedHotelOption: null,
+      isChoiceConfirmed: false
     }
   },
   head () {
@@ -1066,23 +1378,40 @@ export default {
     }
   },
   computed: {
-    // filteredHotels () {
-    //   return this.listGtaHotelDetails.filter((hotel) => {
-    //     const matchesHotelName = hotel.HotelInfo.Name.toLowerCase().includes(this.hotelName.toLowerCase())
-    //     const matchesPointOfInterest = this.selectedPointOfInterest
-    //       ? hotel.HotelInfo.Address.includes(this.selectedPointOfInterest)
-    //       : true // Modify based on how POIs relate to hotels
-    //     const matchesPrice = (Array.isArray(hotel.HotelOptions.HotelOption) && hotel.HotelOptions.HotelOption.length > 0)
-    //       ? hotel.HotelOptions.HotelOption[0].Prices.Price.TotalFixAmounts.Gross >= this.priceRange[0] &&
-    //       hotel.HotelOptions.HotelOption[0].Prices.Price.TotalFixAmounts.Gross <= this.priceRange[1]
-    //       : true
-    //     const matchesRating = this.selectedRatings.length > 0
-    //       ? this.selectedRatings.includes(hotel.HotelInfo.HotelCategory._)
-    //       : true
+    groupedRooms () {
+      let rooms = this.selectedHotelOption.PriceInformation.HotelRooms.HotelRoom
+      rooms = Array.isArray(rooms) ? rooms : [rooms]
 
-    //     return matchesHotelName && matchesPointOfInterest && matchesPrice && matchesRating
-    //   })
-    // },
+      const roomCounts = {}
+
+      rooms.forEach((room) => {
+        const name = room.Name
+        if (roomCounts[name]) {
+          roomCounts[name] += 1
+        } else {
+          roomCounts[name] = 1
+        }
+      })
+
+      return Object.keys(roomCounts).map((name) => {
+        return {
+          name,
+          count: roomCounts[name]
+        }
+      })
+    },
+    formattedComment () {
+      const comment = this.selectedHotelOption?.OptionalElements?.Comments?.Comment?._
+      if (!comment) {
+        return ''
+      }
+
+      const placeholderComment = comment.replace(/\bi\s*\.\s*e\s*\./gi, 'ie-placeholder')
+
+      const formattedComment = placeholderComment.replace(/\.\s*/g, '.<br>')
+
+      return formattedComment.replace(/ie-placeholder/g, 'i.e.')
+    },
     countries () {
       return this.$store.state.countries
     },
@@ -1147,6 +1476,9 @@ export default {
     await this.getGtaBoards()
   },
   methods: {
+    confirmChoice () {
+      this.isChoiceConfirmed = true
+    },
     handleNationalitySelected (nationality) {
       this.selectedNationality = nationality
       // eslint-disable-next-line no-console
@@ -1355,6 +1687,8 @@ export default {
           ageSelects: room.childrenAges || []
         }
       })
+      // eslint-disable-next-line no-console
+      console.log(rooms)
       this.travellers = this.totalTravelers
       this.children = this.totalChildren
       // await this.calculateAllPrice(this.packageStartDay)
@@ -1369,6 +1703,39 @@ export default {
       }
       this.otherChildren = this.onlyUniqueObjectsId(this.otherChildren)
     },
+    // setGuests (rooms) {
+    //   console.log(rooms)
+    //   this.room_count = rooms.length
+    //   this.rooms = rooms.map((room) => {
+    //     return {
+    //       travelers: room.adults,
+    //       children: room.children,
+    //       ageSelects: room.childrenAges || []
+    //     }
+    //   })
+
+    //   this.travellers = this.totalTravelers
+    //   this.children = this.totalChildren
+
+    //   this.otherTravellers = []
+    //   this.otherChildren = []
+    //   this.bAgesChild = [] // Initialize the array for children's ages
+
+    //   // For each room, create unique ids for travelers and children
+    //   rooms.forEach((room, roomIndex) => {
+    //     for (let x = 1; x <= room.adults - 1; x++) {
+    //       this.otherTravellers.push({ id: `${roomIndex}-${x}` }) // Unique id based on room index and traveler index
+    //     }
+
+    //     for (let y = 0; y < room.children; y++) {
+    //       this.otherChildren.push({ id: `${roomIndex}-${y}` }) // Unique id based on room index and child index
+    //       this.bAgesChild.push(room.childrenAges[y] || '') // Populate the age based on the room's childrenAges array
+    //     }
+    //   })
+
+    //   this.otherTravellers = this.onlyUniqueObjectsId(this.otherTravellers)
+    //   this.otherChildren = this.onlyUniqueObjectsId(this.otherChildren)
+    // },
     formatDate (date, i, type) {
       if (!date) { return null }
       const [year, month, day] = date.split('-')
@@ -1524,6 +1891,7 @@ export default {
       let totalPages = 1
 
       try {
+        await this.searchZones()
         do {
           const start = (page - 1) * pageSize
           const end = start + pageSize
@@ -1746,6 +2114,9 @@ export default {
           this.checkResponseCode = false
         } else {
           this.getbookingRule = results.Results.HotelResult
+          this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
+          // eslint-disable-next-line no-console
+          console.log(this.getbookingRule)
           this.confirmedSelectedRoom = true
         }
       } catch (error) {
@@ -1895,8 +2266,8 @@ export default {
           formData.append('hotel_type_category', this.selectedHotelTypeCategory)
           formData.append('identification_document_pax', this.identification_document_pax)
           formData.append('address_pax', this.address_pax)
-          formData.append('city_pax', this.city_pax)
-          formData.append('country_pax', this.country_pax)
+          // formData.append('city_pax', this.city_pax)
+          // formData.append('country_pax', this.country_pax)
           formData.append('postal_code_pax', this.postal_code_pax)
           formData.append('book_after_payment', '1')
           if (this.rooms.length > 0) {

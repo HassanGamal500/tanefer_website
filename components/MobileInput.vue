@@ -2,7 +2,6 @@
   <VuePhoneNumberInput
     v-model="initialPhone"
     outlined
-    size="lg"
     default-country-code="US"
     :preferred-countries="['US', 'EG']"
     :countries-height="25"

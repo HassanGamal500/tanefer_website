@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <LoadingScreen v-if="isLoading" />
     <div class="mb-5">
       <h3 class="font-weight-bold" style="font-size: 24px;">
         {{ gtaHotelDetails?.HotelName || 'Hotel Name' }}
@@ -126,27 +127,34 @@ export default {
       gtaHotelDetails: null,
       imageDialog: false,
       dialogImage: '',
-      cancellationPolicy: null
+      cancellationPolicy: null,
+      isLoading: true
     }
   },
   async mounted () {
     const hotelCode = this.$route.query.hotelCode
     this.cancellationPolicy = this.$route.query.cancellationPolicy
+
     if (hotelCode) {
       try {
+        this.isLoading = true
+
         const response = await hotelsServices.getGtaHotelDetails(hotelCode)
         this.gtaHotelDetails = response.data.ContentRS.Contents.HotelContent
-        // eslint-disable-next-line no-console
-        console.log(this.gtaHotelDetails)
+
         if (this.gtaHotelDetails.Images && this.gtaHotelDetails.Images.Image) {
           this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'BIG')
         }
       } catch (error) {
+      // Handle error
         // eslint-disable-next-line no-console
         console.error('Error fetching hotel details:', error)
+      } finally {
+        this.isLoading = false
       }
     }
   },
+
   methods: {
     bookRoom (roomCode) {
       // Implement booking logic
