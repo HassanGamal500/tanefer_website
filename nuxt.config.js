@@ -2,6 +2,7 @@ import axios from 'axios'
 
 export default {
   router: {
+    // base: '/public/'
     base: ''
     // middleware: ['redirectNonGenerated']
   },

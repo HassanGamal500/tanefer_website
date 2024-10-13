@@ -28,7 +28,7 @@
         </template>
       </v-snackbar>
       <!-- <div v-if="!listGtaHotelDetails.length"> -->
-      <div v-if="showSearch">
+      <div v-if="showSearch && !isChoiceConfirmed">
         <div style="" class="px-0 my-5">
           <div>
             <v-card class="px-7 pt-7 pb-1" style="border-radius: 15px;">
@@ -58,7 +58,7 @@
                       />
                     </template>
 
-                    <v-list style="overflow-y: auto; max-height: 300px;">
+                    <v-list style="overflow-y: auto; max-height: 300px; width: 217px">
                       <v-list-item
                         v-for="zone in filteredZones"
                         :key="zone.id"
@@ -97,6 +97,7 @@
                     <v-date-picker
                       ref="picker"
                       v-model="hotelStartDate"
+                      :min="minDate"
                       color="late"
                       @input="menuStartDate = false, formatDate(hotelStartDate, 1, 'hotelStartDate')"
                     />
@@ -123,6 +124,7 @@
                     <v-date-picker
                       ref="picker"
                       v-model="hotelEndDate"
+                      :min="minDate"
                       color="late"
                       @input="menuEndDate = false, formatDate(hotelEndDate, 1, 'hotelEndDate')"
                     />
@@ -227,12 +229,6 @@
 
           <!-- Second Row: Sidebar and Main Content -->
           <v-row>
-            <!-- Sidebar (col-4) -->
-            <!-- <v-col cols="12" md="3">
-              <v-card class="pa-3">
-                <h3>Filters Search Results</h3>
-              </v-card>
-            </v-col> -->
             <v-col cols="12" md="3">
               <v-card class="pa-3" outlined>
                 <!-- Text Box for Hotel Name -->
@@ -241,28 +237,10 @@
                   label="Hotel Name"
                   outlined
                   dense
-                  class="my-2"
+                  class="mt-1"
                 />
-                <div v-if="hotelName">
+                <div v-if="hotelName" class="pb-1">
                   <v-btn class="v-btn-brown" @click="applyHotelNameFilter">
-                    Apply
-                  </v-btn>
-                  <v-btn text @click="clearFilters">
-                    Clear
-                  </v-btn>
-                </div>
-
-                <!-- Points of Interest Dropdown -->
-                <v-select
-                  v-model="selectedPointOfInterest"
-                  :items="pointsOfInterest"
-                  label="Points of Interest"
-                  outlined
-                  dense
-                  class="my-2"
-                />
-                <div v-if="selectedPointOfInterest">
-                  <v-btn class="v-btn-brown" @click="applyPointOfInterestFilter">
                     Apply
                   </v-btn>
                   <v-btn text @click="clearFilters">
@@ -279,8 +257,8 @@
                   <!-- Slider -->
                   <v-range-slider
                     v-model="priceRange"
-                    :min="10"
-                    :max="5000"
+                    :min="0"
+                    :max="3000"
                     :step="10"
                     thumb-label="always"
                     class="mt-10"
@@ -292,8 +270,8 @@
                         v-model="priceRange[0]"
                         label="Min $"
                         type="number"
-                        min="10"
-                        max="5000"
+                        min="0"
+                        max="3000"
                         hide-details
                         dense
                       />
@@ -303,8 +281,8 @@
                         v-model="priceRange[1]"
                         label="Max $"
                         type="number"
-                        min="10"
-                        max="5000"
+                        min="0"
+                        max="3000"
                         hide-details
                         dense
                       />
@@ -328,12 +306,13 @@
                       v-for="rating in ratingOptions"
                       :key="rating.value"
                       cols="6"
+                      class="py-0 my-0"
                     >
                       <v-checkbox
                         v-model="selectedRatings"
                         :value="rating.value"
-                        class="my-1"
                         dense
+                        class="my-0 py-0"
                       >
                         <template #label>
                           <span class="rating-stars">
@@ -384,6 +363,7 @@
                         />
                       </v-col>
 
+                      <!-- Hotel Content -->
                       <v-col cols="7" class="pa-3">
                         <div class="d-flex justify-space-between align-center mb-1 hotel-title">
                           <div>
@@ -403,27 +383,28 @@
                         <div class="grey--text text-justify text-body-2 font-italic description mb-2">
                           {{ truncatedDescriptions[h] }}
                         </div>
+
+                        <!-- Buttons Section -->
                         <v-row no-gutters>
                           <v-col cols="12" class="pa-3">
                             <div class="mt-2 d-flex justify-space-between align-center">
                               <div>
-                                <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
+                                <v-btn small outlined color="sienna" class="mr-2 px-5 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
                                   Info
                                 </v-btn>
-                                <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown">
+                                <!-- <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown">
                                   Compare
                                 </v-btn>
                                 <v-btn small outlined icon color="sienna" class="mr-2 no-wrap v-btn-brown">
                                   <v-icon>mdi-share-variant</v-icon>
-                                </v-btn>
+                                </v-btn> -->
                               </div>
                               <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown" @click="toggleRoomDetails(h)">
-                                Options
+                                Room options
                               </v-btn>
                             </div>
                           </v-col>
                         </v-row>
-
                         <!-- Price and Rating -->
                         <div class="price-wrapper text-right">
                           <v-rating
@@ -445,14 +426,14 @@
                         </div>
                       </v-col>
                     </v-row>
+                    <!-- Room Details -->
                     <v-row>
                       <v-col cols="12">
                         <div>
-                          <!-- Collapsible Room Details (Unconditionally Rendered) -->
                           <v-expand-transition>
                             <v-card v-if="activeRoomIndex === h" class="mt-2" elevation="2">
                               <v-card-text>
-                                <v-row v-for="(roomOption, index) in hotel.HotelOptions.HotelOption" :key="index">
+                                <v-row v-for="(roomOption, index) in displayedRooms(hotel.HotelOptions.HotelOption)" :key="index">
                                   <v-col cols="12">
                                     <v-row justify="space-between">
                                       <v-col cols="12" md="6">
@@ -474,25 +455,46 @@
                                         </p>
                                       </v-col>
                                     </v-row>
-                                    <p>
-                                      {{ roomOption.HotelRoom?.Description || '' }}
-                                    </p>
-                                    <p>
-                                      <strong>Cancellation Policy:</strong>
-                                      <br>
-                                      <span class="grey--text" v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
-                                    </p>
+
+                                    <!-- Book Button -->
                                     <div class="d-flex justify-end">
-                                      <v-btn small color="brown" outlined @click="bookRoom(roomOption, h)">
+                                      <v-btn small class="mr-2 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
                                         Book
                                       </v-btn>
                                     </div>
-                                    <!-- <div style="visibility: hidden;">
-                                      <p>
-                                        *testing*: RatePlanCode: {{ roomOption.RatePlanCode }}
-                                      </p>
-                                    </div> -->
-                                    <hr class="my-2" color="tan">
+                                    <v-btn small text color="red" @click="toggleCancellationPolicy(index)">
+                                      Non-refundable
+                                      <v-icon small class="ml-1">
+                                        {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                      </v-icon>
+                                    </v-btn>
+                                    <p>
+                                      <span class="grey--text">
+                                        <span v-if="showFullCancellationPolicy[index]">
+                                          <strong>Cancellation Policy:</strong>
+                                          <br>
+                                          <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                                        </span>
+                                      </span>
+                                    </p>
+                                    <hr class="ma-1" color="tan">
+                                  </v-col>
+                                </v-row>
+                                <v-row justify="center">
+                                  <v-col cols="auto">
+                                    <v-btn
+                                      v-if="hotel.HotelOptions.HotelOption.length > 2"
+                                      small
+                                      class="text-body-1 text-brown font-weight-bold"
+                                      text
+                                      color="brown"
+                                      @click="toggleRoomDisplay"
+                                    >
+                                      {{ showAllRooms ? 'See Less' : `See More (${hiddenRoomCount(hotel.HotelOptions.HotelOption)}+)` }}
+                                      <v-icon small>
+                                        {{ showAllRooms ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                      </v-icon>
+                                    </v-btn>
                                   </v-col>
                                 </v-row>
                               </v-card-text>
@@ -509,356 +511,17 @@
         </v-container>
         <!-- new results end -->
       </div>
-      <v-dialog v-model="showHotelGtaDetails" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
-        <v-card>
-          <v-card-title class="white--text" style="background-color: #4f3316;">
-            Hotel
-            <v-btn
-              text
-              color="white"
-              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
-              elevation="4"
-              icon
-              small
-              absolute
-              right
-              class="float-right"
-              @click="showHotelGtaDetails = false"
-            >
-              <v-icon color="white">
-                mdi-close
-              </v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text class="pt-4">
-            <div v-if="gtaHotelDetails !== null">
-              <v-row class="" style="padding: 5px;margin: 10px 0">
-                <v-col cols="12" md="4" class="pt-4">
-                  <div v-if="gtaHotelDetails.Images">
-                    <v-img
-                      max-height="400"
-                      :src="gtaHotelDetails.Images && gtaHotelDetails.Images.Image[0] ? gtaHotelDetails.Images.Image[0].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
-                      max-width="400"
-                      class="rounded-lg"
-                    />
-                  </div>
-                </v-col>
-                <v-col cols="12" md="8">
-                  <div class="cruise-result-trip justify-space-between">
-                    <div>
-                      <h6 class="text-h6 font-weight-bold">
-                        {{ gtaHotelDetails.HotelName }}
-                      </h6>
-                    </div>
-                    <div v-if="gtaHotelDetails.Images && gtaHotelDetails.Images.Image.length > 0">
-                      <v-row>
-                        <v-col cols="12" md="7">
-                          <v-carousel hide-delimiters height="200">
-                            <v-carousel-item
-                              v-for="(image,i) in gtaHotelDetails.Images.Image"
-                              :key="i"
-                              :src="image.FileName"
-                            />
-                          </v-carousel>
-                        </v-col>
-                      </v-row>
-                    </div>
-                    <div class="black--text">
-                      <p v-if="gtaHotelDetails.Address.Address" class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Address:</strong> {{ gtaHotelDetails.Address.Address }}
-                      </p>
-                      <p v-if="gtaHotelDetails.Address && gtaHotelDetails.Address.PostalCode" class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Postal Code:</strong> {{ gtaHotelDetails.Address.PostalCode }}
-                      </p>
-                      <p v-if="gtaHotelDetails.HotelCategory" class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Category:</strong> {{ gtaHotelDetails.HotelCategory._ }}
-                      </p>
-                      <p v-if="gtaHotelDetails.HotelType" class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Type:</strong> {{ gtaHotelDetails.HotelType._ }}
-                      </p>
-                      <!-- <p class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Hotel Chain:</strong> {{ gtaHotelDetails.HotelChain.Name }}
-                      </p> -->
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Descriptions:</strong>
-                        <span v-if="Array.isArray(gtaHotelDetails.Descriptions.Description)">
-                          <span v-for="(description, d) in gtaHotelDetails.Descriptions.Description" :key="d">
-                            <span v-if="description.Type === 'LNG'">
-                              <span class="" style="font-size: 15px;margin: 2px 0;">{{ description._ }}</span>
-                            </span>
-                          </span>
-                        </span>
-                        <span v-else>
-                          {{ gtaHotelDetails.Descriptions.Description._ }}
-                        </span>
-                      </p>
-                      <div v-if="gtaHotelDetails.Features" class="trips-cityname" style="margin: 10px 0;">
-                        <v-expansion-panels>
-                          <v-expansion-panel v-if="gtaHotelDetails.Features.Feature.length">
-                            <v-expansion-panel-header>
-                              Features
-                            </v-expansion-panel-header>
-                            <v-expansion-panel-content>
-                              <span v-for="(feature, f) in gtaHotelDetails.Features.Feature" :key="f">
-                                <v-chip label large color="#F6F6F6" class="my-1 px-4 ma-2 py-2">{{ feature._ }}</v-chip>
-                              </span>
-                            </v-expansion-panel-content>
-                          </v-expansion-panel>
-                        </v-expansion-panels>
-                      </div>
-                      <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="gtaHotelAvailDetails.HotelOptions && gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price">
-                        <strong>Price:</strong> {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }}  {{ gtaHotelAvailDetails.HotelOptions.HotelOption.Prices.Price.Currency }}
-                      </p> -->
-                      <p v-if="gtaHotelAvailDetails.HotelOptions.HotelOption.CancellationPolicy" class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Cancellation Policy:</strong> {{ gtaHotelAvailDetails.HotelOptions.HotelOption.CancellationPolicy.Description }}
-                      </p>
-                    </div>
-                  </div>
-                </v-col>
-              </v-row>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="showRoomsDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
-        <v-card>
-          <v-card-title class="white--text" style="background-color: #4f3316;">
-            Change Room
-            <v-btn
-              text
-              color="white"
-              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
-              elevation="4"
-              icon
-              small
-              absolute
-              right
-              class="float-right"
-              @click="showRoomsDialog = false"
-            >
-              <v-icon color="white">
-                mdi-close
-              </v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text class="pt-4">
-            <div v-if="hotelAvails !== null">
-              <div v-if="Array.isArray(hotelAvails.HotelOptions.HotelOption)">
-                <div v-for="(hotelOption, hO) in hotelAvails.HotelOptions.HotelOption" :key="hO">
-                  <v-card v-if="hotelOption" class="my-4">
-                    <v-card-title class="white--text" style="background-color: #4f3316;">
-                      Board: <span v-if="hotelOption.Board && hotelOption.Board._">{{ hotelOption.Board._ }}, </span><span v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">{{ hotelOption.HotelRooms.HotelRoom.Name }}</span>
-                    </v-card-title>
-                    <v-card-text class="pt-4">
-                      <v-row class="" style="padding: 5px;margin: 10px 0">
-                        <v-col cols="12" md="10">
-                          <div class="cruise-result-trip justify-space-between">
-                            <div class="black--text">
-                              <p v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
-                                <span v-if="Array.isArray(hotelOption.HotelRooms.HotelRoom)">
-                                  <div v-for="(room, r) in hotelOption.HotelRooms.HotelRoom" :key="r">
-                                    <span v-if="room.Name"><strong>Room Name:</strong> {{ room.Name }} <br></span>
-                                    <span v-if="room.RoomCategory._"><strong>Room Category:</strong> {{ room.RoomCategory._ }} <br></span>
-                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br></span>
-                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br></span>                                    <hr>
-                                  </div>
-                                </span>
-                                <span v-else>
-                                  <span v-if="hotelOption.HotelRooms.HotelRoom.Name"><strong>Room Name:</strong> {{ hotelOption.HotelRooms.HotelRoom.Name }} <br></span>
-                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomCategory._"><strong>Room Category:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br></span>
-                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br></span>
-                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br></span>
-                                </span>
-                              </p>
-                              <!-- <p class="" style="font-size: 15px;margin: 2px 0;" v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">
-                                <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
-                              </p> -->
-                              <p v-if="hotelOption.AdditionalElements && hotelOption.AdditionalElements.HotelOffers" class="" style="font-size: 18px;margin: 2px 0;">
-                                <strong>Hotel Offer:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
-                                <strong>Hotel Offer Description:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
-                              </p>
-                              <v-divider class="mb-4" />
-                              <p v-if="hotelOption.CancellationPolicy" class="" style="font-size: 18px;margin: 2px 0;">
-                                <strong>Cancellation Policy</strong>
-                                <strong>Description:</strong> {{ hotelOption.CancellationPolicy.Description }} <br>
-                                <strong>First Day Cost Cancellation (Hour):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation.Hour }} <br>
-                                <strong>First Day Cost Cancellation (Date):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation._ }} <br>
-                              </p>
-                              <v-divider class="mb-4" />
-                              <p v-if="hotelOption.Prices && hotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
-                                <strong>Prices:</strong> {{ hotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotelOption.Prices.Price.Currency }}
-                              </p>
-                            </div>
-                          </div>
-                        </v-col>
-                        <v-col cols="12" md="2">
-                          <v-btn
-                            class="rounded"
-                            large
-                            tile
-                            elevation="0"
-                            dark
-                            color="#4f3316"
-                            block
-                            @click="selectRoomHotelGta(hO)"
-                          >
-                            Select
-                          </v-btn>
-                        </v-col>
-                      </v-row>
-                    </v-card-text>
-                  </v-card>
-                </div>
-              </div>
-              <div v-else>
-                <v-card v-if="hotelAvails.HotelOptions.HotelOption" class="my-4">
-                  <v-card-title class="white--text" style="background-color: #4f3316;">
-                    Board: <span v-if="hotelAvails.HotelOptions.HotelOption.Board && hotelAvails.HotelOptions.HotelOption.Board._">{{ hotelAvails.HotelOptions.HotelOption.Board._ }}, </span><span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom">{{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name }}</span>
-                  </v-card-title>
-                  <v-card-text class="pt-4">
-                    <v-row class="" style="padding: 5px;margin: 10px 0">
-                      <v-col cols="12" md="10">
-                        <div class="cruise-result-trip justify-space-between">
-                          <div class="black--text">
-                            <p v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
-                              <span v-if="Array.isArray(hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom)">
-                                <div v-for="(room, r) in hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom" :key="r">
-                                  <span v-if="room.Name"><strong>Room Name:</strong> {{ room.Name }} <br></span>
-                                  <span v-if="room.RoomCategory._"><strong>Room Category:</strong> {{ room.RoomCategory._ }} <br></span>
-                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br></span>
-                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br></span>
-                                  <hr>
-                                </div>
-                              </span>
-                              <span v-else>
-                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name"><strong>Room Name:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name }} <br></span>
-                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomCategory._"><strong>Room Category:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br></span>
-                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults"><strong>Number of Adults:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br></span>
-                                <span v-if="hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children"><strong>Number of Children:</strong> {{ hotelAvails.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br></span>
-                              </span>
-                            </p>
-                            <p v-if="hotelAvails.HotelOptions.HotelOption.AdditionalElements && hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers" class="" style="font-size: 18px;margin: 2px 0;">
-                              <strong>Hotel Offer:</strong> {{ hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
-                              <strong>Hotel Offer Description:</strong> {{ hotelAvails.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
-                            </p>
-                            <v-divider class="mb-4" />
-                            <p v-if="hotelAvails.HotelOptions.HotelOption.CancellationPolicy" class="" style="font-size: 18px;margin: 2px 0;">
-                              <strong>Cancellation Policy</strong>
-                              <strong>Description:</strong> {{ hotelAvails.HotelOptions.HotelOption.CancellationPolicy.Description }} <br>
-                              <strong>First Day Cost Cancellation (Hour):</strong> {{ hotelAvails.HotelOptions.HotelOption.CancellationPolicy.FirstDayCostCancellation.Hour }} <br>
-                              <strong>First Day Cost Cancellation (Date):</strong> {{ hotelAvails.HotelOptions.HotelOption.CancellationPolicy.FirstDayCostCancellation._ }} <br>
-                            </p>
-                            <v-divider class="mb-4" />
-                            <p v-if="hotelAvails.HotelOptions.HotelOption.Prices && hotelAvails.HotelOptions.HotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
-                              <strong>Prices:</strong> {{ hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotelAvails.HotelOptions.HotelOption.Prices.Price.Currency }}
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-                      <v-col cols="12" md="2">
-                        <v-btn
-                          class="rounded"
-                          large
-                          tile
-                          elevation="0"
-                          dark
-                          color="#4f3316"
-                          block
-                          @click="selectRoomHotelGta(hO)"
-                        >
-                          Select
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                </v-card>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-      <v-dialog v-model="showCheckout" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
-        <v-card>
-          <v-card-title class="white--text" style="background-color: #4f3316;">
-            Hotel Summary
-            <v-btn
-              text
-              color="white"
-              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
-              elevation="4"
-              icon
-              small
-              absolute
-              right
-              class="float-right"
-              @click="showCheckout = false"
-            >
-              <v-icon color="white">
-                mdi-close
-              </v-icon>
-            </v-btn>
-          </v-card-title>
-          <v-card-text class="pt-4">
-            <v-row>
-              <v-col cols="6" sm="2">
-                <v-text-field
-                  :value="travellers"
-                  label="Adults"
-                  prepend-inner-icon="mdi-account"
-                  readonly
-                />
-              </v-col>
-
-              <v-col cols="6" sm="2">
-                <v-text-field
-                  :value="children"
-                  label="Children"
-                  prepend-inner-icon="mdi-account"
-                  readonly
-                />
-              </v-col>
-            </v-row>
-          </v-card-text>
-          <v-card-actions class="dialog-cart-footer" style="background-color: #fff">
-            <v-row align="center" justify="center" class="px-5">
-              <v-col cols="12" md="12">
-                <v-row class="mt-2">
-                  <v-col cols="8">
-                    <h5 class="text-h5">
-                      Total
-                    </h5>
-                  </v-col>
-                  <v-col cols="4">
-                    <p>$ {{ hotelPrices }}</p>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" md="12">
-                <v-btn
-                  class="rounded"
-                  style="margin-bottom: 15px;"
-                  x-large
-                  tile
-                  elevation="0"
-                  dark
-                  color="#4f3316"
-                  block
-                  :disabled="!openProceed"
-                  @click="bookAdventures"
-                >
-                  Complete Checkout
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-
       <!-- the booking confirmation card  -->
       <v-row>
         <!-- Left Column (Booking Form + Additional Information) -->
         <v-col cols="12" md="8">
+          <v-row>
+            <v-col cols="12" md="4">
+              <v-btn v-if="!showSearch && confirmedSelectedRoom && !isChoiceConfirmed" class="mt-5 justify-end v-btn-brown" @click="toggleSearch">
+                Change Search
+              </v-btn>
+            </v-col>
+          </v-row>
           <!-- Additional Information Card -->
           <v-card v-if="confirmedSelectedRoom && !isChoiceConfirmed" class="pa-4 mt-4" elevation="6">
             <v-row>
@@ -873,7 +536,7 @@
         </v-col>
         <!-- Right Column (Booking Confirmation) -->
         <v-col cols="12" md="4">
-          <v-card v-if="confirmedSelectedRoom && !isChoiceConfirmed" class="pa-4 mb-12" elevation="6">
+          <v-card v-if="confirmedSelectedRoom && !isChoiceConfirmed" ref="targetDiv" class="pa-4 mb-12" elevation="6">
             <!-- Hotel Name -->
             <v-row>
               <v-col cols="12">
@@ -914,7 +577,6 @@
                 </ul>
               </v-col>
             </v-row>
-
             <!-- Price Information -->
             <v-row>
               <v-col cols="12">
@@ -922,12 +584,12 @@
                   <span class="font-weight-bold">Board Type:</span>
                   <span class="ml-3" style="color: gray;">{{ selectedHotelOption.PriceInformation.Board._ || '' }}</span>
                   <br>
+                  <br>
                   <span class="font-weight-bold">Total Price:</span>
-                  <span class="ml-3" style="color: gray;">$ {{ selectedHotelOption.PriceInformation.Prices.Price.TotalFixAmounts.Gross || '' }}</span>
+                  <span class="ml-5 font-weight-bold" style="color: black">$ {{ selectedHotelOption.PriceInformation.Prices.Price.TotalFixAmounts.Gross || '' }}</span>
                 </p>
               </v-col>
             </v-row>
-
             <!-- Confirm Button -->
             <v-row>
               <v-col cols="12" class="text-right">
@@ -1148,7 +810,7 @@
               <!-- Book Button -->
               <v-col cols="12">
                 <v-btn
-                  class="white--text"
+                  class="white--text text-capitalize justify-center v-btn-brown"
                   color="#4f3316"
                   elevation="6"
                   large
@@ -1336,8 +998,8 @@ export default {
       selectedDate: '',
       // rooms: 1,
       roomOccupancy: '',
-      priceRange: [10, 5000],
-      defaultPriceRange: [10, 5000],
+      priceRange: [0, 3000],
+      defaultPriceRange: [0, 3000],
       selectedPOI: null,
       hotelName: '',
       pointsOfInterest: ['city1', 'city2', 'city3'],
@@ -1347,7 +1009,10 @@ export default {
       filteredHotels: [],
       selectedNationality: '',
       selectedHotelOption: null,
-      isChoiceConfirmed: false
+      isChoiceConfirmed: false,
+      showFullCancellationPolicy: {},
+      showAllRooms: false,
+      minDate: this.getToday()
     }
   },
   head () {
@@ -1454,8 +1119,12 @@ export default {
     truncatedDescriptions () {
       return this.listGtaHotelDetails.map((hotel) => {
         const description = hotel.HotelInfo.Description || 'Hotel Description'
-        return description.length > 100 ? description.substring(0, 100) + '...' : description
+        return description.length > 150 ? description.substring(0, 150) + '...' : description
       })
+    },
+    truncatedCancellationPolicy () {
+      const policyText = this.roomOption?.CancellationPolicy?.Description || ''
+      return policyText.length > 100 ? policyText.substring(0, 100) + '...' : policyText
     }
   },
   watch: {
@@ -1476,6 +1145,25 @@ export default {
     await this.getGtaBoards()
   },
   methods: {
+    getToday () {
+      const today = new Date()
+      const yyyy = today.getFullYear()
+      const mm = String(today.getMonth() + 1).padStart(2, '0') // Months are 0-indexed
+      const dd = String(today.getDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    },
+    displayedRooms (roomOptions) {
+      return this.showAllRooms ? roomOptions : roomOptions.slice(0, 2)
+    },
+    hiddenRoomCount (roomOptions) {
+      return roomOptions.length - 2
+    },
+    toggleRoomDisplay () {
+      this.showAllRooms = !this.showAllRooms
+    },
+    toggleCancellationPolicy (index) {
+      this.$set(this.showFullCancellationPolicy, index, !this.showFullCancellationPolicy[index])
+    },
     confirmChoice () {
       this.isChoiceConfirmed = true
     },
@@ -1505,10 +1193,6 @@ export default {
         return hotelPrice >= this.priceRange[0] && hotelPrice <= this.priceRange[1]
       })
     },
-    // clearPriceFilter () {
-    //   this.priceRange = [...this.defaultPriceRange] // Reset to default min and max values
-    //   this.filteredHotels = this.listGtaHotelDetails // Reset the filtered list
-    // },
     extractNumericRating (category) {
       const match = category.match(/(\d)/)
       return match ? parseInt(match[1], 10) : null
@@ -1744,6 +1428,13 @@ export default {
       if (type === 'hotelStartDate') { this.hotelStartDateText = newDate }
       if (type === 'hotelEndDate') { this.hotelEndDateText = newDate }
     },
+    getTodayDate () {
+      const today = new Date()
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, '0')
+      const day = String(today.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    },
     async getMetaData () {
       try {
         const promise = hotelsServices.getMetaData(7)
@@ -1844,8 +1535,11 @@ export default {
       window.open(url, '_blank')
     },
     async checkHotelAvailability () {
+      // Set the destination and clear previous results
       this.destination = this.query
       this.clearPreviousResults()
+
+      // Validate travelers and dates
       if (this.travellers === 0) {
         this.snackbar = true
         this.color = 'error'
@@ -1860,6 +1554,7 @@ export default {
         return
       }
 
+      // Initialize loading state and clear previous hotel results
       this.isLoading = true
       this.hotelAvailsArray = []
       this.hotelAvails = null
@@ -1877,39 +1572,48 @@ export default {
       this.getbookingRuleArray = []
       this.confirmedSelectedRoom = false
 
+      // Prepare form data to send in the request
       const formData = new FormData()
       formData.append('start_date', this.hotelStartDate)
       formData.append('end_date', this.hotelEndDate)
       formData.append('board', this.selectedBoard || '')
-      formData.append('hotel_name', this.selectedHotelName || '')
+      formData.append('hotel_name', this.selectedHotelName || '') // Hotel Name filtering
       formData.append('hotel_category', this.selectedHotelCategory || '')
       formData.append('hotel_type_category', this.selectedHotelTypeCategory || '')
 
+      // Initialize pagination settings
       const hotels = this.gtaHotels || []
       let page = 1
       const pageSize = 100
       let totalPages = 1
 
       try {
+        // Call searchZones API
         await this.searchZones()
+
+        // Loop through paginated hotel results
         do {
           const start = (page - 1) * pageSize
           const end = start + pageSize
-          const hotelsForPage = hotels.slice(start, end) // Slice hotels for the current page
+          const hotelsForPage = hotels.slice(start, end)
 
+          // Add hotels to form data for the current page
           for (let i = 0; i < hotelsForPage.length; i++) {
             formData.append(`hotels[${i}]`, hotelsForPage[i].Jpd_code)
           }
 
+          // Add traveler and room details to the form data
           formData.append('adults', this.travellers)
           formData.append('children', this.children || 0)
 
+          // Add children's ages if provided
           if (this.ageSelects.length > 0) {
             for (let x = 0; x < this.ageSelects.length; x++) {
               formData.append(`ages[${x}]`, this.ageSelects[x].age)
             }
           }
 
+          // Add room details to the form data
           if (this.rooms && this.rooms.length > 0) {
             for (let r = 0; r < this.rooms.length; r++) {
               formData.append(`rooms[${r}][travellers]`, this.rooms[r].travelers || 1)
@@ -1923,49 +1627,65 @@ export default {
             }
           }
 
-          const promise = hotelsServices.checkHotelAvailabilities(formData, page, pageSize)
-          const response = await promise
+          // Call the API to check hotel availability
+          const response = await hotelsServices.checkHotelAvailabilities(formData, page, pageSize)
 
-          // Log the full response to ensure structure is as expected
-          // eslint-disable-next-line no-console
+          // Log the full API response
           console.log('Full Response:', response.data)
 
           const availabilityRS = response?.data?.data?.AvailabilityRS
 
+          // Handle any errors returned in the response
           if (!availabilityRS || availabilityRS?.Errors !== undefined) {
-            console.log('Error in availabilityRS:', availabilityRS?.Errors)
+            console.error('Error in availabilityRS:', availabilityRS?.Errors)
             this.snackbar = true
             this.color = 'error'
-            this.text = availabilityRS?.Errors?.Error?.Text || 'An error occurred while fetching availability.'
+            this.text = availabilityRS?.Errors?.Error?.Text || 'Unfortunately, there is currently no availability found.'
             this.loaded = false
-            this.checkResponseCode = false
             this.isLoading = false
             break
           } else {
             this.isAvailable = true
-            const results = availabilityRS?.Results?.HotelResult || []
+
+            // Process the results if found
+            let results = availabilityRS?.Results?.HotelResult
+
+            // Check if results is an object, if so, convert it to an array
+            if (results && !Array.isArray(results)) {
+              results = [results] // Wrap the single object into an array
+            }
+
+            console.log('Processed Results:', results)
 
             if (results.length > 0) {
+              // Add results to hotel arrays
               this.hotelAvailsArray.push(...results)
               this.listGtaHotelDetails = [...this.listGtaHotelDetails, ...results]
               this.filteredHotels = this.listGtaHotelDetails
-              // eslint-disable-next-line no-console
+
+              // Log the filtered results
               console.log('filteredHotels:', this.filteredHotels)
-              this.showSearch = false
+
+              this.showSearch = false // Hide the search form if results are found
+            } else {
+              console.log('No matching hotels found.')
+              this.filteredHotels = [] // Handle no results found case
             }
 
+            // Update pagination details
             totalPages = availabilityRS?.pagination?.total_pages || 1
           }
 
-          page++ // Increment the page
+          page++
 
+          // If all pages have been processed, stop the loop
           if (page > totalPages) {
             this.checkResponseCode = true
             this.isLoading = false
           }
         } while (page <= totalPages)
       } catch (error) {
-        // eslint-disable-next-line no-console
+        // Catch and log any errors during the API call
         console.error('Error fetching availability:', error)
         this.snackbar = true
         this.color = 'error'
@@ -1975,6 +1695,137 @@ export default {
         this.isLoading = false
       }
     },
+    // async checkHotelAvailability () {
+    //   this.destination = this.query
+    //   this.clearPreviousResults()
+    //   if (this.travellers === 0) {
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'Please select Number of Adults'
+    //     this.loaded = false
+    //     return
+    //   } else if (this.hotelStartDate === null || this.hotelEndDate === null) {
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'Please select Start Date and End Date'
+    //     this.loaded = false
+    //     return
+    //   }
+
+    //   this.isLoading = true
+    //   this.hotelAvailsArray = []
+    //   this.hotelAvails = null
+    //   this.selectedRoomGtaArray = []
+    //   this.getRatePlanCodeArray = []
+    //   this.selectedHotelCodeArray = []
+    //   this.selectedHotelJPCodeArray = []
+    //   this.selectedHotelJPDCodeArray = []
+    //   this.selectedRoomGta = null
+    //   this.getRatePlanCode = null
+    //   this.hotelPrices = null
+    //   this.selectedHotelCode = null
+    //   this.selectedHotelJPCode = null
+    //   this.selectedHotelJPDCode = null
+    //   this.getbookingRuleArray = []
+    //   this.confirmedSelectedRoom = false
+
+    //   const formData = new FormData()
+    //   formData.append('start_date', this.hotelStartDate)
+    //   formData.append('end_date', this.hotelEndDate)
+    //   formData.append('board', this.selectedBoard || '')
+    //   formData.append('hotel_name', this.selectedHotelName || '')
+    //   formData.append('hotel_category', this.selectedHotelCategory || '')
+    //   formData.append('hotel_type_category', this.selectedHotelTypeCategory || '')
+
+    //   const hotels = this.gtaHotels || []
+    //   let page = 1
+    //   const pageSize = 100
+    //   let totalPages = 1
+
+    //   try {
+    //     await this.searchZones()
+    //     do {
+    //       const start = (page - 1) * pageSize
+    //       const end = start + pageSize
+    //       const hotelsForPage = hotels.slice(start, end)
+
+    //       for (let i = 0; i < hotelsForPage.length; i++) {
+    //         formData.append(`hotels[${i}]`, hotelsForPage[i].Jpd_code)
+    //       }
+
+    //       formData.append('adults', this.travellers)
+    //       formData.append('children', this.children || 0)
+
+    //       if (this.ageSelects.length > 0) {
+    //         for (let x = 0; x < this.ageSelects.length; x++) {
+    //           formData.append(`ages[${x}]`, this.ageSelects[x].age)
+    //         }
+    //       }
+
+    //       if (this.rooms && this.rooms.length > 0) {
+    //         for (let r = 0; r < this.rooms.length; r++) {
+    //           formData.append(`rooms[${r}][travellers]`, this.rooms[r].travelers || 1)
+    //           formData.append(`rooms[${r}][children]`, this.rooms[r].children || 0)
+    //           if (this.rooms[r].ageSelects && this.rooms[r].ageSelects.length > 0) {
+    //             for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+    //               formData.append(`rooms[${r}][ages][${rx}]`, this.rooms[r].ageSelects[rx])
+    //             }
+    //           }
+    //           formData.append(`rooms[${r}][category]`, this.selectedCategory || '')
+    //         }
+    //       }
+
+    //       const promise = hotelsServices.checkHotelAvailabilities(formData, page, pageSize)
+    //       const response = await promise
+
+    //       // eslint-disable-next-line no-console
+    //       console.log('Full Response:', response.data)
+
+    //       const availabilityRS = response?.data?.data?.AvailabilityRS
+
+    //       if (!availabilityRS || availabilityRS?.Errors !== undefined) {
+    //         console.log('Error in availabilityRS:', availabilityRS?.Errors)
+    //         this.snackbar = true
+    //         this.color = 'error'
+    //         this.text = availabilityRS?.Errors?.Error?.Text || 'Unfortunately,  No availability found.'
+    //         this.loaded = false
+    //         this.checkResponseCode = false
+    //         this.isLoading = false
+    //         break
+    //       } else {
+    //         this.isAvailable = true
+    //         const results = availabilityRS?.Results?.HotelResult || []
+
+    //         if (results.length > 0) {
+    //           this.hotelAvailsArray.push(...results)
+    //           this.listGtaHotelDetails = [...this.listGtaHotelDetails, ...results]
+    //           this.filteredHotels = this.listGtaHotelDetails
+    //           // eslint-disable-next-line no-console
+    //           console.log('filteredHotels:', this.filteredHotels)
+    //           this.showSearch = false
+    //         }
+
+    //         totalPages = availabilityRS?.pagination?.total_pages || 1
+    //       }
+
+    //       page++ // Increment the page
+
+    //       if (page > totalPages) {
+    //         this.checkResponseCode = true
+    //         this.isLoading = false
+    //       }
+    //     } while (page <= totalPages)
+    //   } catch (error) {
+    //     // eslint-disable-next-line no-console
+    //     console.error('Error fetching availability:', error)
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'An error occurred while fetching availability.'
+    //     this.loaded = false
+    //     this.checkResponseCode = false
+    //     this.isLoading = false
+    //   }
+    // },
     showHotelDetails (hotelIndex) {
       this.gtaHotelDetails = this.listGtaHotelDetails[hotelIndex]
       this.showHotelGtaDetails = true
@@ -2118,6 +1969,15 @@ export default {
           // eslint-disable-next-line no-console
           console.log(this.getbookingRule)
           this.confirmedSelectedRoom = true
+
+          this.$nextTick(() => {
+            if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
+              const targetEl = this.$refs.targetDiv.$el
+              if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth' })
+              }
+            }
+          })
         }
       } catch (error) {
         // eslint-disable-next-line no-console
@@ -2662,6 +2522,10 @@ export default {
 /* .v-btn:hover {
   background-color: #A0522D !important; /* Lighter brown on hover */
 /* } */
+
+.text-brown {
+  color: sienna !important;
+}
 
 .v-btn-brown {
   background-color: sienna !important; /* Brown color */

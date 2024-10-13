@@ -9,7 +9,8 @@
     outlined
     hide-no-data
     autocomplete="off"
-    :menu-props="{ auto: true, maxWidth: 200, overflowY: true, zIndex: 9999 }"
+    :menu-props="{ auto: true, minWidth: 150, maxWidth: 150, left: true, zIndex: 9999 }"
+    :filter="customFilter"
   />
 </template>
 
@@ -38,6 +39,13 @@ export default {
       // eslint-disable-next-line no-console
       console.error('Error fetching countries:', error)
     }
+  },
+  methods: {
+    customFilter (item, queryText) {
+      const text = item.name.toLowerCase()
+      const query = queryText.toLowerCase()
+      return text.startsWith(query)
+    }
   }
 }
 </script>
@@ -46,5 +54,9 @@ export default {
 .custom-placeholder ::placeholder {
   color: black;
   opacity: 1;
+}
+
+::v-deep div.v-menu__content.theme--light.v-menu__content--auto.menuable__content__active.v-autocomplete__content {
+  left: 600px !important;
 }
 </style>

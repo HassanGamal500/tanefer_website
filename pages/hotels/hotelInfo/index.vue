@@ -27,7 +27,7 @@
 
     <v-carousel hide-delimiters height="100%" show-arrows>
       <v-carousel-item
-        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], 2)"
+        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'THB') || [], 2)"
         :key="index"
       >
         <v-row>
@@ -40,7 +40,6 @@
               :src="img.FileName || 'https://source.unsplash.com/user/c_v_r/1900x800'"
               height="500px"
               width="100%"
-              contain
               @click="openImageModal(img.FileName)"
             />
           </v-col>
@@ -143,7 +142,7 @@ export default {
         this.gtaHotelDetails = response.data.ContentRS.Contents.HotelContent
 
         if (this.gtaHotelDetails.Images && this.gtaHotelDetails.Images.Image) {
-          this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'BIG')
+          this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'THB')
         }
       } catch (error) {
       // Handle error
