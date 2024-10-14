@@ -27,7 +27,7 @@
 
     <v-carousel hide-delimiters height="100%" show-arrows>
       <v-carousel-item
-        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'THB') || [], 2)"
+        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], 2)"
         :key="index"
       >
         <v-row>
@@ -142,7 +142,7 @@ export default {
         this.gtaHotelDetails = response.data.ContentRS.Contents.HotelContent
 
         if (this.gtaHotelDetails.Images && this.gtaHotelDetails.Images.Image) {
-          this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'THB')
+          this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'BIG')
         }
       } catch (error) {
       // Handle error

@@ -351,15 +351,14 @@
                 <div v-for="(hotel, h) in filteredHotels" :key="h">
                   <!-- Hotel Card -->
                   <v-card class="hotel-card mb-2" max-width="100%" height="100%" elevation="2">
-                    <v-row no-gutters>
+                    <v-row no-gutters class="align-stretch">
                       <!-- Hotel Image -->
-                      <v-col cols="5">
+                      <v-col cols="5" class="p-0">
                         <v-img
                           :src="getHotelImageSrc(hotel)"
                           alt="Hotel Image"
-                          height="255px"
-                          contain
-                          class="hotel-image pt-10 mt-4"
+                          class="hotel-image"
+                          style="height: 100%; object-fit: cover;"
                         />
                       </v-col>
 
@@ -392,19 +391,14 @@
                                 <v-btn small outlined color="sienna" class="mr-2 px-5 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
                                   Info
                                 </v-btn>
-                                <!-- <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown">
-                                  Compare
-                                </v-btn>
-                                <v-btn small outlined icon color="sienna" class="mr-2 no-wrap v-btn-brown">
-                                  <v-icon>mdi-share-variant</v-icon>
-                                </v-btn> -->
                               </div>
-                              <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown" @click="toggleRoomDetails(h)">
+                              <!-- <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown" @click="toggleRoomDetails(h)">
                                 Room options
-                              </v-btn>
+                              </v-btn> -->
                             </div>
                           </v-col>
                         </v-row>
+
                         <!-- Price and Rating -->
                         <div class="price-wrapper text-right">
                           <v-rating
@@ -426,14 +420,16 @@
                         </div>
                       </v-col>
                     </v-row>
+
                     <!-- Room Details -->
                     <v-row>
                       <v-col cols="12">
                         <div>
                           <v-expand-transition>
-                            <v-card v-if="activeRoomIndex === h" class="mt-2" elevation="2">
+                            <v-card v-if="true" class="mt-2" elevation="2">
                               <v-card-text>
-                                <v-row v-for="(roomOption, index) in displayedRooms(hotel.HotelOptions.HotelOption)" :key="index">
+                                <!-- Handle both array and object cases for rooms -->
+                                <v-row v-for="(roomOption, index) in getRoomOptions(hotel.HotelOptions.HotelOption).slice(0, 2)" :key="index">
                                   <v-col cols="12">
                                     <v-row justify="space-between">
                                       <v-col cols="12" md="6">
@@ -480,19 +476,70 @@
                                     <hr class="ma-1" color="tan">
                                   </v-col>
                                 </v-row>
+
+                                <!-- Show more rooms if available -->
+                                <v-row v-if="getRoomOptions(hotel.HotelOptions.HotelOption).length > 2 && showAllRoomsForHotel[h]">
+                                  <v-col v-for="(roomOption, index) in getRoomOptions(hotel.HotelOptions.HotelOption).slice(2)" :key="index + 2" cols="12">
+                                    <v-row justify="space-between">
+                                      <v-col cols="12" md="6">
+                                        <h4 class="mb-0 brown--text">
+                                          {{ roomOption.HotelRooms.HotelRoom?.Name || 'Room Name Not Available' }}
+                                        </h4>
+                                      </v-col>
+                                      <v-col cols="12" md="6" class="text-right">
+                                        <p class="mb-0 font-weight-medium">
+                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                        </p>
+                                      </v-col>
+                                      <v-col cols="12" md="6">
+                                        <p class="mb-0 font-weight-medium">
+                                          <strong>Board:</strong>
+                                          <span class="grey--text">
+                                            {{ roomOption.Board && roomOption.Board._ || 'Board not available' }}
+                                          </span>
+                                        </p>
+                                      </v-col>
+                                    </v-row>
+
+                                    <!-- Book Button -->
+                                    <div class="d-flex justify-end">
+                                      <v-btn small class="mr-2 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
+                                        Book
+                                      </v-btn>
+                                    </div>
+                                    <v-btn small text color="red" @click="toggleCancellationPolicy(index)">
+                                      Non-refundable
+                                      <v-icon small class="ml-1">
+                                        {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                      </v-icon>
+                                    </v-btn>
+                                    <p>
+                                      <span class="grey--text">
+                                        <span v-if="showFullCancellationPolicy[index]">
+                                          <strong>Cancellation Policy:</strong>
+                                          <br>
+                                          <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                                        </span>
+                                      </span>
+                                    </p>
+                                    <hr class="ma-1" color="tan">
+                                  </v-col>
+                                </v-row>
+
+                                <!-- Toggle button to show more/less rooms -->
                                 <v-row justify="center">
                                   <v-col cols="auto">
                                     <v-btn
-                                      v-if="hotel.HotelOptions.HotelOption.length > 2"
+                                      v-if="getRoomOptions(hotel.HotelOptions.HotelOption).length > 2"
                                       small
                                       class="text-body-1 text-brown font-weight-bold"
                                       text
                                       color="brown"
-                                      @click="toggleRoomDisplay"
+                                      @click="toggleRoomDisplay(h)"
                                     >
-                                      {{ showAllRooms ? 'See Less' : `See More (${hiddenRoomCount(hotel.HotelOptions.HotelOption)}+)` }}
+                                      {{ showAllRoomsForHotel[h] ? 'See Less' : `See More (${hiddenRoomCount(hotel.HotelOptions.HotelOption)}+)` }}
                                       <v-icon small>
-                                        {{ showAllRooms ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                        {{ showAllRoomsForHotel[h] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                                       </v-icon>
                                     </v-btn>
                                   </v-col>
@@ -1012,7 +1059,8 @@ export default {
       isChoiceConfirmed: false,
       showFullCancellationPolicy: {},
       showAllRooms: false,
-      minDate: this.getToday()
+      minDate: this.getToday(),
+      showAllRoomsForHotel: {}
     }
   },
   head () {
@@ -1145,6 +1193,12 @@ export default {
     await this.getGtaBoards()
   },
   methods: {
+    toggleRoomDisplay (hotelIndex) {
+      this.$set(this.showAllRoomsForHotel, hotelIndex, !this.showAllRoomsForHotel[hotelIndex])
+    },
+    getRoomOptions (roomOptions) {
+      return Array.isArray(roomOptions) ? roomOptions : [roomOptions]
+    },
     getToday () {
       const today = new Date()
       const yyyy = today.getFullYear()
@@ -1158,9 +1212,9 @@ export default {
     hiddenRoomCount (roomOptions) {
       return roomOptions.length - 2
     },
-    toggleRoomDisplay () {
-      this.showAllRooms = !this.showAllRooms
-    },
+    // toggleRoomDisplay () {
+    //   this.showAllRooms = !this.showAllRooms
+    // },
     toggleCancellationPolicy (index) {
       this.$set(this.showFullCancellationPolicy, index, !this.showFullCancellationPolicy[index])
     },
@@ -1521,7 +1575,7 @@ export default {
       }
     },
     showHotelDetailsObject (hotelIndex) {
-      const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
+      const getHotelGtaDetails = this.filteredHotels[hotelIndex]
       const hotelCode = getHotelGtaDetails.Code
       // const cancellationPolicy = getHotelGtaDetails.HotelOptions.HotelOption[0]?.CancellationPolicy?.Description || 'No cancellation policy available.'
 
