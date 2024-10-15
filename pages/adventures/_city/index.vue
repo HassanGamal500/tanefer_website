@@ -6,6 +6,7 @@
       contain
       class="image-fit"
       max-height="400"
+      style="margin-top: -3.5rem;"
     >
       <v-row
         align="center"
