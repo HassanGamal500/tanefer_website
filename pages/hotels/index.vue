@@ -225,7 +225,6 @@
               </v-btn>
             </v-col>
           </v-row>
-
           <!-- Second Row: Sidebar and Main Content -->
           <v-row>
             <v-col cols="12" md="3">
@@ -238,13 +237,11 @@
                   dense
                   class="mt-1"
                 />
-
                 <!-- Price Range Slider -->
                 <v-card class="pa-3 mb-2" outlined>
                   <p class="text-subtitle-2 mb-2">
                     Price Range
                   </p>
-
                   <!-- Slider -->
                   <v-range-slider
                     v-model="priceRange"
@@ -353,12 +350,11 @@
                           :src="getHotelImageSrc(hotel)"
                           alt="Hotel Image"
                           class="hotel-image"
-                          style="height: 100%; object-fit: cover;"
+                          style="width: 225px; height: 232px; object-fit: cover; overflow: hidden;"
                         />
                       </v-col>
-
                       <!-- Hotel Content -->
-                      <v-col cols="7" class="pa-3">
+                      <v-col cols="7" class="py-2 px-1" style="margin-left: -45px;">
                         <div class="d-flex justify-space-between align-center mb-1 hotel-title">
                           <div>
                             <h4 class="mb-0 font-weight-bold">
@@ -372,28 +368,23 @@
                             </span>
                           </div>
                         </div>
-
                         <!-- Hotel Description -->
-                        <div class="grey--text text-justify text-body-2 font-italic description mb-2">
+                        <div class="grey--text text-justify text-body-2 font-italic description mb-1">
                           {{ truncatedDescriptions[h] }}
                         </div>
-
                         <!-- Buttons Section -->
                         <v-row no-gutters>
-                          <v-col cols="12" class="pa-3">
+                          <v-col cols="12" class="pa-1">
+                            <!-- Reduced padding -->
                             <div class="mt-2 d-flex justify-space-between align-center">
                               <div>
                                 <v-btn small outlined color="sienna" class="mr-2 px-5 no-wrap v-btn-brown" @click="showHotelDetailsObject(h)">
                                   Info
                                 </v-btn>
                               </div>
-                              <!-- <v-btn small outlined color="sienna" class="mr-2 no-wrap v-btn-brown" @click="toggleRoomDetails(h)">
-                                Room options
-                              </v-btn> -->
                             </div>
                           </v-col>
                         </v-row>
-
                         <!-- Price and Rating -->
                         <div class="price-wrapper text-right">
                           <v-rating
@@ -415,93 +406,92 @@
                         </div>
                       </v-col>
                     </v-row>
-
                     <!-- Room Details -->
-                    <v-row>
+                    <v-row style="margin-top: -20px;">
                       <v-col cols="12">
                         <div>
                           <v-expand-transition>
                             <v-card v-if="true" class="mt-2" elevation="2">
                               <v-card-text>
-                                <!-- Handle both array and object cases for rooms -->
-                                <v-row v-for="(roomOption, index) in getRoomOptions(hotel.HotelOptions.HotelOption).slice(0, 2)" :key="index">
+                                <v-row v-for="(roomOption, index) in getRoomOptions(hotel.HotelOptions.HotelOption).slice(0, 2)" :key="index" class="room-card">
                                   <v-col cols="12">
                                     <v-row justify="space-between">
                                       <v-col cols="12" md="6">
-                                        <h4 class="mb-0 brown--text">
+                                        <h5 class="mb-0 brown--text text-decoration-underline">
                                           {{ roomOption.HotelRooms.HotelRoom?.Name || 'Room Name Not Available' }}
-                                        </h4>
+                                        </h5>
                                       </v-col>
-                                      <v-col cols="12" md="6" class="text-right">
+                                    </v-row>
+                                    <v-row class="d-flex align-center justify-space-between" no-gutters>
+                                      <v-col cols="4">
                                         <p class="mb-0 font-weight-medium">
-                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
-                                        </p>
-                                      </v-col>
-                                      <v-col cols="12" md="6">
-                                        <p class="mb-0 font-weight-medium">
-                                          <strong>Board:</strong>
+                                          <!-- <strong>Board:</strong> -->
                                           <span class="grey--text">
                                             {{ roomOption.Board && roomOption.Board._ || 'Board not available' }}
                                           </span>
                                         </p>
                                       </v-col>
-                                    </v-row>
-
-                                    <!-- Book Button -->
-                                    <!-- <div class="d-flex justify-end">
-                                      <v-btn small class="mr-2 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
-                                        Book
-                                      </v-btn>
-                                    </div>
-                                    <v-btn small text color="red" @click="toggleCancellationPolicy(index)">
-                                      Non-refundable
-                                      <v-icon small class="ml-1">
-                                        {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                                      </v-icon>
-                                    </v-btn> -->
-                                    <v-row class="mt-0 pt-0">
-                                      <v-col cols="12" md="6">
-                                        <v-btn small text color="red" @click="toggleCancellationPolicy(h, index)">
+                                      <v-col cols="4" class="d-flex align-center">
+                                        <v-btn small text color="red" class="text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
                                           Non-refundable
                                           <v-icon small class="ml-1">
                                             {{ showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                                           </v-icon>
                                         </v-btn>
                                       </v-col>
-                                      <v-col cols="12" md="6" class="d-flex justify-end">
-                                        <v-btn small class="mr-2 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
+                                      <v-col cols="4" class="d-flex justify-end">
+                                        <p class="mr-3 font-weight-bold text-subtitle-1">
+                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                        </p>
+                                        <v-btn small class="mr-2 px-8 py-4 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
                                           Book
                                         </v-btn>
                                       </v-col>
                                     </v-row>
-                                    <p>
-                                      <span class="grey--text">
-                                        <span v-if="showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index]">
-                                          <strong>Cancellation Policy:</strong>
-                                          <br>
-                                          <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
-                                        </span>
-                                      </span>
-                                    </p>
-                                    <hr class="ma-1" color="tan">
+                                    <v-row v-if="showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index]">
+                                      <v-col cols="12">
+                                        <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
+                                          <tr style="background-color: #eaeaea;">
+                                            <td style="padding: 10px;">
+                                              <strong>Cancellation Charges:</strong>
+                                            </td>
+                                          </tr>
+                                          <tr style="background-color: rgb(255,239.5,193);">
+                                            <td style="padding: 10px; color: rgb(134.5,100.875,0);">
+                                              <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
+                                                mdi-alert
+                                              </v-icon>
+                                              Booking subject to cancellation charges
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td style="padding: 10px;">
+                                              <span class="grey--text">
+                                                <span>
+                                                  <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                                                </span>
+                                              </span>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                      </v-col>
+                                    </v-row>
                                   </v-col>
                                 </v-row>
 
                                 <!-- Show more rooms if available -->
                                 <v-row v-if="getRoomOptions(hotel.HotelOptions.HotelOption).length > 2 && showAllRoomsForHotel[h]">
-                                  <v-col v-for="(roomOption, index) in getRoomOptions(hotel.HotelOptions.HotelOption).slice(2)" :key="index + 2" cols="12">
+                                  <v-col v-for="(roomOption, index) in getRoomOptions(hotel.HotelOptions.HotelOption).slice(2)" :key="index + 2" cols="12" class="room-card">
                                     <v-row justify="space-between">
                                       <v-col cols="12" md="6">
-                                        <h4 class="mb-0 brown--text">
+                                        <h5 class="mb-0 brown--text  text-decoration-underline">
                                           {{ roomOption.HotelRooms.HotelRoom?.Name || 'Room Name Not Available' }}
-                                        </h4>
+                                        </h5>
                                       </v-col>
-                                      <v-col cols="12" md="6" class="text-right">
-                                        <p class="mb-0 font-weight-medium">
-                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
-                                        </p>
-                                      </v-col>
-                                      <v-col cols="12" md="6">
+                                    </v-row>
+                                    <!-- Aligning the Board, Non-refundable, and Book Button in one row -->
+                                    <v-row class="d-flex align-center justify-space-between" no-gutters>
+                                      <v-col cols="4">
                                         <p class="mb-0 font-weight-medium">
                                           <strong>Board:</strong>
                                           <span class="grey--text">
@@ -509,33 +499,59 @@
                                           </span>
                                         </p>
                                       </v-col>
+                                      <v-col cols="4" class="d-flex align-center">
+                                        <v-btn small text color="red" class=" text-decoration-underline" @click="toggleCancellationPolicy(index)">
+                                          Non-refundable
+                                          <v-icon small class="ml-1">
+                                            {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                          </v-icon>
+                                        </v-btn>
+                                      </v-col>
+                                      <v-col cols="4" class="d-flex justify-end">
+                                        <p class="mr-3 font-weight-bold text-subtitle-1">
+                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                        </p>
+                                        <!-- Book Button -->
+                                        <v-btn small class="mr-2 px-8 py-4 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
+                                          Book
+                                        </v-btn>
+                                      </v-col>
                                     </v-row>
+                                    <v-row v-if="showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index]">
+                                      <v-col cols="12">
+                                        <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
+                                          <!-- Row 1: Cancellation Charges -->
+                                          <tr style="background-color: #eaeaea;">
+                                            <td style="padding: 10px;">
+                                              <strong>Cancellation Charges:</strong>
+                                            </td>
+                                          </tr>
 
-                                    <!-- Book Button -->
-                                    <div class="d-flex justify-end">
-                                      <v-btn small class="mr-2 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
-                                        Book
-                                      </v-btn>
-                                    </div>
-                                    <v-btn small text color="red" @click="toggleCancellationPolicy(index)">
-                                      Non-refundable
-                                      <v-icon small class="ml-1">
-                                        {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                                      </v-icon>
-                                    </v-btn>
-                                    <p>
-                                      <span class="grey--text">
-                                        <span v-if="showFullCancellationPolicy[index]">
-                                          <strong>Cancellation Policy:</strong>
-                                          <br>
-                                          <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
-                                        </span>
-                                      </span>
-                                    </p>
-                                    <hr class="ma-1" color="tan">
+                                          <!-- Row 2: Alert Message -->
+                                          <tr style="background-color: rgb(255,239.5,193);">
+                                            <td style="padding: 10px; color: rgb(134.5,100.875,0);">
+                                              <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
+                                                mdi-alert
+                                              </v-icon>
+                                              Booking subject to cancellation charges
+                                            </td>
+                                          </tr>
+
+                                          <!-- Row 3: Cancellation Policy Details -->
+                                          <tr>
+                                            <td style="padding: 10px;">
+                                              <span class="grey--text">
+                                                <span>
+                                                  <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                                                </span>
+                                              </span>
+                                            </td>
+                                          </tr>
+                                        </table>
+                                      </v-col>
+                                    </v-row>
                                   </v-col>
                                 </v-row>
-
                                 <!-- Toggle button to show more/less rooms -->
                                 <v-row justify="center">
                                   <v-col cols="auto">
@@ -2525,5 +2541,10 @@ export default {
   margin-bottom: 1px !important;
   padding-bottom: 0 !important;
 }
-
+.room-card {
+  border-bottom: 1px solid #d6b682;
+}
+/* hr {
+  height: 1px;
+} */
 </style>
