@@ -6,18 +6,15 @@
       contain
       class="image-fit"
       max-height="400"
-      style="margin-top: -3.5rem;"
+      style="margin-top: -1.2rem;"
     >
-      <v-row
-        align="center"
-        justify="center"
-      >
-        <v-col
-          class="text-center"
-          cols="12"
-        >
+      <v-row align="center" justify="center">
+        <v-col class="text-center" cols="12">
           <h3 class="text-h3 white--text font-weight-bold my-12 set-line-height-responsive" style="line-height: 12rem;">
-            {{ tripsCity.CityName }} Adventures
+            <!-- Surround the text with a span and apply a background color -->
+            <span style="background-color: rgba(171, 141, 118, 0.6); padding: 0.5rem 1rem; border-radius: 5px;">
+              {{ tripsCity.CityName }} Adventures
+            </span>
           </h3>
         </v-col>
       </v-row>

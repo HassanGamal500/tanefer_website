@@ -41,7 +41,7 @@
                     transition="scale-transition"
                     offset-y
                     max-height="300"
-                    :activator="null"
+                    :style="{ minWidth: `${activatorWidth}px` }"
                   >
                     <template #activator="{ on, attrs }">
                       <v-text-field
@@ -57,14 +57,23 @@
                         @input="handleInput"
                       />
                     </template>
-
-                    <v-list style="overflow-y: auto; max-height: 300px; width: 217px">
+                    <template v-if="loading">
+                      <div style="display: flex; justify-content: center; background-color: white; height: 100%;">
+                        <v-progress-circular indeterminate color="primary" />
+                      </div>
+                    </template>
+                    <v-list
+                      v-else
+                      style="overflow-y: auto; max-height: 300px;"
+                      :style="{ minWidth: `${activatorWidth}px`, maxWidth: `${activatorWidth}px` }"
+                    >
                       <v-list-item
                         v-for="zone in filteredZones"
                         :key="zone.id"
+                        class="custom-list-item"
                         @click="handleZoneSelection(zone)"
                       >
-                        <v-list-item-content>
+                        <v-list-item-content class="custom-list-item-content">
                           <v-list-item-title>{{ zone.name }}</v-list-item-title>
                           <v-list-item-subtitle v-if="zone.parent_name">
                             {{ zone.parent_name }}
@@ -75,7 +84,6 @@
                     </v-list>
                   </v-menu>
                 </v-col>
-
                 <v-col cols="12" md="2">
                   <v-menu
                     v-model="menuStartDate"
@@ -103,6 +111,8 @@
                     />
                   </v-menu>
                 </v-col>
+
+                <!-- Check-out Date Picker -->
                 <v-col cols="12" md="2">
                   <v-menu
                     v-model="menuEndDate"
@@ -124,16 +134,16 @@
                     <v-date-picker
                       ref="picker"
                       v-model="hotelEndDate"
-                      :min="minDate"
+                      :min="hotelStartDate"
                       color="late"
                       @input="menuEndDate = false, formatDate(hotelEndDate, 1, 'hotelEndDate')"
                     />
                   </v-menu>
                 </v-col>
-                <v-col cols="12" md="2">
+                <v-col cols="12" md="3">
                   <select-nationality @nationalitySelected="handleNationalitySelected" />
                 </v-col>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="2">
                   <rooms-and-guests @save="setGuests" />
                 </v-col>
               </v-row>
@@ -296,43 +306,46 @@
                     </v-col>
                   </v-row>
                 </v-card>
-                <!-- Ratings -->
-                <v-card class="pa-3">
-                  <p class="text-subtitle-2">
-                    Specify a Category:
+                <v-card class="pa-3 mb-2" outlined>
+                  <p class="text-subtitle-2 mb-2 pb-1">
+                    Specify a Category
                   </p>
-                  <div>
+                  <v-row>
                     <v-col
                       v-for="rating in ratingOptions"
                       :key="rating.value"
-                      cols="6"
+                      cols="12"
                       class="py-0 my-0"
                     >
                       <v-checkbox
                         v-model="selectedRatings"
                         :value="rating.value"
                         dense
-                        class="my-0 py-0"
+                        class="my-1 py-0"
+                        hide-details
                       >
                         <template #label>
-                          <span class="rating-stars">
+                          <span class="rating-stars" style="display: flex; align-items: center;">
                             <v-rating
-                              v-if="typeof rating.value === 'number'"
-                              :value="rating.value"
+                              v-if="isNumericRating(rating.value)"
+                              :value="parseInt(rating.value)"
                               dense
                               empty-icon="mdi-star-outline"
                               full-icon="mdi-star"
                               readonly
                               small
                             />
-                            <span v-else style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <span v-else style="font-size: 12px;">
                               {{ rating.label }}
+                            </span>
+                            <span style="font-size: 12px; margin-left: 5px;">
+                              ({{ rating.count }})
                             </span>
                           </span>
                         </template>
                       </v-checkbox>
                     </v-col>
-                  </div>
+                  </v-row>
                 </v-card>
               </v-card>
             </v-col>
@@ -350,11 +363,11 @@
                           :src="getHotelImageSrc(hotel)"
                           alt="Hotel Image"
                           class="hotel-image"
-                          style="width: 225px; height: 232px; object-fit: cover; overflow: hidden;"
+                          style="width: 260px; height: 232px; object-fit: cover; overflow: hidden;"
                         />
                       </v-col>
                       <!-- Hotel Content -->
-                      <v-col cols="7" class="py-2 px-1" style="margin-left: -45px;">
+                      <v-col cols="7" class="py-2 px-1" style="margin-left: -30px;">
                         <div class="d-flex justify-space-between align-center mb-1 hotel-title">
                           <div>
                             <h4 class="mb-0 font-weight-bold">
@@ -500,7 +513,7 @@
                                         </p>
                                       </v-col>
                                       <v-col cols="4" class="d-flex align-center">
-                                        <v-btn small text color="red" class=" text-decoration-underline" @click="toggleCancellationPolicy(index)">
+                                        <v-btn small text color="red" class=" text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
                                           Non-refundable
                                           <v-icon small class="ml-1">
                                             {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
@@ -590,7 +603,7 @@
         <v-col cols="12" md="8">
           <v-row>
             <v-col cols="12" md="4">
-              <v-btn v-if="!showSearch && confirmedSelectedRoom && !isChoiceConfirmed" class="mt-5 justify-end v-btn-brown" @click="toggleSearch">
+              <v-btn v-if="!showSearch && confirmedSelectedRoom && !isChoiceConfirmed" class="mt-5 justify-end" color="" @click="toggleSearch">
                 Change Search
               </v-btn>
             </v-col>
@@ -916,19 +929,7 @@ export default {
   data () {
     return {
       selectedRatings: [],
-      ratingOptions: [
-        { value: 1, label: '1 Star' },
-        { value: 2, label: '2 Stars' },
-        { value: 3, label: '3 Stars' },
-        { value: 4, label: '4 Stars' },
-        { value: 5, label: '5 Stars' },
-        { value: 'Superior Apartment', label: 'Superior Apartment' },
-        { value: 'Deluxe Villas', label: 'Deluxe Villas' },
-        { value: 'Deluxe Apartment', label: 'Deluxe Apartment' },
-        { value: 'Standard Apartment', label: 'Standard Apartment' },
-        { value: 'Residence', label: 'Residence' },
-        { value: 'Bungalow', label: 'Bungalow' }
-      ],
+      ratingOptions: [],
       selectedPointOfInterest: null,
       showSearch: true,
       comingSoon: false,
@@ -1090,7 +1091,9 @@ export default {
       minDate: this.getToday(),
       showAllRoomsForHotel: {},
       selectedBoards: [],
-      boardOptions: []
+      boardOptions: [],
+      loading: false,
+      activatorWidth: 0
     }
   },
   head () {
@@ -1195,7 +1198,7 @@ export default {
     truncatedDescriptions () {
       return this.listGtaHotelDetails.map((hotel) => {
         const description = hotel.HotelInfo.Description || 'Hotel Description'
-        return description.length > 150 ? description.substring(0, 150) + '...' : description
+        return description.length > 200 ? description.substring(0, 200) + '...' : description
       })
     },
     truncatedCancellationPolicy () {
@@ -1204,43 +1207,56 @@ export default {
     }
   },
   watch: {
+    hotelStartDate (newDate) {
+      if (newDate) {
+        const nextDay = new Date(newDate)
+        nextDay.setDate(nextDay.getDate() + 1)
+        this.hotelEndDate = nextDay.toISOString().substr(0, 10)
+        this.formatDate(this.hotelEndDate, 1, 'hotelEndDate')
+      }
+    },
+    menu (val) {
+      if (val) {
+        this.$nextTick(() => {
+          const activatorEl = this.$el.querySelector('.v-text-field')
+          if (activatorEl) {
+            this.activatorWidth = activatorEl.clientWidth
+          }
+        })
+      }
+    },
     filteredHotels () {
       this.calculatePriceRange()
       this.calculateBoardOptions()
+      this.calculateRatingOptions()
     },
     priceRange: {
       handler (newVal) {
         if (newVal[0] !== null && newVal[1] !== null) {
-          if (newVal[0] === this.minPrice && newVal[1] === this.maxPrice) {
-            this.filteredHotels = this.listGtaHotelDetails
-          } else {
-            this.debouncedApplyPriceFilter()
-          }
+          this.applyCombinedFilters()
         }
       },
       deep: true
     },
     hotelName (newVal) {
-      if (newVal !== '') {
-        this.applyHotelNameFilter()
-      } else {
-        this.filteredHotels = this.listGtaHotelDetails
-      }
+      this.applyCombinedFilters()
     },
-
     selectedRatings (newVal) {
-      if (newVal.length > 0) {
-        this.applyRatingFilter()
-      } else {
-        this.filteredHotels = this.listGtaHotelDetails
-      }
+      this.applyCombinedFilters()
+    },
+    selectedBoards (newVal) {
+      this.applyCombinedFilters()
     },
     query (newQuery) {
       this.handleInput()
-    },
-    selectedBoards () {
-      this.applyBoardFilter()
     }
+  },
+  mounted () {
+    window.addEventListener('popstate', this.handleBackButton)
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('popstate', this.handleBackButton)
   },
 
   async created () {
@@ -1254,6 +1270,86 @@ export default {
     this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
   },
   methods: {
+    calculateRatingOptions () {
+      const ratingCounts = {}
+
+      // Count how many hotels fall under each category
+      this.filteredHotels.forEach((hotel) => {
+        const category = hotel?.HotelInfo?.HotelCategory?._ || 'Uncategorized'
+        if (ratingCounts[category]) {
+          ratingCounts[category]++
+        } else {
+          ratingCounts[category] = 1
+        }
+      })
+
+      // Convert the object into an array
+      const ratingArray = Object.keys(ratingCounts).map(rating => ({
+        label: rating,
+        value: this.extractNumericRating(rating),
+        count: ratingCounts[rating]
+      }))
+
+      this.ratingOptions = ratingArray.sort((a, b) => {
+        const aIsNumeric = !isNaN(a.value)
+        const bIsNumeric = !isNaN(b.value)
+
+        if (aIsNumeric && bIsNumeric) {
+          return a.value - b.value
+        } else if (aIsNumeric) {
+          return -1
+        } else if (bIsNumeric) {
+          return 1
+        } else {
+          return a.label.localeCompare(b.label)
+        }
+      })
+    },
+    isNumericRating (value) {
+      return !isNaN(parseInt(value)) && /^\d+$/.test(value)
+    },
+    handleBackButton () {
+      window.location.reload()
+    },
+    applyCombinedFilters () {
+      let filtered = this.listGtaHotelDetails
+
+      // Apply hotel name filter
+      if (this.hotelName) {
+        filtered = filtered.filter((hotel) => {
+          return hotel.HotelInfo.Name.toLowerCase().includes(this.hotelName.toLowerCase())
+        })
+      }
+
+      if (this.selectedRatings.length > 0) {
+        filtered = filtered.filter((hotel) => {
+          const hotelCategory = hotel?.HotelInfo?.HotelCategory?._
+          const numericRating = this.extractNumericRating(hotelCategory)
+          const matchesNumericRating = numericRating && this.selectedRatings.includes(numericRating)
+          const matchesDescriptiveCategory = this.selectedRatings.includes(hotelCategory)
+          return matchesNumericRating || matchesDescriptiveCategory
+        })
+      }
+
+      if (this.selectedBoards.length > 0) {
+        filtered = filtered.filter((hotel) => {
+          let hotelOptions = hotel.HotelOptions.HotelOption
+          if (!Array.isArray(hotelOptions)) {
+            hotelOptions = [hotelOptions]
+          }
+          return hotelOptions.some(roomOption => this.selectedBoards.includes(roomOption.Board?._))
+        })
+      }
+
+      if (this.priceRange[0] !== null && this.priceRange[1] !== null) {
+        filtered = filtered.filter((hotel) => {
+          const price = parseFloat(hotel.HotelOptions.HotelOption[0]?.Prices.Price.TotalFixAmounts.Gross || 0)
+          return price >= this.priceRange[0] && price <= this.priceRange[1]
+        })
+      }
+
+      this.filteredHotels = filtered
+    },
     calculateBoardOptions () {
       const boardCounts = {}
 
@@ -1303,12 +1399,20 @@ export default {
             ? hotel.HotelOptions.HotelOption[0]?.Prices.Price.TotalFixAmounts.Gross
             : hotel.HotelOptions.HotelOption?.Prices.Price.TotalFixAmounts.Gross) || 0)
         })
-        this.minPrice = Math.min(...prices)
-        this.maxPrice = Math.max(...prices)
 
-        if (this.priceRange[0] === null && this.priceRange[1] === null) {
-          this.priceRange = [this.minPrice, this.maxPrice]
+        const newMinPrice = Math.min(...prices)
+        const newMaxPrice = Math.max(...prices)
+        if (newMinPrice !== this.minPrice || newMaxPrice !== this.maxPrice) {
+          this.minPrice = newMinPrice
+          this.maxPrice = newMaxPrice
+          if (this.priceRange[0] < this.minPrice || this.priceRange[1] > this.maxPrice) {
+            this.priceRange = [this.minPrice, this.maxPrice]
+          }
         }
+      } else {
+        this.minPrice = 0
+        this.maxPrice = 0
+        this.priceRange = [0, 0]
       }
     },
     applyPriceFilter () {
@@ -1343,12 +1447,6 @@ export default {
     hiddenRoomCount (roomOptions) {
       return roomOptions.length - 2
     },
-    // toggleRoomDisplay () {
-    //   this.showAllRooms = !this.showAllRooms
-    // },
-    // toggleCancellationPolicy (index) {
-    //   this.$set(this.showFullCancellationPolicy, index, !this.showFullCancellationPolicy[index])
-    // },
     toggleCancellationPolicy (hotelIndex, roomIndex) {
       if (!this.showFullCancellationPolicy[hotelIndex]) {
         this.$set(this.showFullCancellationPolicy, hotelIndex, {})
@@ -1378,20 +1476,24 @@ export default {
         return !this.selectedPointOfInterest || hotel.PointsOfInterest.includes(this.selectedPointOfInterest)
       })
     },
+    // extractNumericRating (category) {
+    //   const match = category.match(/(\d)/)
+    //   return match ? parseInt(match[1], 10) : null
+    // },
     extractNumericRating (category) {
-      const match = category.match(/(\d)/)
-      return match ? parseInt(match[1], 10) : null
+      const match = category.match(/\d+/) // Match digits in the category name
+      return match ? parseInt(match[0]) : category // Return the numeric part or the full category
     },
     applyRatingFilter () {
-      this.filteredHotels = this.listGtaHotelDetails.filter((hotel) => {
-        const hotelCategory = hotel?.HotelInfo?.HotelCategory?._
-        const numericRating = this.extractNumericRating(hotelCategory)
-        const matchesNumericRating = numericRating && this.selectedRatings.includes(numericRating)
-        const matchesDescriptiveCategory = this.selectedRatings.includes(hotelCategory)
-        const matchesRating = this.selectedRatings.length === 0 || matchesNumericRating || matchesDescriptiveCategory
-
-        return matchesRating
-      })
+      if (this.selectedRatings.length === 0) {
+        this.filteredHotels = this.listGtaHotelDetails
+      } else {
+        this.filteredHotels = this.listGtaHotelDetails.filter((hotel) => {
+          const category = hotel?.HotelInfo?.HotelCategory?._ || 'Uncategorized'
+          const numericCategory = this.extractNumericRating(category)
+          return this.selectedRatings.includes(numericCategory)
+        })
+      }
     },
     clearFilters () {
       this.hotelName = ''
@@ -1462,11 +1564,14 @@ export default {
       this.listGtaHotelDetails = []
       this.isLoading = false
     },
-    handleInput: _.debounce(function () {
+    handleInput: _.debounce(async function () {
       if (this.query.length >= 3) {
-        this.searchZones()
+        this.loading = true
         this.menu = true
+        await this.searchZones()
+        this.loading = false
       } else {
+        this.loading = false
         this.filteredZones = []
         this.menu = false
       }
@@ -1487,6 +1592,7 @@ export default {
     },
     handleZoneSelection (zone) {
       this.selectZone(zone)
+      this.menu = false
       if (zone.area_type === 'CTY') {
         this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
           this.getGtaHotelsPerCity(cityId)
@@ -2544,6 +2650,27 @@ export default {
 .room-card {
   border-bottom: 1px solid #d6b682;
 }
+.custom-list-item {
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.custom-list-item-content {
+  font-size: 14px;
+  padding: 8px;
+  max-width: 100%;
+}
+
+.custom-list-item-title,
+.custom-list-item-subtitle {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* hr {
   height: 1px;
 } */
