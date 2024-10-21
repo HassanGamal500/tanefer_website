@@ -9,6 +9,7 @@
     item-value="code"
     outlined
     hide-no-data
+    hide-details
     autocomplete="off"
   />
 </template>

@@ -27,14 +27,14 @@
 
     <v-carousel hide-delimiters height="100%" show-arrows>
       <v-carousel-item
-        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], 2)"
+        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], isMobile ? 1 : 2)"
         :key="index"
       >
         <v-row>
           <v-col
             v-for="(img, imgIndex) in imageGroup"
             :key="imgIndex"
-            cols="6"
+            :cols="isMobile ? 12 : 6"
           >
             <v-img
               :src="img.FileName || 'https://source.unsplash.com/user/c_v_r/1900x800'"
@@ -91,13 +91,11 @@
       </v-card-title>
       <v-card-text>
         <v-row>
-          <v-chip
-            v-for="(feature, index) in gtaHotelDetails?.Features?.Feature || []"
-            :key="index"
-            class="ma-1"
-          >
-            {{ feature._ || 'Feature not available' }}
-          </v-chip>
+          <ul>
+            <li v-for="(feature, index) in gtaHotelDetails?.Features?.Feature || []" :key="index">
+              {{ feature._ || 'Feature not available' }}
+            </li>
+          </ul>
         </v-row>
       </v-card-text>
     </v-card>
@@ -128,6 +126,11 @@ export default {
       dialogImage: '',
       cancellationPolicy: null,
       isLoading: true
+    }
+  },
+  computed: {
+    isMobile () {
+      return this.$vuetify.breakpoint.smAndDown
     }
   },
   async mounted () {
