@@ -325,10 +325,22 @@ export const state = () => ({
     { code: 'ZW', name: 'Zimbabwe' },
     { code: 'AX', name: 'Åland Islands' }
   ],
-  cities: []
+  cities: [],
+  hotelSearchData: {
+    startDate: null,
+    endDate: null,
+    travellers: 0,
+    children: 0,
+    board: '',
+    hotelCategory: '',
+    hotelTypeCategory: ''
+  }
 })
 
 export const mutations = {
+  setHotelSearchData (state, searchData) {
+    state.hotelSearchData = searchData
+  },
   setAirports (state, payload) {
     switch (payload.type) {
       case 'departure1':
@@ -752,6 +764,10 @@ export const actions = {
   setCities ({ commit }, payload) {
     commit('setCities', payload)
   }
+}
+
+export const getters = {
+  getHotelSearchData: state => state.hotelSearchData
 }
 
 export const strict = false

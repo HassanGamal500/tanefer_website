@@ -45,6 +45,7 @@
                   >
                     <template #activator="{ on, attrs }">
                       <v-text-field
+                        ref="queryInput"
                         v-model="query"
                         prepend-inner-icon="mdi-map-marker"
                         label="Destination"
@@ -242,90 +243,169 @@
           <v-row>
             <v-col cols="12" md="3">
               <v-card class="pa-3" outlined style="background-color: #CFBB9A">
-                <!-- Text Box for Hotel Name -->
-                <v-text-field
-                  v-model="hotelName"
-                  label="Hotel Name"
-                  outlined
-                  dense
-                  class="mt-1"
-                />
-                <!-- Price Range Slider -->
-                <v-card class="pa-3 mb-2" outlined>
-                  <p class="text-subtitle-2 mb-2">
-                    Price Range
-                  </p>
-
-                  <!-- Slider -->
-                  <v-range-slider
-                    v-model="priceRange"
-                    :min="minPrice"
-                    :max="maxPrice"
-                    :step="5"
-                    thumb-label="always"
-                    class="mt-10"
-                    @input="applyCombinedFilters"
-                  />
-                </v-card>
-
-                <v-card class="pa-3 mb-2" outlined>
-                  <p class="text-subtitle-2 mb-2">
-                    Board Options
-                  </p>
-                  <v-row>
-                    <v-col v-for="board in boardOptions" :key="board.value" cols="12" class="board-col">
-                      <v-checkbox
-                        v-model="selectedBoards"
-                        :value="board.value"
-                        :label="board.label"
-                        hide-details="auto"
+                <!-- On mobile, show filters as an expandable section -->
+                <v-expansion-panels v-if="isMobile">
+                  <v-expansion-panel>
+                    <v-expansion-panel-header class="text-subtitle-2">
+                      Show Filters
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <!-- Filters content inside the expandable section on mobile -->
+                      <v-text-field
+                        v-model="hotelName"
+                        label="Hotel Name"
+                        outlined
                         dense
-                        class="board-checkbox"
+                        class="mt-1"
                       />
-                    </v-col>
-                  </v-row>
-                </v-card>
-                <v-card class="pa-3 mb-2" outlined>
-                  <p class="text-subtitle-2 mb-2 pb-1">
-                    Specify a Category
-                  </p>
-                  <v-row>
-                    <v-col
-                      v-for="rating in ratingOptions"
-                      :key="rating.value"
-                      cols="12"
-                      class="py-0 my-0"
-                    >
-                      <v-checkbox
-                        v-model="selectedRatings"
-                        :value="rating.value"
-                        dense
-                        class="my-1 py-0"
-                        hide-details
-                      >
-                        <template #label>
-                          <span class="rating-stars" style="display: flex; align-items: center;">
-                            <v-rating
-                              v-if="isNumericRating(rating.value)"
-                              :value="parseInt(rating.value)"
+                      <v-card class="pa-3 mb-2" outlined>
+                        <p class="text-subtitle-2 mb-2">
+                          Price Range
+                        </p>
+                        <v-range-slider
+                          v-model="priceRange"
+                          :min="minPrice"
+                          :max="maxPrice"
+                          :step="5"
+                          thumb-label="always"
+                          class="mt-10"
+                          @input="applyCombinedFilters"
+                        />
+                      </v-card>
+
+                      <v-card class="pa-3 mb-2" outlined>
+                        <p class="text-subtitle-2 mb-2">
+                          Board Options
+                        </p>
+                        <v-row>
+                          <v-col v-for="board in boardOptions" :key="board.value" cols="12">
+                            <v-checkbox
+                              v-model="selectedBoards"
+                              :value="board.value"
+                              :label="board.label"
+                              hide-details="auto"
                               dense
-                              empty-icon="mdi-star-outline"
-                              full-icon="mdi-star"
-                              readonly
-                              small
                             />
-                            <span v-else style="font-size: 12px;">
-                              {{ rating.label }}
+                          </v-col>
+                        </v-row>
+                      </v-card>
+
+                      <v-card class="pa-3 mb-2" outlined>
+                        <p class="text-subtitle-2 mb-2 pb-1">
+                          Specify a Category
+                        </p>
+                        <v-row>
+                          <v-col v-for="rating in ratingOptions" :key="rating.value" cols="12">
+                            <v-checkbox
+                              v-model="selectedRatings"
+                              :value="rating.value"
+                              dense
+                              hide-details
+                            >
+                              <template #label>
+                                <span class="rating-stars" style="display: flex; align-items: center;">
+                                  <v-rating
+                                    v-if="isNumericRating(rating.value)"
+                                    :value="parseInt(rating.value)"
+                                    dense
+                                    empty-icon="mdi-star-outline"
+                                    full-icon="mdi-star"
+                                    readonly
+                                    small
+                                  />
+                                  <span v-else style="font-size: 12px;">
+                                    {{ rating.label }}
+                                  </span>
+                                  <span style="font-size: 12px; margin-left: 5px;">
+                                    ({{ rating.count }})
+                                  </span>
+                                </span>
+                              </template>
+                            </v-checkbox>
+                          </v-col>
+                        </v-row>
+                      </v-card>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
+
+                <!-- On larger screens, show filters directly without expansion -->
+                <div v-else>
+                  <v-text-field
+                    v-model="hotelName"
+                    label="Hotel Name"
+                    outlined
+                    dense
+                    class="mt-1"
+                  />
+                  <v-card class="pa-3 mb-2" outlined>
+                    <p class="text-subtitle-2 mb-2">
+                      Price Range
+                    </p>
+                    <v-range-slider
+                      v-model="priceRange"
+                      :min="minPrice"
+                      :max="maxPrice"
+                      :step="5"
+                      thumb-label="always"
+                      class="mt-10"
+                      @input="applyCombinedFilters"
+                    />
+                  </v-card>
+
+                  <v-card class="pa-3 mb-2" outlined>
+                    <p class="text-subtitle-2 mb-2">
+                      Board Options
+                    </p>
+                    <v-row>
+                      <v-col v-for="board in boardOptions" :key="board.value" cols="12">
+                        <v-checkbox
+                          v-model="selectedBoards"
+                          :value="board.value"
+                          :label="board.label"
+                          hide-details="auto"
+                          dense
+                        />
+                      </v-col>
+                    </v-row>
+                  </v-card>
+
+                  <v-card class="pa-3 mb-2" outlined>
+                    <p class="text-subtitle-2 mb-2 pb-1">
+                      Specify a Category
+                    </p>
+                    <v-row>
+                      <v-col v-for="rating in ratingOptions" :key="rating.value" cols="12">
+                        <v-checkbox
+                          v-model="selectedRatings"
+                          :value="rating.value"
+                          dense
+                          hide-details
+                        >
+                          <template #label>
+                            <span class="rating-stars" style="display: flex; align-items: center;">
+                              <v-rating
+                                v-if="isNumericRating(rating.value)"
+                                :value="parseInt(rating.value)"
+                                dense
+                                empty-icon="mdi-star-outline"
+                                full-icon="mdi-star"
+                                readonly
+                                small
+                              />
+                              <span v-else style="font-size: 12px;">
+                                {{ rating.label }}
+                              </span>
+                              <span style="font-size: 12px; margin-left: 5px;">
+                                ({{ rating.count }})
+                              </span>
                             </span>
-                            <span style="font-size: 12px; margin-left: 5px;">
-                              ({{ rating.count }})
-                            </span>
-                          </span>
-                        </template>
-                      </v-checkbox>
-                    </v-col>
-                  </v-row>
-                </v-card>
+                          </template>
+                        </v-checkbox>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </div>
               </v-card>
             </v-col>
             <!-- Main Content (col-8) -->
@@ -353,7 +433,7 @@
                         </v-col>
 
                         <!-- Hotel Content -->
-                        <v-col cols="8" class="py-2 ml-0 pl-0" style="margin-left: -30px;">
+                        <v-col cols="8" class="py-2 pl-0" style="margin-left: -15px;">
                           <div class="d-flex justify-space-between align-center mb-1 hotel-title">
                             <div>
                               <h4 class="mb-0 font-weight-bold">
@@ -363,7 +443,7 @@
                                 mdi-map-marker
                               </v-icon>
                               <span class="grey--text text-caption text-justify">
-                                <span v-html="formatAddress(hotel.HotelInfo.Address) || 'Location'" /> - <a href="#">Map</a>
+                                <span v-html="formatAddress(hotel.HotelInfo.Address) || 'Location'" />
                               </span>
                             </div>
                           </div>
@@ -426,30 +506,31 @@
                                 mdi-map-marker
                               </v-icon>
                               <span class="grey--text text-caption text-justify">
-                                <span v-html="formatAddress(hotel.HotelInfo.Address) || 'Location'" /> - <a href="#">Map</a>
+                                <span v-html="formatAddress(hotel.HotelInfo.Address) || 'Location'" />
                               </span>
-                              <!-- Price and Rating -->
-                              <div class="d-flex justify-space-between align-center mt-2">
-                                <!-- Rating and Category -->
-                                <div class="d-flex align-center">
-                                  <v-rating
-                                    :value="getRatingFromCategory(hotel.HotelInfo.HotelCategory._)"
-                                    active-color="yellow-accent-4"
-                                    dense
-                                    readonly
-                                  />
-                                </div>
-
-                                <!-- Price Section -->
-                                <div class="text-right ml-10">
-                                  <small class="grey--text">Average price</small>
-                                  <div class="font-weight-bold text-subtitle-1">
-                                    ${{ getHotelPrice(hotel) || 'not defined' }}
-                                  </div>
-                                </div>
-                              </div>
                             </div>
                           </div>
+                          <v-row class=" pb-1 mb-1">
+                            <!-- Rating Section -->
+                            <v-col cols="6" class="d-flex align-center">
+                              <v-rating
+                                :value="getRatingFromCategory(hotel.HotelInfo.HotelCategory._)"
+                                active-color="yellow-accent-4"
+                                dense
+                                readonly
+                              />
+                            </v-col>
+
+                            <!-- Price Section -->
+                            <v-col cols="6" class="d-flex justify-end text-right">
+                              <div>
+                                <small class="grey--text">Average price</small>
+                                <div class="font-weight-bold text-subtitle-1">
+                                  ${{ getHotelPrice(hotel) || 'not defined' }}
+                                </div>
+                              </div>
+                            </v-col>
+                          </v-row>
                           <!-- Hotel Description -->
                           <div class="grey--text text-body-2 font-italic mb-1">
                             {{ truncatedDescriptions[h] }}
@@ -489,7 +570,7 @@
                                           </span>
                                         </p>
                                       </v-col>
-                                      <v-col cols="4" class="d-flex align-center">
+                                      <v-col cols="4" class="d-flex align-start">
                                         <v-btn small text color="red" class="text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
                                           Non-refundable
                                           <v-icon small class="ml-1">
@@ -669,7 +750,7 @@
                                           </span>
                                         </p>
                                       </v-col>
-                                      <v-col cols="12" md="4" class="py-1 d-flex align-center">
+                                      <v-col cols="12" md="4" class="py-1 d-flex justify-start">
                                         <v-btn small text color="red" class="text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
                                           Non-refundable
                                           <v-icon small class="ml-1">
@@ -678,10 +759,12 @@
                                         </v-btn>
                                       </v-col>
                                       <v-col cols="12" md="4" class="d-flex justify-end py-1">
-                                        <p class="mr-3 font-weight-bold text-subtitle-1">
-                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                        <p class="mr-3 font-weight-black text-h6">
+                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }} USD
                                         </p>
-                                        <v-btn small class="mr-2 px-8 py-4 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
+                                      </v-col>
+                                      <v-col cols="12" md="4" class="py-1">
+                                        <v-btn size="x-large" block class="pa-1 ma-1 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
                                           Book
                                         </v-btn>
                                       </v-col>
@@ -736,7 +819,7 @@
                                           </span>
                                         </p>
                                       </v-col>
-                                      <v-col cols="12" md="4" class="py-1 d-flex align-center">
+                                      <v-col cols="12" md="4" class="py-1 d-flex justify-start">
                                         <v-btn small text color="red" class=" text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
                                           Non-refundable
                                           <v-icon small class="ml-1">
@@ -745,10 +828,12 @@
                                         </v-btn>
                                       </v-col>
                                       <v-col cols="12" md="4" class="d-flex justify-end py-1">
-                                        <p class="mr-3 font-weight-bold text-subtitle-1">
-                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                        <p class="mr-3 font-weight-black text-h6">
+                                          $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }} USD
                                         </p>
-                                        <v-btn small class="mr-2 px-8 py-4 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
+                                      </v-col>
+                                      <v-col cols="12" md="4" class="py-1">
+                                        <v-btn size="x-large" block class="pa-1 ma-1 no-wrap v-btn-brown" @click="bookRoom(roomOption, h)">
                                           Book
                                         </v-btn>
                                       </v-col>
@@ -879,7 +964,7 @@
               <v-col cols="12">
                 <ul>
                   <li v-for="(room, index) in groupedRooms" :key="index" class="text-subtitle-1">
-                    {{ room.name }} <span v-if="room.count > 1">x{{ room.count }}</span>
+                    {{ room.name }} <span v-if="room.count > 1">x{{ room.count }} ROOMS</span>
                   </li>
                 </ul>
               </v-col>
@@ -1264,6 +1349,7 @@ export default {
       results: [],
       filteredZones: [],
       menu: false,
+      isSelecting: false,
       selectedZone: null,
       perZoneHotels: [],
       filters: [],
@@ -1451,6 +1537,9 @@ export default {
       this.debouncedApplyCombinedFilters()
     },
     query (newQuery) {
+      if (this.isSelecting) {
+        return
+      }
       this.handleInput()
     }
   },
@@ -1941,9 +2030,14 @@ export default {
       this.isLoading = false
     },
     handleInput: _.debounce(async function () {
+      // Prevent the input handler from running if a selection is being made
+      if (this.isSelecting) {
+        return
+      }
+
       if (this.query.length >= 3) {
         this.loading = true
-        this.menu = true
+        this.menu = true // Only open the menu if not in selecting mode
         await this.searchZones()
         this.loading = false
       } else {
@@ -1966,9 +2060,24 @@ export default {
         console.error(error)
       }
     },
+    // handleZoneSelection (zone) {
+    //   this.selectZone(zone)
+    //   this.menu = false
+    //   if (zone.area_type === 'CTY') {
+    //     this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
+    //       this.getGtaHotelsPerCity(cityId)
+    //     })
+    //   } else if (zone.area_type === 'REG' || zone.area_type === 'LOC') {
+    //     this.searchHotelsByAddress(zone.name)
+    //   } else {
+    //     this.getGtaHotelsPerZone(zone.id)
+    //   }
+    // },
     handleZoneSelection (zone) {
-      this.selectZone(zone)
-      this.menu = false
+      this.isSelecting = true // Set the flag to indicate selection is in progress
+
+      this.selectZone(zone) // Set the selected zone and close the menu
+
       if (zone.area_type === 'CTY') {
         this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
           this.getGtaHotelsPerCity(cityId)
@@ -1978,6 +2087,11 @@ export default {
       } else {
         this.getGtaHotelsPerZone(zone.id)
       }
+
+      // After selection, reset the flag to allow future searches
+      this.$nextTick(() => {
+        this.isSelecting = false
+      })
     },
     async getCityIdByJpdCode (jpdCode) {
       try {
@@ -2019,9 +2133,10 @@ export default {
       }
     },
     selectZone (zone) {
+      this.menu = false
+      this.$refs.queryInput.blur()
       this.selectedZone = zone
       this.query = zone.name
-      this.menu = false
     },
     toggleOptions () {
       this.showMoreOptions = !this.showMoreOptions
@@ -2171,6 +2286,15 @@ export default {
     async checkHotelAvailability () {
       this.destination = this.query
       this.clearPreviousResults()
+      this.$store.commit('setHotelSearchData', {
+        startDate: this.hotelStartDate,
+        endDate: this.hotelEndDate,
+        travellers: this.travellers,
+        children: this.children || 0,
+        board: this.selectedBoard || '',
+        hotelCategory: this.selectedHotelCategory || '',
+        hotelTypeCategory: this.selectedHotelTypeCategory || ''
+      })
 
       if (this.travellers === 0) {
         this.snackbar = true

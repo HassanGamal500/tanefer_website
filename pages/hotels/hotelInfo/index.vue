@@ -50,24 +50,76 @@
       <v-img :src="dialogImage" @click.stop />
     </v-dialog>
     <v-card class="mt-4">
-      <v-card-title>
-        <h3>All Room Options</h3>
-      </v-card-title>
       <v-card-text>
-        <v-row>
-          <v-col v-for="(room, index) in gtaHotelDetails?.HotelRooms?.HotelRoom || []" :key="index" cols="12" md="6">
-            <v-card class="mb-3">
-              <v-card-title class="body-1 late--text d-flex flex-wrap justify-space-between">
-                {{ room.Name || 'Room Name' }}
-              </v-card-title>
-              <v-row>
-                <v-col cols="12">
-                  <p class="grey--text justify-center ma-1">
-                    Occupancy: {{ room.RoomOccupancy?.MaxAdults }} Adults, {{ room.RoomOccupancy?.MaxChildren }} Children
-                  </p>
-                </v-col>
-              </v-row>
-            </v-card>
+        <v-row v-for="(roomOption, index) in roomOptions" :key="index" class="room-card">
+          <v-col cols="12">
+            <v-row justify="space-between">
+              <v-col cols="12" md="6">
+                <!-- Room Name -->
+                <h5 class="mb-0 brown--text text-decoration-underline">
+                  {{ roomOption.HotelRooms?.HotelRoom?.Name || 'Room Name Not Available' }}
+                </h5>
+              </v-col>
+            </v-row>
+
+            <v-row class="d-flex align-center justify-space-between" no-gutters>
+              <v-col cols="4">
+                <!-- Board Type -->
+                <p class="mb-0 font-weight-medium">
+                  <span class="grey--text">
+                    {{ roomOption.Board?._ || 'Board not available' }} ({{ roomOption.Board?.Type || 'N/A' }})
+                  </span>
+                </p>
+              </v-col>
+
+              <v-col cols="4" class="d-flex align-start">
+                <!-- Non-refundable Button -->
+                <v-btn small text color="red" class="text-decoration-underline" @click="toggleCancellationPolicy(index)">
+                  Non-refundable
+                  <v-icon small class="ml-1">
+                    {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                  </v-icon>
+                </v-btn>
+              </v-col>
+
+              <v-col cols="4" class="d-flex justify-end">
+                <!-- Price -->
+                <p class="mr-3 font-weight-bold text-subtitle-1">
+                  $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                </p>
+                <v-btn small class="mr-2 px-8 py-4 no-wrap v-btn-brown" @click="bookRoom(roomOption)">
+                  Book
+                </v-btn>
+              </v-col>
+            </v-row>
+
+            <!-- Cancellation Policy -->
+            <v-row v-if="showFullCancellationPolicy[index]">
+              <v-col cols="12">
+                <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
+                  <tr style="background-color: #eaeaea;">
+                    <td style="padding: 10px;">
+                      <strong>Cancellation Charges:</strong>
+                    </td>
+                  </tr>
+                  <tr style="background-color: rgb(255,239.5,193);">
+                    <td style="padding: 10px; color: rgb(134.5,100.875,0);">
+                      <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
+                        mdi-alert
+                      </v-icon>
+                      Booking subject to cancellation charges
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 10px;">
+                      <span class="grey--text">
+                        <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
       </v-card-text>
@@ -116,6 +168,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import hotelsServices from '~/services/HotelsServices'
 
 export default {
@@ -125,32 +178,36 @@ export default {
       imageDialog: false,
       dialogImage: '',
       cancellationPolicy: null,
-      isLoading: true
+      isLoading: true,
+      roomOptions: [],
+      showFullCancellationPolicy: {}
     }
   },
   computed: {
     isMobile () {
       return this.$vuetify.breakpoint.smAndDown
-    }
+    },
+    ...mapGetters(['getHotelSearchData'])
   },
   async mounted () {
     const hotelCode = this.$route.query.hotelCode
-    this.cancellationPolicy = this.$route.query.cancellationPolicy
 
     if (hotelCode) {
       try {
         this.isLoading = true
 
+        // Get the hotel details
         const response = await hotelsServices.getGtaHotelDetails(hotelCode)
         this.gtaHotelDetails = response.data.ContentRS.Contents.HotelContent
+
+        // Check the hotel availability using the stored data
+        await this.checkSingleHotelAvailability(this.getHotelSearchData)
 
         if (this.gtaHotelDetails.Images && this.gtaHotelDetails.Images.Image) {
           this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'BIG')
         }
       } catch (error) {
-      // Handle error
-        // eslint-disable-next-line no-console
-        console.error('Error fetching hotel details:', error)
+        console.error('Error fetching hotel details or availability:', error)
       } finally {
         this.isLoading = false
       }
@@ -158,10 +215,44 @@ export default {
   },
 
   methods: {
-    bookRoom (roomCode) {
+    toggleCancellationPolicy (index) {
+      this.$set(this.showFullCancellationPolicy, index, !this.showFullCancellationPolicy[index])
+    },
+    formatCancellationPolicy (description) {
+      if (typeof description !== 'string') {
+        return 'No cancellation policy available'
+      }
+
+      const normalizeText = (text) => {
+        return text.toLowerCase().trim()
+      }
+
+      const percentagePattern = /\d{1,3}(?:\.\d+)?\s*%\s*of\s*total\s*amount/i
+      const pricePattern = /\b\d+(?:\.\d+)?\s+usd\b/i
+      const nightPattern = /\b\d+\s+night\b/i
+      const mostExpensiveNightPattern = /\bmost\s*expensive\s*night\b/i
+
+      const wrapRed = match => `<span style="color: red;">${match.replace(/\s*usd\b/i, '$')}</span>`
+
+      return description
+        .replace(/\*/g, '\n')
+        .split('\n')
+        .map((line) => {
+          const normalizedLine = normalizeText(line)
+          const highlightedLine = normalizedLine
+            .replace(percentagePattern, wrapRed)
+            .replace(pricePattern, wrapRed)
+            .replace(nightPattern, wrapRed)
+            .replace(mostExpensiveNightPattern, wrapRed)
+
+          return `<span style="color: grey;">${highlightedLine.trim()}</span>`
+        })
+        .join('<br>')
+    },
+    bookRoom (roomOption) {
       // Implement booking logic
       // eslint-disable-next-line no-console
-      console.log('Booking room:', roomCode)
+      console.log('Booking room:', roomOption)
     },
     openImageModal (imageSrc) {
       this.dialogImage = imageSrc
@@ -173,6 +264,78 @@ export default {
         result.push(images.slice(i, i + chunkSize))
       }
       return result
+    },
+    async checkSingleHotelAvailability (searchData) {
+      let hotelCode = this.$route.query.hotelCode
+
+      // Ensure the hotelCode is an array (if handling multiple hotels)
+      hotelCode = Array.isArray(hotelCode) ? hotelCode : [hotelCode]
+
+      const formData = new FormData()
+
+      formData.append('start_date', searchData.startDate)
+      formData.append('end_date', searchData.endDate)
+      formData.append('board', searchData.board || 'all')
+      formData.append('hotel_category', searchData.hotelCategory || 'all')
+      formData.append('hotel_type_category', searchData.hotelTypeCategory || 'all')
+
+      // Append hotel codes
+      hotelCode.forEach((code, index) => {
+        formData.append(`hotels[${index}]`, code)
+      })
+
+      // Append travelers and children
+      formData.append('adults', searchData.travellers)
+      formData.append('children', searchData.children || 0)
+
+      // Append the rooms array properly
+      if (this.rooms && this.rooms.length > 0) {
+        this.rooms.forEach((room, index) => {
+          formData.append(`rooms[${index}][travellers]`, room.travelers || 1)
+          formData.append(`rooms[${index}][children]`, room.children || 0)
+          formData.append(`rooms[${index}][category]`, room.category || 'all')
+        })
+      } else {
+        // If no rooms data is available, add at least one default room entry
+        formData.append('rooms[0][travellers]', searchData.travellers || 1)
+        formData.append('rooms[0][children]', searchData.children || 0)
+        formData.append('rooms[0][category]', 'all')
+      }
+
+      try {
+        const response = await hotelsServices.checkHotelAvailabilitySingleHotel(formData)
+        const availabilityRS = response?.data?.data?.AvailabilityRS
+
+        if (!availabilityRS || availabilityRS?.Errors !== undefined) {
+          console.error('Error in availabilityRS:', availabilityRS?.Errors)
+          this.snackbar = true
+          this.color = 'error'
+          this.text = availabilityRS?.Errors?.Error?.Text || 'No availability found for this hotel.'
+        } else {
+          this.isAvailable = true
+          let results = availabilityRS?.Results?.HotelResult
+          this.roomOptions = results?.HotelOptions?.HotelOption
+          console.log(this.roomOptions)
+          if (results && !Array.isArray(results)) {
+            results = [results]
+          }
+
+          if (results.length > 0) {
+            this.hotelAvailsArray = results
+            this.showSearch = false
+          } else {
+            console.log('No matching rooms found for the hotel.')
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching single hotel availability:', error)
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'An error occurred while fetching availability for this hotel.'
+      }
+    },
+    getRoomOptions (roomOptions) {
+      return Array.isArray(roomOptions) ? roomOptions : [roomOptions]
     }
   }
 }
@@ -192,5 +355,9 @@ export default {
 
 .v-btn-brown:hover {
   background-color: #A0522D !important; /* Lighter brown on hover */
+}
+
+.room-card {
+  border-bottom: 1px solid #d6b682;
 }
 </style>

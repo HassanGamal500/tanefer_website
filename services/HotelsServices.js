@@ -100,6 +100,10 @@ export default {
     payload.page_size = pageSize
     return clientAPI(baseURL).post('/packages/get-availability', payload)
   },
+  checkHotelAvailabilitySingleHotel (payload) {
+    return clientAPI(baseURL).post('/packages/get-availability', payload)
+  },
+
   getGtaHotelDetails (jpdCode) {
     return clientAPI(baseURL).get(`/packages/get-content?hotelCode=${jpdCode}`)
   },
