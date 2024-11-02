@@ -111,7 +111,7 @@ export default {
     return clientAPI(baseURL).post('/packages/get-booking-rules', payload)
   },
   finalBookHotel (payload) {
-    return clientAPI(baseURL).post('/packages/get-booking', payload)
+    return clientAuthAPI(baseURL).post('/packages/get-booking', payload)
   },
   saveHotel (payload) {
     return clientAuthAPI(baseURL).post('/hotels/save', payload)

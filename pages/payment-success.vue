@@ -36,12 +36,53 @@
 </template>
 
 <script>
+import hotelsServices from '~/services/HotelsServices'
+// import tripsServices from '~/services/tripsServices'
+
 export default {
+  async mounted () {
+    const urlParams = new URLSearchParams(window.location.search)
+    const formDataId = urlParams.get('merchant_extra') // Fetch formDataId from 'merchant_extra'
+
+    if (formDataId) {
+      console.log('formDataId (merchant_extra) found:', formDataId) // Verify formDataId is retrieved
+      try {
+      // Prepare the payload to send to the backend
+        const body = {
+          formDataId,
+          book_after_payment: '1' // Tell the backend to finalize the booking
+        }
+
+        console.log('Sending request to finalize booking with body:', body)
+
+        // Call the backend to finalize the booking
+        await hotelsServices.saveHotel(body)
+        // this.confirmBooking()
+        this.snackbar = true
+        this.color = 'success'
+        this.text = 'Booking successfully finalized!'
+      } catch (error) {
+        console.error('Error during final booking confirmation:', error)
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Something went wrong while finalizing your booking.'
+      }
+    } else {
+      console.log('No formDataId found in URL parameters.')
+    }
+  },
   methods: {
+    // confirmBooking () {
+    //   // ?amount=110000&response_code=14000&card_number=****************&card_holder_name=****&signature=365e3f128cd3229c8908fc2f3e2da63ea1b18b1b309652b5ee492e4e79cd0d7c&merchant_identifier=CwCfehEU&access_code=Xnx4srzFskSSrNGkxlr8&payment_option=VISA&expiry_date=****&customer_ip=**************&language=en&eci=ECOMMERCE&fort_id=169996200010637834&command=PURCHASE&merchant_extra=5&response_message=Success&merchant_reference=TANEFER-5805816523&authorization_code=736332&customer_email=***********************&currency=USD&status=14
+    //   // console.log(window.location.href)
+    //   const query = this.$route.fullPath.split('?')[1] + '&url=' + window.location.href
+    //   tripsServices.confirmTripBooking(query)
+    // },
     goHome () {
       this.$router.push('/')
     }
   }
+
 }
 </script>
 

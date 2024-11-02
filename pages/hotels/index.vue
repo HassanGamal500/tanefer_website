@@ -1184,9 +1184,20 @@
                   large
                   block
                   :disabled="!isButtonEnabledFormValidation || isBooked"
+                  @click="finalBookHotel"
+                >
+                  <span>finalise Booking</span>
+                  <!-- <span v-else>Booked Successfully</span> -->
+                </v-btn>
+                <v-btn
+                  class="white--text text-capitalize justify-center v-btn-brown mt-2"
+                  color="#4f3316"
+                  elevation="6"
+                  large
+                  block
                   @click="processHotelBooking"
                 >
-                  <span>Complete Booking</span>
+                  <span>Proceed to checkout</span>
                   <!-- <span v-else>Booked Successfully</span> -->
                 </v-btn>
               </v-col>
@@ -1554,64 +1565,27 @@ export default {
 
   async created () {
     await this.getMetaData()
-    // await this.getGtaCountries()
-    // await this.getGtaCities()
-    // await this.getGtaHotelCategories()
-    // await this.getGtaHotelTypeCategories()
-    // await this.getGtaCategories()
-    // await this.getGtaBoards()
     this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
     this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
   },
   methods: {
     async processHotelBooking () {
-      if (!this.selectedHotelOption || !this.getbookingRule) {
-        this.snackbar = true
-        this.color = 'error'
-        this.text = 'Please select a room before proceeding with the booking.'
-        return
-      }
-
-      let totalPrice = 0
-      let taxesAndFees = 0
-      let currency = ''
-
-      const adults = this.rooms.reduce((total, room) => total + room.travelers, 0)
-      const children = this.rooms.reduce((total, room) => total + room.children, 0)
+      this.isLoading = true
 
       try {
-        const priceInfo = this.selectedHotelOption?.PriceInformation?.Prices?.Price
-        totalPrice = priceInfo.TotalFixAmounts.Gross
-        taxesAndFees = priceInfo.TotalFixAmounts.Service.Amount
-        currency = priceInfo.Currency
+        const formDataId = await this.finalBookHotel() // Save booking, get booking ID
 
-        const bookingCode = this.selectedHotelOption?.BookingCode?._
-        const hotelJPCode = this.selectedHotelOption?.PriceInformation.HotelContent?.Code
-
-        console.log('Adults:', adults)
-        console.log('Children:', children)
-
-        const body = {
-          passengerDetails: this.travellersData.length > 0 ? this.travellersData : this.generateTravellerDetails(),
-          bookingDetails: {
-            contact_name: this.name,
-            contact_phone: this.phone.formattedNumber || this.phone.e164,
-            contact_email: this.email
-          },
-          start_date: this.hotelStartDate,
-          end_date: this.hotelEndDate,
-          bookingCode,
-          total_price: totalPrice,
-          taxes_and_fees: taxesAndFees,
-          currency,
-          hotelJPCode,
-          adults,
-          children
+        if (!formDataId) {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = 'Something went wrong during booking registration.'
+          this.isLoading = false
+          return
         }
-
-        const saveBookingPromise = hotelsServices.saveHotel(body)
-        const saveBookingResponse = await saveBookingPromise
-        const bookingData = saveBookingResponse.data.data
+        const priceInfo = this.selectedHotelOption?.PriceInformation?.Prices?.Price
+        const totalPrice = priceInfo.TotalFixAmounts.Gross
+        const taxesAndFees = priceInfo.TotalFixAmounts.Service.Amount
+        const currency = priceInfo.Currency
 
         const form = this.$refs.paymentForm
 
@@ -1623,42 +1597,157 @@ export default {
         form.insertAdjacentHTML('beforeend', `<input type="hidden" name="final_price" value="${totalPrice}">`)
         form.insertAdjacentHTML('beforeend', `<input type="hidden" name="taxes_and_fees" value="${taxesAndFees}">`)
         form.insertAdjacentHTML('beforeend', `<input type="hidden" name="currency" value="${currency}">`)
-        form.insertAdjacentHTML('beforeend', `<input type="hidden" name="url" value="${window.location.origin + '/payment-success'}">`)
-        form.insertAdjacentHTML('beforeend', `<input type="hidden" name="bookingId" value="${bookingData.booking_id}">`)
+
+        form.insertAdjacentHTML(
+          'beforeend',
+      `<input type="hidden" name="url" value="${window.location.origin}/payment-success">`
+        )
+
+        form.insertAdjacentHTML('beforeend', `<input type="hidden" name="bookingId" value="${formDataId}">`)
 
         form.submit()
+
+        this.isLoading = false
       } catch (error) {
         console.error('Error during hotel booking:', error)
         this.snackbar = true
         this.color = 'error'
         this.text = 'Something went wrong while processing your booking.'
+        this.isLoading = false
       }
     },
+    async finalBookHotel () {
+      this.isLoading = true
+
+      try {
+        if (!this.selectedHotelOption || !this.getbookingRule) {
+          this.snackbar = true
+          this.color = 'error'
+          this.text = 'Please select a room before proceeding with the booking.'
+          this.isLoading = false
+          return
+        }
+
+        const adults = this.rooms.reduce((total, room) => total + room.travelers, 0)
+        const children = this.rooms.reduce((total, room) => total + room.children, 0)
+
+        const priceInfo = this.selectedHotelOption?.PriceInformation?.Prices?.Price
+        const totalPrice = priceInfo.TotalFixAmounts.Gross
+        const taxesAndFees = priceInfo.TotalFixAmounts.Service.Amount
+        const currency = priceInfo.Currency
+
+        const body = {
+          bookingCode: this.selectedHotelOption?.BookingCode?._,
+          startDate: this.hotelStartDate,
+          endDate: this.hotelEndDate,
+          HotelCode: this.selectedHotelOption?.PriceInformation.HotelContent?.Code,
+          minimumPrice: totalPrice.toFixed(2),
+          maximumPrice: (totalPrice + taxesAndFees).toFixed(2),
+          currency,
+          phone_number: this.phone.formattedNumber || this.phone.e164,
+          title: this.title || 'Mr',
+          name: this.name || 'Guest',
+          surname: this.surname || 'Unknown',
+          age: this.age || '30',
+          email: this.email || 'guest@example.com',
+          nationality: this.issueCountry || 'EG', // Ensure consistency
+          CountryOfResidence: this.issueCountry || 'EG', // Ensure consistency with nationality
+          board: this.selectedBoard || 'all',
+          hotel_name: this.selectedHotelName || 'Hotel Default',
+          hotel_category: this.selectedHotelCategory || '3-star',
+          hotel_type_category: this.selectedHotelTypeCategory || 'all',
+          identification_document_pax: this.identification_document_pax || 'ID123456789',
+          address_pax: this.address_pax || '123 Default St',
+          city_pax: this.city_pax || 'Cairo',
+          country_pax: this.country_pax || 'EG',
+          postal_code_pax: this.postal_code_pax || '12345',
+          book_after_payment: '0',
+          rooms: this.rooms.map(room => ({
+            travellers: room.travelers.toString(),
+            children: room.children.toString(),
+            category: this.selectedCategory || 'all'
+          })),
+          adults,
+          children
+        }
+
+        const bookingResponse = await hotelsServices.finalBookHotel(body)
+        const resultFormData = bookingResponse.data.formDataId
+
+        this.finalBookHotelFormData = resultFormData
+        this.isBooked = true
+        this.isLoading = false
+
+        console.log('Booking confirmed with payload:', body)
+
+        return resultFormData
+      } catch (error) {
+        console.error('Error during hotel booking:', error)
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Something went wrong while processing your booking.'
+        this.isLoading = false
+      }
+    },
+    // generateTravellerDetails () {
+    //   const bookingHolder = {
+    //     title: this.title,
+    //     name: this.name,
+    //     surname: this.surname,
+    //     age: this.age,
+    //     email: this.email,
+    //     phone: this.phone,
+    //     nationality: this.selectedNationality,
+    //     identification_document: this.identification_document_pax,
+    //     issueCountry: this.issueCountry
+    //   }
+
+    //   const otherTravellers = this.otherTravellers.map((traveller, index) => ({
+    //     name: this.bNames[index],
+    //     surname: this.bSurnames[index],
+    //     age: this.bAges[index]
+    //   }))
+
+    //   const otherChildren = this.otherChildren.map((child, index) => ({
+    //     name: this.bNamesChild[index],
+    //     surname: this.bSurnamesChild[index],
+    //     age: this.bAgesChild[index]
+    //   }))
+
+    //   return [bookingHolder, ...otherTravellers, ...otherChildren]
+    // },
     generateTravellerDetails () {
+      // First, map the booking holder (main traveler) to the backend's expected structure
       const bookingHolder = {
-        title: this.title,
-        name: this.name,
-        surname: this.surname,
-        age: this.age,
-        email: this.email,
-        phone: this.phone,
-        nationality: this.selectedNationality,
-        identification_document: this.identification_document_pax,
-        issueCountry: this.issueCountry
+        passengerTitle: this.title, // Mapping title to passengerTitle
+        passengerFirstName: this.name, // Mapping name to passengerFirstName
+        passengerLastName: this.surname, // Mapping surname to passengerLastName
+        date_of_birth: this.age, // Mapping age to date_of_birth
+        email: this.email, // Email field as per your existing structure
+        phone: this.phone, // Phone field as per your existing structure
+        nationality: this.selectedNationality, // Nationality mapped to backend
+        passport_number: this.identification_document_pax, // Mapping identification_document to passport_number
+        passport_issue_country: this.issueCountry, // Mapping issueCountry to passport_issue_country
+        passengerType: 'Adult' // Assuming the booking holder is an adult
       }
 
+      // Map the other adult travellers (if any) to match backend structure
       const otherTravellers = this.otherTravellers.map((traveller, index) => ({
-        name: this.bNames[index],
-        surname: this.bSurnames[index],
-        age: this.bAges[index]
+        passengerFirstName: this.bNames[index], // Mapping first name
+        passengerLastName: this.bSurnames[index], // Mapping surname
+        date_of_birth: this.bAges[index], // Mapping age as date_of_birth
+        passengerType: 'Adult' // Assuming otherTravellers are adults
       }))
 
+      // Map the children travellers (if any) to match backend structure
       const otherChildren = this.otherChildren.map((child, index) => ({
-        name: this.bNamesChild[index],
-        surname: this.bSurnamesChild[index],
-        age: this.bAgesChild[index]
+        passengerFirstName: this.bNamesChild[index], // Mapping child's first name
+        passengerLastName: this.bSurnamesChild[index], // Mapping child's surname
+        date_of_birth: this.bAgesChild[index], // Mapping child's age as date_of_birth
+        passengerType: 'Child' // Children are marked as 'Child'
       }))
 
+      // Return the booking holder, other travellers, and children in a single array
       return [bookingHolder, ...otherTravellers, ...otherChildren]
     },
     populateTravellersData () {
@@ -2685,216 +2774,216 @@ export default {
     assignPhone (phone) {
       this.phone = phone
     },
-    async finalBookHotel () {
-      this.isLoading = true
-      if (this.getbookingRuleArray.length > 0) {
-        for (let x = 0; x < this.getbookingRuleArray.length; x++) {
-          const formData = new FormData()
-          const bookingCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
-          const startDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
-          const endDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
-          const HotelCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
-          const minimumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
-          const maximumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
-          const currency = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
-          formData.append('bookingCode', bookingCode)
-          formData.append('startDate', startDate)
-          formData.append('endDate', endDate)
-          formData.append('HotelCode', HotelCode)
-          formData.append('minimumPrice', minimumPrice)
-          formData.append('maximumPrice', maximumPrice)
-          formData.append('currency', currency)
-          formData.append('phone_number', this.phone.formattedNumber)
-          formData.append('title', this.title)
-          formData.append('name', this.name)
-          formData.append('surname', this.surname)
-          formData.append('age', this.age)
-          formData.append('email', this.email)
-          formData.append('nationality', this.issueCountry)
-          formData.append('board', this.selectedBoard)
-          formData.append('hotel_name', this.selectedHotelName)
-          formData.append('hotel_category', this.selectedHotelCategory)
-          formData.append('hotel_type_category', this.selectedHotelTypeCategory)
-          formData.append('identification_document_pax', this.identification_document_pax)
-          formData.append('address_pax', this.address_pax)
-          // formData.append('city_pax', this.city_pax)
-          // formData.append('country_pax', this.country_pax)
-          formData.append('postal_code_pax', this.postal_code_pax)
-          formData.append('book_after_payment', '1')
-          if (this.rooms.length > 0) {
-            for (let r = 0; r < this.rooms.length; r++) {
-              formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-              formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-              if (this.rooms[r].ageSelects.length > 0) {
-                for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-                  formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
-                }
-              }
-              // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-              formData.append('rooms[' + r + '][category]', this.selectedCategory)
-            }
-          }
-          if (this.bNames.length > 0) {
-            for (let x = 0; x < this.bNames.length; x++) {
-              formData.append('names[' + x + ']', this.bNames[x])
-            }
-          }
-          if (this.bSurnames.length > 0) {
-            for (let y = 0; y < this.bSurnames.length; y++) {
-              formData.append('surnames[' + y + ']', this.bSurnames[y])
-            }
-          }
-          if (this.bAges.length > 0) {
-            for (let z = 0; z < this.bAges.length; z++) {
-              formData.append('ages[' + z + ']', this.bAges[z])
-            }
-          }
-          if (this.bNamesChild.length > 0) {
-            for (let xx = 0; xx < this.bNamesChild.length; xx++) {
-              formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
-            }
-          }
-          if (this.bSurnamesChild.length > 0) {
-            for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
-              formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
-            }
-          }
-          if (this.bAgesChild.length > 0) {
-            for (let zz = 0; zz < this.bAgesChild.length; zz++) {
-              formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
-            }
-          }
+    // async finalBookHotel () {
+    //   this.isLoading = true
+    //   if (this.getbookingRuleArray.length > 0) {
+    //     for (let x = 0; x < this.getbookingRuleArray.length; x++) {
+    //       const formData = new FormData()
+    //       const bookingCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
+    //       const startDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
+    //       const endDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
+    //       const HotelCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
+    //       const minimumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
+    //       const maximumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
+    //       const currency = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
+    //       formData.append('bookingCode', bookingCode)
+    //       formData.append('startDate', startDate)
+    //       formData.append('endDate', endDate)
+    //       formData.append('HotelCode', HotelCode)
+    //       formData.append('minimumPrice', minimumPrice)
+    //       formData.append('maximumPrice', maximumPrice)
+    //       formData.append('currency', currency)
+    //       formData.append('phone_number', this.phone.formattedNumber)
+    //       formData.append('title', this.title)
+    //       formData.append('name', this.name)
+    //       formData.append('surname', this.surname)
+    //       formData.append('age', this.age)
+    //       formData.append('email', this.email)
+    //       formData.append('nationality', this.issueCountry)
+    //       formData.append('board', this.selectedBoard)
+    //       formData.append('hotel_name', this.selectedHotelName)
+    //       formData.append('hotel_category', this.selectedHotelCategory)
+    //       formData.append('hotel_type_category', this.selectedHotelTypeCategory)
+    //       formData.append('identification_document_pax', this.identification_document_pax)
+    //       formData.append('address_pax', this.address_pax)
+    //       // formData.append('city_pax', this.city_pax)
+    //       // formData.append('country_pax', this.country_pax)
+    //       formData.append('postal_code_pax', this.postal_code_pax)
+    //       formData.append('book_after_payment', '1')
+    //       if (this.rooms.length > 0) {
+    //         for (let r = 0; r < this.rooms.length; r++) {
+    //           formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+    //           formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+    //           if (this.rooms[r].ageSelects.length > 0) {
+    //             for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+    //               formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+    //             }
+    //           }
+    //           // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+    //           formData.append('rooms[' + r + '][category]', this.selectedCategory)
+    //         }
+    //       }
+    //       if (this.bNames.length > 0) {
+    //         for (let x = 0; x < this.bNames.length; x++) {
+    //           formData.append('names[' + x + ']', this.bNames[x])
+    //         }
+    //       }
+    //       if (this.bSurnames.length > 0) {
+    //         for (let y = 0; y < this.bSurnames.length; y++) {
+    //           formData.append('surnames[' + y + ']', this.bSurnames[y])
+    //         }
+    //       }
+    //       if (this.bAges.length > 0) {
+    //         for (let z = 0; z < this.bAges.length; z++) {
+    //           formData.append('ages[' + z + ']', this.bAges[z])
+    //         }
+    //       }
+    //       if (this.bNamesChild.length > 0) {
+    //         for (let xx = 0; xx < this.bNamesChild.length; xx++) {
+    //           formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
+    //         }
+    //       }
+    //       if (this.bSurnamesChild.length > 0) {
+    //         for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
+    //           formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
+    //         }
+    //       }
+    //       if (this.bAgesChild.length > 0) {
+    //         for (let zz = 0; zz < this.bAgesChild.length; zz++) {
+    //           formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
+    //         }
+    //       }
 
-          try {
-            const promise = hotelsServices.finalBookHotel(formData)
-            const response = await promise
-            console.log(response)
-            // const results = response.data.BookingRS
-            const resultFormData = response.data.formDataId
-            this.finalBookHotelFormData = resultFormData
-            this.finalBookHotelsFormData[x] = resultFormData
-            this.isBooked = true
-            this.isLoading = false
-          } catch (error) {
-            this.snackbar = true
-            this.color = 'error'
-            this.text = 'Something went wrong'
-            this.loaded = false
-            this.checkResponseCode = false
-            this.isLoading = false
-          }
-        }
-      }
-      if (this.getbookingRuleArray.length === 0 && this.getbookingRule) {
-        const formData = new FormData()
-        const bookingCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
-        const startDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
-        const endDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
-        const HotelCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
-        const minimumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
-        const maximumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
-        const currency = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
-        formData.append('bookingCode', bookingCode)
-        formData.append('startDate', startDate)
-        formData.append('endDate', endDate)
-        formData.append('HotelCode', HotelCode)
-        formData.append('minimumPrice', minimumPrice)
-        formData.append('maximumPrice', maximumPrice)
-        formData.append('currency', currency)
-        formData.append('phone_number', this.phone.formattedNumber)
-        formData.append('title', this.title)
-        formData.append('name', this.name)
-        formData.append('surname', this.surname)
-        formData.append('age', this.age)
-        formData.append('email', this.email)
-        formData.append('nationality', this.issueCountry)
-        formData.append('board', this.selectedBoard)
-        formData.append('hotel_name', this.selectedHotelName)
-        formData.append('hotel_category', this.selectedHotelCategory)
-        formData.append('hotel_type_category', this.selectedHotelTypeCategory)
-        formData.append('identification_document_pax', this.identification_document_pax)
-        formData.append('address_pax', this.address_pax)
-        formData.append('city_pax', this.city_pax)
-        formData.append('country_pax', this.country_pax)
-        formData.append('postal_code_pax', this.postal_code_pax)
-        formData.append('book_after_payment', '1')
-        if (this.rooms.length > 0) {
-          for (let r = 0; r < this.rooms.length; r++) {
-            formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-            formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-            if (this.rooms[r].ageSelects.length > 0) {
-              for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-                formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
-              }
-            }
-            // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-            formData.append('rooms[' + r + '][category]', this.selectedCategory)
-          }
-        }
-        if (this.bNames.length > 0) {
-          for (let x = 0; x < this.bNames.length; x++) {
-            formData.append('names[' + x + ']', this.bNames[x])
-          }
-        }
-        if (this.bSurnames.length > 0) {
-          for (let y = 0; y < this.bSurnames.length; y++) {
-            formData.append('surnames[' + y + ']', this.bSurnames[y])
-          }
-        }
-        if (this.bAges.length > 0) {
-          for (let z = 0; z < this.bAges.length; z++) {
-            formData.append('ages[' + z + ']', this.bAges[z])
-          }
-        }
-        if (this.bNamesChild.length > 0) {
-          for (let xx = 0; xx < this.bNamesChild.length; xx++) {
-            formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
-          }
-        }
-        if (this.bSurnamesChild.length > 0) {
-          for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
-            formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
-          }
-        }
-        if (this.bAgesChild.length > 0) {
-          for (let zz = 0; zz < this.bAgesChild.length; zz++) {
-            formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
-          }
-        }
+    //       try {
+    //         const promise = hotelsServices.finalBookHotel(formData)
+    //         const response = await promise
+    //         console.log(response)
+    //         // const results = response.data.BookingRS
+    //         const resultFormData = response.data.formDataId
+    //         this.finalBookHotelFormData = resultFormData
+    //         this.finalBookHotelsFormData[x] = resultFormData
+    //         this.isBooked = true
+    //         this.isLoading = false
+    //       } catch (error) {
+    //         this.snackbar = true
+    //         this.color = 'error'
+    //         this.text = 'Something went wrong'
+    //         this.loaded = false
+    //         this.checkResponseCode = false
+    //         this.isLoading = false
+    //       }
+    //     }
+    //   }
+    //   if (this.getbookingRuleArray.length === 0 && this.getbookingRule) {
+    //     const formData = new FormData()
+    //     const bookingCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
+    //     const startDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
+    //     const endDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
+    //     const HotelCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
+    //     const minimumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
+    //     const maximumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
+    //     const currency = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
+    //     formData.append('bookingCode', bookingCode)
+    //     formData.append('startDate', startDate)
+    //     formData.append('endDate', endDate)
+    //     formData.append('HotelCode', HotelCode)
+    //     formData.append('minimumPrice', minimumPrice)
+    //     formData.append('maximumPrice', maximumPrice)
+    //     formData.append('currency', currency)
+    //     formData.append('phone_number', this.phone.formattedNumber)
+    //     formData.append('title', this.title)
+    //     formData.append('name', this.name)
+    //     formData.append('surname', this.surname)
+    //     formData.append('age', this.age)
+    //     formData.append('email', this.email)
+    //     formData.append('nationality', this.issueCountry)
+    //     formData.append('board', this.selectedBoard)
+    //     formData.append('hotel_name', this.selectedHotelName)
+    //     formData.append('hotel_category', this.selectedHotelCategory)
+    //     formData.append('hotel_type_category', this.selectedHotelTypeCategory)
+    //     formData.append('identification_document_pax', this.identification_document_pax)
+    //     formData.append('address_pax', this.address_pax)
+    //     formData.append('city_pax', this.city_pax)
+    //     formData.append('country_pax', this.country_pax)
+    //     formData.append('postal_code_pax', this.postal_code_pax)
+    //     formData.append('book_after_payment', '1')
+    //     if (this.rooms.length > 0) {
+    //       for (let r = 0; r < this.rooms.length; r++) {
+    //         formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+    //         formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+    //         if (this.rooms[r].ageSelects.length > 0) {
+    //           for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+    //             formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+    //           }
+    //         }
+    //         // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+    //         formData.append('rooms[' + r + '][category]', this.selectedCategory)
+    //       }
+    //     }
+    //     if (this.bNames.length > 0) {
+    //       for (let x = 0; x < this.bNames.length; x++) {
+    //         formData.append('names[' + x + ']', this.bNames[x])
+    //       }
+    //     }
+    //     if (this.bSurnames.length > 0) {
+    //       for (let y = 0; y < this.bSurnames.length; y++) {
+    //         formData.append('surnames[' + y + ']', this.bSurnames[y])
+    //       }
+    //     }
+    //     if (this.bAges.length > 0) {
+    //       for (let z = 0; z < this.bAges.length; z++) {
+    //         formData.append('ages[' + z + ']', this.bAges[z])
+    //       }
+    //     }
+    //     if (this.bNamesChild.length > 0) {
+    //       for (let xx = 0; xx < this.bNamesChild.length; xx++) {
+    //         formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
+    //       }
+    //     }
+    //     if (this.bSurnamesChild.length > 0) {
+    //       for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
+    //         formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
+    //       }
+    //     }
+    //     if (this.bAgesChild.length > 0) {
+    //       for (let zz = 0; zz < this.bAgesChild.length; zz++) {
+    //         formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
+    //       }
+    //     }
 
-        try {
-          const promise = hotelsServices.finalBookHotel(formData)
-          const response = await promise
-          console.log(response)
-          // const results = response.data.BookingRS
-          const resultFormData = response.data.formDataId
-          this.finalBookHotelFormData = resultFormData
-          this.isBooked = true
-          this.isLoading = false
-          // if (results.Errors !== undefined) {
-          //   this.snackbar = true
-          //   this.color = 'error'
-          //   this.text = results.Errors.Error.Text
-          //   this.loaded = false
-          //   this.checkResponseCode = false
-          //   this.isBooked = true
-          //   this.isLoading = false
-          // } else {
-          //   this.getBookingCode = results
-          //   this.finalBookHotelFormData = resultFormData
-          //   this.isBooked = true
-          //   this.isLoading = false
-          // }
-        } catch (error) {
-          this.snackbar = true
-          this.color = 'error'
-          this.text = 'Something went wrong'
-          this.loaded = false
-          this.checkResponseCode = false
-          this.isLoading = false
-        }
-      }
-    },
+    //     try {
+    //       const promise = hotelsServices.finalBookHotel(formData)
+    //       const response = await promise
+    //       console.log(response)
+    //       // const results = response.data.BookingRS
+    //       const resultFormData = response.data.formDataId
+    //       this.finalBookHotelFormData = resultFormData
+    //       this.isBooked = true
+    //       this.isLoading = false
+    //       // if (results.Errors !== undefined) {
+    //       //   this.snackbar = true
+    //       //   this.color = 'error'
+    //       //   this.text = results.Errors.Error.Text
+    //       //   this.loaded = false
+    //       //   this.checkResponseCode = false
+    //       //   this.isBooked = true
+    //       //   this.isLoading = false
+    //       // } else {
+    //       //   this.getBookingCode = results
+    //       //   this.finalBookHotelFormData = resultFormData
+    //       //   this.isBooked = true
+    //       //   this.isLoading = false
+    //       // }
+    //     } catch (error) {
+    //       this.snackbar = true
+    //       this.color = 'error'
+    //       this.text = 'Something went wrong'
+    //       this.loaded = false
+    //       this.checkResponseCode = false
+    //       this.isLoading = false
+    //     }
+    //   }
+    // },
     changeCounterRoom (index, type, value) {
       if (!this.hotelStartDate) {
         this.snackbar = true
