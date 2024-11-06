@@ -212,37 +212,37 @@ export default {
         case 'age':
           switch (n) {
             case 1:
-              if (this.childrenAges[i - 1] > 11) { this.childrenAges[i - 1] = 18 } else {
+              if (this.childrenAges[i - 1] > 11) { this.childrenAges[i - 1] = 17 } else {
                 this.childrenAges[i - 1] === undefined ? this.childrenAges[i - 1] = 2 : this.childrenAges[i - 1] = this.childrenAges[i - 1] + 1
               }
               document.getElementById(`age${i}`).innerText = this.childrenAges[i - 1]
               break
             case 2:
-              if (this.childrenAges[(i - 1) + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber1] = 18 } else {
+              if (this.childrenAges[(i - 1) + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber1] = 17 } else {
                 this.childrenAges[(i - 1) + this.childrenNumber1] === undefined ? this.childrenAges[(i - 1) + this.childrenNumber1] = 2 : this.childrenAges[(i - 1) + this.childrenNumber1] = this.childrenAges[(i - 1) + this.childrenNumber1] + 1
               }
               document.getElementById(`age${i + this.childrenNumber1}`).innerText = this.childrenAges[(i - 1) + this.childrenNumber1]
               break
             case 3:
-              if (this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] = 18 } else {
+              if (this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] = 17 } else {
                 this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] === undefined ? this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] = 2 : this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] = this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1] + 1
               }
               document.getElementById(`age${i + this.childrenNumber2 + this.childrenNumber1}`).innerText = this.childrenAges[(i - 1) + this.childrenNumber2 + this.childrenNumber1]
               break
             case 4:
-              if (this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 18 } else {
+              if (this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 17 } else {
                 this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] === undefined ? this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 2 : this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] + 1
               }
               document.getElementById(`age${i + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1}`).innerText = this.childrenAges[(i - 1) + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1]
               break
             case 5:
-              if (this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 18 } else {
+              if (this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 17 } else {
                 this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] === undefined ? this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 2 : this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] + 1
               }
               document.getElementById(`age${i + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1}`).innerText = this.childrenAges[(i - 1) + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1]
               break
             case 6:
-              if (this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 18 } else {
+              if (this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] > 11) { this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 17 } else {
                 this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] === undefined ? this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = 2 : this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] = this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1] + 1
               }
               document.getElementById(`age${i + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1}`).innerText = this.childrenAges[(i - 1) + this.childrenNumber5 + this.childrenNumber4 + this.childrenNumber3 + this.childrenNumber2 + this.childrenNumber1]
@@ -406,7 +406,7 @@ export default {
     width: 90px;
   }
   .inputs {
-    margin: 18px auto;
+    margin: 17px auto;
     position: relative;
     max-width: 276px;
     flex-wrap: wrap;
@@ -426,7 +426,7 @@ export default {
   }
   .label {
     position: absolute;
-    top: -18px;
+    top: -17px;
   }
   .minus, .plus {
     background-color: #BD9468;

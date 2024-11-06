@@ -26,32 +26,66 @@
             </p>
           </div>
         </div>
+        <div v-if="gtaHotelDetails?.Images?.Image?.length" class="gallery-container">
+          <!-- Main Image Display with Scroll Arrows -->
+          <div class="main-image-container">
+            <v-img :src="currentMainImage" class="main-image" contain />
+            <v-btn icon class="scroll-btn-left" @click="prevImage">
+              <v-icon>mdi-chevron-left</v-icon>
+            </v-btn>
+            <v-btn icon class="scroll-btn-right" @click="nextImage">
+              <v-icon>mdi-chevron-right</v-icon>
+            </v-btn>
+          </div>
 
-        <v-carousel hide-delimiters height="100%" show-arrows>
-          <v-carousel-item
-            v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], isMobile ? 1 : 2)"
-            :key="index"
-          >
-            <v-row>
-              <v-col
-                v-for="(img, imgIndex) in imageGroup"
-                :key="imgIndex"
-                :cols="isMobile ? 12 : 6"
-              >
+          <!-- Thumbnails Row -->
+          <!-- <div class="thumbnails-container">
+            <v-img
+              v-for="(image, index) in gtaHotelDetails.Images.Image"
+              :key="index"
+              :src="image.FileName"
+              class="thumbnail"
+              @click="selectImage(index)"
+            />
+          </div> -->
+          <!-- Thumbnails Row within Row and Col for Better Containment -->
+          <v-row justify="center">
+            <v-col cols="12" md="12">
+              <!-- Contain within a specific width -->
+              <div class="thumbnails-container">
                 <v-img
-                  :src="img.FileName || 'https://source.unsplash.com/user/c_v_r/1900x800'"
-                  height="500px"
-                  width="100%"
-                  @click="openImageModal(img.FileName)"
+                  v-for="(image, index) in gtaHotelDetails.Images.Image"
+                  :key="index"
+                  :src="image.FileName"
+                  class="thumbnail"
+                  @click="selectImage(index)"
                 />
-              </v-col>
-            </v-row>
-          </v-carousel-item>
-        </v-carousel>
+              </div>
+            </v-col>
+          </v-row>
+        </div>
         <v-dialog v-model="imageDialog" max-width="800px" z-index="600">
           <v-img :src="dialogImage" @click.stop />
         </v-dialog>
         <v-card class="mt-4">
+          <v-card-title>
+            <v-col cols="12" md="8">
+              <p class="subtitle">
+                <v-icon color="brown" class="">
+                  mdi-calendar
+                </v-icon>
+                {{ getHotelSearchData.startDate }} to {{ getHotelSearchData.endDate }}
+                <v-icon color="brown" class="">
+                  mdi-home
+                </v-icon>
+                {{ room_count }} Room(s)
+                <v-icon color="brown" class="">
+                  mdi-account
+                </v-icon>
+                {{ getHotelSearchData.travellers }} adult(s) & {{ getHotelSearchData.children }} childrens
+              </p>
+            </v-col>
+          </v-card-title>
           <v-card-text>
             <v-row v-for="(roomOption, index) in roomOptions" :key="index" class="room-card">
               <v-col cols="12">
@@ -69,17 +103,17 @@
                     <!-- Board Type -->
                     <p class="mb-0 font-weight-medium">
                       <span class="grey--text">
-                        {{ roomOption.Board?._ || 'Board not available' }} ({{ roomOption.Board?.Type || 'N/A' }})
+                        {{ roomOption.Board?._ || 'Board not available' }}
                       </span>
                     </p>
                   </v-col>
 
                   <v-col cols="4" class="d-flex align-start">
                     <!-- Non-refundable Button -->
-                    <v-btn small text color="red" class="text-decoration-underline" @click="toggleCancellationPolicy(index)">
-                      Non-refundable
+                    <v-btn small text :color="nonRefundableStatus(roomOption) ? 'red' : 'green'" class="text-decoration-underline" @click="toggleCancellationPolicy(index)">
+                      {{ nonRefundableStatus(roomOption) ? 'Non-refundable' : 'Cancellation Available' }}
                       <v-icon small class="ml-1">
-                        {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                        {{ showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                       </v-icon>
                     </v-btn>
                   </v-col>
@@ -480,9 +514,17 @@ import clientAPI from '~/services/axiosConfig'
 import hotelsServices from '~/services/HotelsServices'
 
 export default {
+  props: {
+    hotel: {
+      type: Object,
+      required: false,
+      default: () => ({}) // Default to an empty object
+    }
+  },
   data () {
     return {
       gtaHotelDetails: null,
+      currentImageIndex: 0,
       imageDialog: false,
       dialogImage: '',
       cancellationPolicy: null,
@@ -655,7 +697,9 @@ export default {
       loading: false,
       activatorWidth: 0,
       hotelCodeJP: '',
-      hotelDetails: true
+      hotelDetails: true,
+      hotelImages: [],
+      currentImage: ''
     }
   },
   head () {
@@ -686,6 +730,16 @@ export default {
     }
   },
   computed: {
+    nonRefundableStatus () {
+    // Returns an object with roomIndex as the key and a boolean indicating non-refundable status
+      return (roomOption) => {
+        const description = roomOption?.CancellationPolicy?.Description || ''
+        return !/0(?:\s|&nbsp;)+usd/i.test(description)
+      }
+    },
+    currentMainImage () {
+      return this.gtaHotelDetails.Images.Image[this.currentImageIndex]?.FileName || 'default-image-url'
+    },
     groupedRooms () {
       let rooms = this.selectedHotelOption.PriceInformation.HotelRooms.HotelRoom
       rooms = Array.isArray(rooms) ? rooms : [rooms]
@@ -819,30 +873,45 @@ export default {
         return
       }
       this.handleInput()
+    },
+    hotel: {
+      immediate: true,
+      handler (newHotel) {
+        if (newHotel) {
+          this.fetchHotelImages()
+        }
+      }
     }
   },
   async mounted () {
+    // this.fetchHotelImages()
     const hotelCode = this.$route.query.hotelCode
-    this.hotelCodeJP = hotelCode
     if (hotelCode) {
       try {
         this.isLoading = true
 
-        // Get the hotel details
+        // Fetch hotel data
         const response = await hotelsServices.getGtaHotelDetails(hotelCode)
-        this.gtaHotelDetails = response.data.ContentRS.Contents.HotelContent
+        this.gtaHotelDetails = response?.data?.ContentRS?.Contents?.HotelContent
 
         // Check the hotel availability using the stored data
         await this.checkSingleHotelAvailability(this.getHotelSearchData)
 
-        if (this.gtaHotelDetails.Images && this.gtaHotelDetails.Images.Image) {
-          this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(image => image.Type === 'BIG')
+        // Filter images
+        if (this.gtaHotelDetails?.Images?.Image) {
+          this.gtaHotelDetails.Images.Image = this.gtaHotelDetails.Images.Image.filter(
+            image => image.Type === 'BIG'
+          )
         }
+
+        console.log('Hotel details:', this.gtaHotelDetails) // Debug log
       } catch (error) {
         console.error('Error fetching hotel details or availability:', error)
       } finally {
         this.isLoading = false
       }
+    } else {
+      this.isLoading = false // Stop loading if no hotelCode
     }
     window.addEventListener('popstate', this.handleBackButton)
     this.priceSessionId = localStorage.getItem('priceSessionId')
@@ -862,6 +931,39 @@ export default {
     this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
   },
   methods: {
+    selectImage (index) {
+      this.currentImageIndex = index
+    },
+    nextImage () {
+      this.currentImageIndex =
+        (this.currentImageIndex + 1) % this.gtaHotelDetails.Images.Image.length
+    },
+    prevImage () {
+      this.currentImageIndex =
+        (this.currentImageIndex - 1 + this.gtaHotelDetails.Images.Image.length) %
+        this.gtaHotelDetails.Images.Image.length
+    },
+    fetchHotelImages () {
+      // Retrieve all images, filtering and formatting with getHotelImageSrc
+      if (this.hotel.Images && this.hotel.Images.length > 0) {
+        this.hotelImages = this.hotel.Images.filter(img => img.Type === 'THB').map(img => img.FileName)
+      }
+
+      // Set initial main image
+      this.currentImage = this.hotelImages.length > 0 ? this.hotelImages[0] : this.getHotelImageSrc(this.hotel)
+    },
+    getHotelImageSrc (hotel) {
+      if (hotel.Images && hotel.Images.length > 0) {
+        const image = hotel.Images.find(img => img.Type === 'THB')
+        return image ? image.FileName : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+      } else if (hotel.HotelInfo && hotel.HotelInfo.Images) {
+        return hotel.HotelInfo.Images.Image || 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+      }
+      return 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    },
+    setCurrentImage (img) {
+      this.currentImage = img
+    },
     toggleCancellationPolicy (index) {
       this.$set(this.showFullCancellationPolicy, index, !this.showFullCancellationPolicy[index])
     },
@@ -871,14 +973,13 @@ export default {
       }
 
       const normalizeText = (text) => {
-        return text.toLowerCase().trim()
+        return text.trim()
       }
 
       const percentagePattern = /\d{1,3}(?:\.\d+)?\s*%\s*of\s*total\s*amount/i
       const pricePattern = /\b\d+(?:\.\d+)?\s+usd\b/i
       const nightPattern = /\b\d+\s+night\b/i
       const mostExpensiveNightPattern = /\bmost\s*expensive\s*night\b/i
-
       const wrapRed = match => `<span style="color: red;">${match.replace(/\s*usd\b/i, '$')}</span>`
 
       return description
@@ -1454,15 +1555,15 @@ export default {
       }
       return 'Location'
     },
-    getHotelImageSrc (hotel) {
-      if (hotel.Images && hotel.Images.length > 0) {
-        const image = hotel.Images.find(img => img.Type === 'THB')
-        return image ? image.FileName : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      } else if (hotel.HotelInfo && hotel.HotelInfo.Images) {
-        return hotel.HotelInfo.Images.Image || 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      }
-      return 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-    },
+    // getHotelImageSrc (hotel) {
+    //   if (hotel.Images && hotel.Images.length > 0) {
+    //     const image = hotel.Images.find(img => img.Type === 'THB')
+    //     return image ? image.FileName : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    //   } else if (hotel.HotelInfo && hotel.HotelInfo.Images) {
+    //     return hotel.HotelInfo.Images.Image || 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    //   }
+    //   return 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+    // },
     toggleSearch () {
       this.showSearch = !this.showSearch
     },
@@ -2527,4 +2628,83 @@ export default {
 .room-card {
   border-bottom: 1px solid #d6b682;
 }
+
+.gallery-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.main-image-container {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background-color: #f3f3f3;
+}
+
+.main-image {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease-in-out;
+  filter: blur(0.5px);
+}
+
+.main-image:hover {
+  transform: scale(1.03); /* Slight zoom effect for smoothness */
+}
+
+.scroll-btn-left,
+.scroll-btn-right {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.scroll-btn-left:hover,
+.scroll-btn-right:hover {
+  background-color: rgba(0, 0, 0, 0.7); /* Darker shade on hover */
+}
+
+.scroll-btn-left {
+  left: 5px;
+}
+
+.scroll-btn-right {
+  right: 5px;
+}
+
+/* Centered Thumbnails Container with Fixed Width */
+/* Centered Thumbnails Container */
+.thumbnails-container {
+  display: flex;
+  justify-content: center; /* Center the thumbnails within the container */
+  gap: 10px; /* Add spacing between thumbnails */
+  margin-top: 10px;
+  overflow-x: auto; /* Add horizontal scroll if needed */
+  padding: 0 10px;
+}
+
+.thumbnail {
+  cursor: pointer;
+  width: 70px; /* Set a fixed width */
+  height: 70px; /* Set a fixed height */
+  object-fit: cover; /* Ensure the image fills the thumbnail area */
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.thumbnail:hover {
+  border: 2px solid #cc9900;
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
 </style>

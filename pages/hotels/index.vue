@@ -243,7 +243,7 @@
           <v-row>
             <v-col cols="12" md="3">
               <v-card class="pa-3" outlined style="background-color: #CFBB9A">
-                <!-- On mobile, show filters as an expandable section -->
+                <!-- On mobile -->
                 <v-expansion-panels v-if="isMobile">
                   <v-expansion-panel>
                     <v-expansion-panel-header class="text-subtitle-2">
@@ -329,7 +329,7 @@
                   </v-expansion-panel>
                 </v-expansion-panels>
 
-                <!-- On larger screens, show filters directly without expansion -->
+                <!-- On larger screens -->
                 <div v-else>
                   <v-text-field
                     v-model="hotelName"
@@ -353,37 +353,39 @@
                     />
                   </v-card>
 
-                  <v-card class="pa-3 mb-2" outlined>
-                    <p class="text-subtitle-2 mb-2">
+                  <v-card class="pa-2 mb-1" outlined>
+                    <p class="text-subtitle-2 mb-1" style="font-size: 14px; font-weight: bold;">
                       Board Options
                     </p>
-                    <v-row>
-                      <v-col v-for="board in boardOptions" :key="board.value" cols="12">
+                    <v-row dense>
+                      <v-col v-for="board in boardOptions" :key="board.value" cols="12" class="py-1">
                         <v-checkbox
                           v-model="selectedBoards"
                           :value="board.value"
                           :label="board.label"
                           hide-details="auto"
                           dense
+                          style="font-size: 12px;"
                         />
                       </v-col>
                     </v-row>
                   </v-card>
 
-                  <v-card class="pa-3 mb-2" outlined>
-                    <p class="text-subtitle-2 mb-2 pb-1">
+                  <v-card class="pa-2 mb-1" outlined>
+                    <p class="text-subtitle-2 mb-1" style="font-size: 14px; font-weight: bold;">
                       Specify a Category
                     </p>
-                    <v-row>
-                      <v-col v-for="rating in ratingOptions" :key="rating.value" cols="12">
+                    <v-row dense>
+                      <v-col v-for="rating in ratingOptions" :key="rating.value" cols="12" class="py-1">
                         <v-checkbox
                           v-model="selectedRatings"
                           :value="rating.value"
                           dense
                           hide-details
+                          style="font-size: 12px;"
                         >
                           <template #label>
-                            <span class="rating-stars" style="display: flex; align-items: center;">
+                            <span class="rating-stars" style="display: flex; align-items: center; font-size: 14px;">
                               <v-rating
                                 v-if="isNumericRating(rating.value)"
                                 :value="parseInt(rating.value)"
@@ -393,10 +395,8 @@
                                 readonly
                                 small
                               />
-                              <span v-else style="font-size: 12px;">
-                                {{ rating.label }}
-                              </span>
-                              <span style="font-size: 12px; margin-left: 5px;">
+                              <span v-else>{{ rating.label }}</span>
+                              <span style="margin-left: 4px;">
                                 ({{ rating.count }})
                               </span>
                             </span>
@@ -571,8 +571,8 @@
                                         </p>
                                       </v-col>
                                       <v-col cols="4" class="d-flex align-start">
-                                        <v-btn small text color="red" class="text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
-                                          Non-refundable
+                                        <v-btn small text :color="nonRefundableStatus(roomOption) ? 'red' : 'green'" class="text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
+                                          {{ nonRefundableStatus(roomOption) ? 'Non-refundable' : 'Cancellation Available' }}
                                           <v-icon small class="ml-1">
                                             {{ showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                                           </v-icon>
@@ -639,10 +639,10 @@
                                         </p>
                                       </v-col>
                                       <v-col cols="4" class="d-flex align-center">
-                                        <v-btn small text color="red" class=" text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
-                                          Non-refundable
+                                        <v-btn small text :color="nonRefundableStatus(roomOption) ? 'red' : 'green'" class=" text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
+                                          {{ nonRefundableStatus(roomOption) ? 'Non-refundable' : 'Cancellation Available' }}
                                           <v-icon small class="ml-1">
-                                            {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                            {{ showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                                           </v-icon>
                                         </v-btn>
                                       </v-col>
@@ -751,8 +751,8 @@
                                         </p>
                                       </v-col>
                                       <v-col cols="12" md="4" class="py-1 d-flex justify-start">
-                                        <v-btn small text color="red" class="text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
-                                          Non-refundable
+                                        <v-btn small text :color="nonRefundableStatus(roomOption) ? 'red' : 'green'" class="text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
+                                          {{ nonRefundableStatus(roomOption) ? 'Non-refundable' : 'Cancellation Available' }}
                                           <v-icon small class="ml-1">
                                             {{ showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                                           </v-icon>
@@ -820,10 +820,10 @@
                                         </p>
                                       </v-col>
                                       <v-col cols="12" md="4" class="py-1 d-flex justify-start">
-                                        <v-btn small text color="red" class=" text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
-                                          Non-refundable
+                                        <v-btn small text :color="nonRefundableStatus(roomOption) ? 'red' : 'green'" class=" text-decoration-underline" @click="toggleCancellationPolicy(h, index)">
+                                          {{ nonRefundableStatus(roomOption) ? 'Non-refundable' : 'Cancellation Available' }}
                                           <v-icon small class="ml-1">
-                                            {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                            {{ showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                                           </v-icon>
                                         </v-btn>
                                       </v-col>
@@ -1195,7 +1195,7 @@
                   elevation="6"
                   large
                   block
-                  @click="processHotelBooking"
+                  @click="checkoutPayment"
                 >
                   <span>Proceed to checkout</span>
                   <!-- <span v-else>Booked Successfully</span> -->
@@ -1205,8 +1205,84 @@
           </v-card>
         </v-col>
       </v-row>
+      <v-dialog v-model="showCheckout" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card>
+          <v-card-title class="white--text" style="background-color: #4f3316;">
+            Hotel Summary
+            <v-btn
+              text
+              color="white"
+              style="background-color: transparent;border: 1px solid #fff;color: #fff;"
+              elevation="4"
+              icon
+              small
+              absolute
+              right
+              class="float-right"
+              @click="showCheckout = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+          <v-card-text class="pt-4">
+            <v-row>
+              <v-col cols="6" sm="2">
+                <v-text-field
+                  :value="travellers"
+                  label="Adults"
+                  prepend-inner-icon="mdi-account"
+                  readonly
+                />
+              </v-col>
+
+              <v-col cols="6" sm="2">
+                <v-text-field
+                  :value="children"
+                  label="Children"
+                  prepend-inner-icon="mdi-account"
+                  readonly
+                />
+              </v-col>
+            </v-row>
+          </v-card-text>
+          <v-card-actions class="dialog-cart-footer" style="background-color: #fff">
+            <v-row align="center" justify="center" class="px-5">
+              <v-col cols="12" md="12">
+                <v-row class="mt-2">
+                  <v-col cols="8">
+                    <h5 class="text-h5">
+                      Total
+                    </h5>
+                  </v-col>
+                  <v-col cols="4">
+                    <p>$ {{ hotelPrices }}</p>
+                  </v-col>
+                </v-row>
+              </v-col>
+              <v-col cols="12" md="12">
+                <v-btn
+                  class="rounded"
+                  style="margin-bottom: 15px;"
+                  x-large
+                  tile
+                  elevation="0"
+                  dark
+                  color="#4f3316"
+                  block
+                  :disabled="!openProceed"
+                  @click="bookAdventures"
+                >
+                  Complete Checkout
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-container>
-    <form ref="paymentForm" method="POST" action="" />
+    <!-- <form ref="paymentForm" method="POST" action="" /> -->
   </div>
 </template>
 <script>
@@ -1389,7 +1465,8 @@ export default {
       selectedBoards: [],
       boardOptions: [],
       loading: false,
-      activatorWidth: 0
+      activatorWidth: 0,
+      selectedHotelForBooking: {}
     }
   },
   head () {
@@ -1420,6 +1497,13 @@ export default {
     }
   },
   computed: {
+    nonRefundableStatus () {
+    // Returns an object with roomIndex as the key and a boolean indicating non-refundable status
+      return (roomOption) => {
+        const description = roomOption?.CancellationPolicy?.Description || ''
+        return !/0(?:\s|&nbsp;)+usd/i.test(description)
+      }
+    },
     isMobile () {
       return this.$vuetify.breakpoint.smAndDown // or use xs only if you want it more specific
     },
@@ -1495,7 +1579,7 @@ export default {
       return [{ _: 'All', Type: 'all' }, ...this.boards]
     },
     truncatedDescriptions () {
-      return this.listGtaHotelDetails.map((hotel) => {
+      return this.filteredHotels.map((hotel) => {
         const description = hotel.HotelInfo.Description || 'Hotel Description'
         return description.length > 200 ? description.substring(0, 200) + '...' : description
       })
@@ -1565,15 +1649,19 @@ export default {
 
   async created () {
     await this.getMetaData()
-    this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
-    this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
+    // this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
+    // this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
+    if (this.filteredHotels.length > 1) {
+      this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
+      this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
+    }
   },
   methods: {
     async processHotelBooking () {
       this.isLoading = true
 
       try {
-        const formDataId = await this.finalBookHotel() // Save booking, get booking ID
+        const formDataId = await this.finalBookHotel()
 
         if (!formDataId) {
           this.snackbar = true
@@ -1618,77 +1706,287 @@ export default {
     },
     async finalBookHotel () {
       this.isLoading = true
+      if (this.getbookingRuleArray.length > 0) {
+        for (let x = 0; x < this.getbookingRuleArray.length; x++) {
+          const formData = new FormData()
+          const bookingCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
+          const startDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
+          const endDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
+          const HotelCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
+          const minimumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
+          const maximumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
+          const currency = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
+          formData.append('bookingCode', bookingCode)
+          formData.append('startDate', startDate)
+          formData.append('endDate', endDate)
+          formData.append('HotelCode', HotelCode)
+          formData.append('minimumPrice', minimumPrice)
+          formData.append('maximumPrice', maximumPrice)
+          formData.append('currency', currency)
+          formData.append('phone_number', this.phone.formattedNumber)
+          formData.append('title', this.title)
+          formData.append('name', this.name)
+          formData.append('surname', this.surname)
+          formData.append('age', this.age)
+          formData.append('email', this.email)
+          formData.append('nationality', this.issueCountry)
+          formData.append('board', this.selectedBoard)
+          formData.append('hotel_name', this.selectedHotelName)
+          formData.append('hotel_category', this.selectedHotelCategory)
+          formData.append('hotel_type_category', this.selectedHotelTypeCategory)
+          formData.append('identification_document_pax', this.identification_document_pax)
+          formData.append('address_pax', this.address_pax)
+          // formData.append('city_pax', this.city_pax)
+          // formData.append('country_pax', this.country_pax)
+          formData.append('postal_code_pax', this.postal_code_pax)
+          formData.append('book_after_payment', '1')
+          if (this.rooms.length > 0) {
+            for (let r = 0; r < this.rooms.length; r++) {
+              formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+              formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+              if (this.rooms[r].ageSelects.length > 0) {
+                for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+                  formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+                }
+              }
+              // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+              formData.append('rooms[' + r + '][category]', this.selectedCategory)
+            }
+          }
+          if (this.bNames.length > 0) {
+            for (let x = 0; x < this.bNames.length; x++) {
+              formData.append('names[' + x + ']', this.bNames[x])
+            }
+          }
+          if (this.bSurnames.length > 0) {
+            for (let y = 0; y < this.bSurnames.length; y++) {
+              formData.append('surnames[' + y + ']', this.bSurnames[y])
+            }
+          }
+          if (this.bAges.length > 0) {
+            for (let z = 0; z < this.bAges.length; z++) {
+              formData.append('ages[' + z + ']', this.bAges[z])
+            }
+          }
+          if (this.bNamesChild.length > 0) {
+            for (let xx = 0; xx < this.bNamesChild.length; xx++) {
+              formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
+            }
+          }
+          if (this.bSurnamesChild.length > 0) {
+            for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
+              formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
+            }
+          }
+          if (this.bAgesChild.length > 0) {
+            for (let zz = 0; zz < this.bAgesChild.length; zz++) {
+              formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
+            }
+          }
 
-      try {
-        if (!this.selectedHotelOption || !this.getbookingRule) {
+          try {
+            const promise = hotelsServices.finalBookHotel(formData)
+            const response = await promise
+            console.log(response)
+            // const results = response.data.BookingRS
+            const resultFormData = response.data.formDataId
+            this.finalBookHotelFormData = resultFormData
+            this.finalBookHotelsFormData[x] = resultFormData
+            this.isBooked = true
+            this.isLoading = false
+          } catch (error) {
+            this.snackbar = true
+            this.color = 'error'
+            this.text = 'Something went wrong'
+            this.loaded = false
+            this.checkResponseCode = false
+            this.isLoading = false
+          }
+        }
+      }
+      if (this.getbookingRuleArray.length === 0 && this.getbookingRule) {
+        const formData = new FormData()
+        const bookingCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
+        const startDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
+        const endDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
+        const HotelCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
+        const minimumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
+        const maximumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
+        const currency = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
+        formData.append('bookingCode', bookingCode)
+        formData.append('startDate', startDate)
+        formData.append('endDate', endDate)
+        formData.append('HotelCode', HotelCode)
+        formData.append('minimumPrice', minimumPrice)
+        formData.append('maximumPrice', maximumPrice)
+        formData.append('currency', currency)
+        formData.append('phone_number', this.phone.formattedNumber)
+        formData.append('title', this.title)
+        formData.append('name', this.name)
+        formData.append('surname', this.surname)
+        formData.append('age', this.age)
+        formData.append('email', this.email)
+        formData.append('nationality', this.issueCountry)
+        formData.append('board', this.selectedBoard)
+        formData.append('hotel_name', this.selectedHotelName)
+        formData.append('hotel_category', this.selectedHotelCategory)
+        formData.append('hotel_type_category', this.selectedHotelTypeCategory)
+        formData.append('identification_document_pax', this.identification_document_pax)
+        formData.append('address_pax', this.address_pax)
+        formData.append('city_pax', this.city_pax)
+        formData.append('country_pax', this.country_pax)
+        formData.append('postal_code_pax', this.postal_code_pax)
+        formData.append('book_after_payment', '1')
+        if (this.rooms.length > 0) {
+          for (let r = 0; r < this.rooms.length; r++) {
+            formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
+            formData.append('rooms[' + r + '][children]', this.rooms[r].children)
+            if (this.rooms[r].ageSelects.length > 0) {
+              for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
+                formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
+              }
+            }
+            // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
+            formData.append('rooms[' + r + '][category]', this.selectedCategory)
+          }
+        }
+        if (this.bNames.length > 0) {
+          for (let x = 0; x < this.bNames.length; x++) {
+            formData.append('names[' + x + ']', this.bNames[x])
+          }
+        }
+        if (this.bSurnames.length > 0) {
+          for (let y = 0; y < this.bSurnames.length; y++) {
+            formData.append('surnames[' + y + ']', this.bSurnames[y])
+          }
+        }
+        if (this.bAges.length > 0) {
+          for (let z = 0; z < this.bAges.length; z++) {
+            formData.append('ages[' + z + ']', this.bAges[z])
+          }
+        }
+        if (this.bNamesChild.length > 0) {
+          for (let xx = 0; xx < this.bNamesChild.length; xx++) {
+            formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
+          }
+        }
+        if (this.bSurnamesChild.length > 0) {
+          for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
+            formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
+          }
+        }
+        if (this.bAgesChild.length > 0) {
+          for (let zz = 0; zz < this.bAgesChild.length; zz++) {
+            formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
+          }
+        }
+
+        try {
+          const promise = hotelsServices.finalBookHotel(formData)
+          const response = await promise
+          console.log(response)
+          // const results = response.data.BookingRS
+          const resultFormData = response.data.formDataId
+          this.finalBookHotelFormData = resultFormData
+          this.isBooked = true
+          this.isLoading = false
+          // if (results.Errors !== undefined) {
+          //   this.snackbar = true
+          //   this.color = 'error'
+          //   this.text = results.Errors.Error.Text
+          //   this.loaded = false
+          //   this.checkResponseCode = false
+          //   this.isBooked = true
+          //   this.isLoading = false
+          // } else {
+          //   this.getBookingCode = results
+          //   this.finalBookHotelFormData = resultFormData
+          //   this.isBooked = true
+          //   this.isLoading = false
+          // }
+        } catch (error) {
           this.snackbar = true
           this.color = 'error'
-          this.text = 'Please select a room before proceeding with the booking.'
+          this.text = 'Something went wrong'
+          this.loaded = false
+          this.checkResponseCode = false
           this.isLoading = false
-          return
         }
-
-        const adults = this.rooms.reduce((total, room) => total + room.travelers, 0)
-        const children = this.rooms.reduce((total, room) => total + room.children, 0)
-
-        const priceInfo = this.selectedHotelOption?.PriceInformation?.Prices?.Price
-        const totalPrice = priceInfo.TotalFixAmounts.Gross
-        const taxesAndFees = priceInfo.TotalFixAmounts.Service.Amount
-        const currency = priceInfo.Currency
-
-        const body = {
-          bookingCode: this.selectedHotelOption?.BookingCode?._,
-          startDate: this.hotelStartDate,
-          endDate: this.hotelEndDate,
-          HotelCode: this.selectedHotelOption?.PriceInformation.HotelContent?.Code,
-          minimumPrice: totalPrice.toFixed(2),
-          maximumPrice: (totalPrice + taxesAndFees).toFixed(2),
-          currency,
-          phone_number: this.phone.formattedNumber || this.phone.e164,
-          title: this.title || 'Mr',
-          name: this.name || 'Guest',
-          surname: this.surname || 'Unknown',
-          age: this.age || '30',
-          email: this.email || 'guest@example.com',
-          nationality: this.issueCountry || 'EG', // Ensure consistency
-          CountryOfResidence: this.issueCountry || 'EG', // Ensure consistency with nationality
-          board: this.selectedBoard || 'all',
-          hotel_name: this.selectedHotelName || 'Hotel Default',
-          hotel_category: this.selectedHotelCategory || '3-star',
-          hotel_type_category: this.selectedHotelTypeCategory || 'all',
-          identification_document_pax: this.identification_document_pax || 'ID123456789',
-          address_pax: this.address_pax || '123 Default St',
-          city_pax: this.city_pax || 'Cairo',
-          country_pax: this.country_pax || 'EG',
-          postal_code_pax: this.postal_code_pax || '12345',
-          book_after_payment: '0',
-          rooms: this.rooms.map(room => ({
-            travellers: room.travelers.toString(),
-            children: room.children.toString(),
-            category: this.selectedCategory || 'all'
-          })),
-          adults,
-          children
-        }
-
-        const bookingResponse = await hotelsServices.finalBookHotel(body)
-        const resultFormData = bookingResponse.data.formDataId
-
-        this.finalBookHotelFormData = resultFormData
-        this.isBooked = true
-        this.isLoading = false
-
-        console.log('Booking confirmed with payload:', body)
-
-        return resultFormData
-      } catch (error) {
-        console.error('Error during hotel booking:', error)
-        this.snackbar = true
-        this.color = 'error'
-        this.text = 'Something went wrong while processing your booking.'
-        this.isLoading = false
       }
     },
+    // async finalBookHotel () {
+    //   this.isLoading = true
+
+    //   try {
+    //     if (!this.selectedHotelOption || !this.getbookingRule) {
+    //       this.snackbar = true
+    //       this.color = 'error'
+    //       this.text = 'Please select a room before proceeding with the booking.'
+    //       this.isLoading = false
+    //       return
+    //     }
+
+    //     const adults = this.rooms.reduce((total, room) => total + room.travelers, 0)
+    //     const children = this.rooms.reduce((total, room) => total + room.children, 0)
+
+    //     const priceInfo = this.selectedHotelOption?.PriceInformation?.Prices?.Price
+    //     const totalPrice = priceInfo.TotalFixAmounts.Gross
+    //     const taxesAndFees = priceInfo.TotalFixAmounts.Service.Amount
+    //     const currency = priceInfo.Currency
+
+    //     const body = {
+    //       bookingCode: this.selectedHotelOption?.BookingCode?._,
+    //       startDate: this.hotelStartDate,
+    //       endDate: this.hotelEndDate,
+    //       HotelCode: this.selectedHotelOption?.PriceInformation.HotelContent?.Code,
+    //       minimumPrice: totalPrice.toFixed(2),
+    //       maximumPrice: (totalPrice + taxesAndFees).toFixed(2),
+    //       currency,
+    //       phone_number: this.phone.formattedNumber || this.phone.e164,
+    //       title: this.title || 'Mr',
+    //       name: this.name || 'Guest',
+    //       surname: this.surname || 'Unknown',
+    //       age: this.age || '30',
+    //       email: this.email || 'guest@example.com',
+    //       nationality: this.issueCountry || 'EG', // Ensure consistency
+    //       CountryOfResidence: this.issueCountry || 'EG', // Ensure consistency with nationality
+    //       board: this.selectedBoard || 'all',
+    //       hotel_name: this.selectedHotelName || 'Hotel Default',
+    //       hotel_category: this.selectedHotelCategory || '3-star',
+    //       hotel_type_category: this.selectedHotelTypeCategory || 'all',
+    //       identification_document_pax: this.identification_document_pax || 'ID123456789',
+    //       address_pax: this.address_pax || '123 Default St',
+    //       city_pax: this.city_pax || 'Cairo',
+    //       country_pax: this.country_pax || 'EG',
+    //       postal_code_pax: this.postal_code_pax || '12345',
+    //       book_after_payment: '0',
+    //       rooms: this.rooms.map(room => ({
+    //         travellers: room.travelers.toString(),
+    //         children: room.children.toString(),
+    //         category: this.selectedCategory || 'all'
+    //       })),
+    //       adults,
+    //       children
+    //     }
+
+    //     const bookingResponse = await hotelsServices.finalBookHotel(body)
+    //     const resultFormData = bookingResponse.data.formDataId
+
+    //     this.finalBookHotelFormData = resultFormData
+    //     this.isBooked = true
+    //     this.isLoading = false
+
+    //     console.log('Booking confirmed with payload:', body)
+
+    //     return resultFormData
+    //   } catch (error) {
+    //     console.error('Error during hotel booking:', error)
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'Something went wrong while processing your booking.'
+    //     this.isLoading = false
+    //   }
+    // },
     // generateTravellerDetails () {
     //   const bookingHolder = {
     //     title: this.title,
@@ -1880,7 +2178,7 @@ export default {
       }
     },
     calculatePriceRange () {
-      if (this.listGtaHotelDetails.length > 0) {
+      if (this.listGtaHotelDetails.length > 0 && this.filteredHotels.length !== 0) {
         const prices = this.listGtaHotelDetails
           .map((hotel) => {
             const price = parseFloat(hotel.HotelOptions.HotelOption[0]?.Prices.Price.TotalFixAmounts.Gross || 0)
@@ -1908,6 +2206,10 @@ export default {
     },
 
     applyPriceFilter () {
+      if (this.listGtaHotelDetails.length === 1) {
+        this.filteredHotels = this.listGtaHotelDetails
+        return
+      }
       if (this.priceRange[0] === null || this.priceRange[1] === null) {
         this.filteredHotels = this.listGtaHotelDetails
       } else {
@@ -1929,6 +2231,10 @@ export default {
     },
 
     applyCombinedFilters () {
+      if (this.listGtaHotelDetails.length === 1) {
+        this.filteredHotels = this.listGtaHotelDetails
+        return
+      }
       let filtered = [...this.listGtaHotelDetails]
       if (this.hotelName) {
         filtered = filtered.filter((hotel) => {
@@ -2051,7 +2357,7 @@ export default {
       }
 
       const normalizeText = (text) => {
-        return text.toLowerCase().trim()
+        return text.trim()
       }
 
       const percentagePattern = /\d{1,3}(?:\.\d+)?\s*%\s*of\s*total\s*amount/i
@@ -2428,7 +2734,7 @@ export default {
 
       const hotels = this.gtaHotels || []
       let page = 1
-      const pageSize = 100
+      const pageSize = 500
       let totalPages = 1
 
       try {
@@ -2480,7 +2786,6 @@ export default {
 
             let results = availabilityRS?.Results?.HotelResult
             // eslint-disable-next-line no-console
-            console.log(results)
             if (results && !Array.isArray(results)) {
               results = [results]
             }
@@ -2489,11 +2794,26 @@ export default {
               this.hotelAvailsArray.push(...results)
               this.listGtaHotelDetails = [...this.listGtaHotelDetails, ...results]
               this.filteredHotels = [...this.listGtaHotelDetails]
-
+              console.log(this.filteredHotels)
               this.calculatePriceRange()
               this.applyCombinedFilters()
 
               this.showSearch = false
+              // const results = Array.isArray(availabilityRS?.Results?.HotelResult)
+              //   ? availabilityRS.Results.HotelResult
+              //   : []
+
+              // if (results.length > 0) {
+              //   // Push results to all relevant arrays
+              //   this.hotelAvailsArray.push(...results)
+              //   this.listGtaHotelDetails.push(...results)
+              //   // Set filteredHotels directly to results for immediate display
+              //   this.filteredHotels = results
+              //   console.log(this.filteredHotels)
+              //   this.calculatePriceRange()
+              //   this.applyCombinedFilters()
+
+            //   this.showSearch = false
             } else {
               console.log('No matching hotels found.')
               this.filteredHotels = []
@@ -2633,36 +2953,167 @@ export default {
         this.showRoomsDialog = true
       }
     },
+    // async bookRoom (roomOption, hotelIndex) {
+    //   try {
+    //     this.isLoading = true
+    //     const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
+    //     // this.hotelPrices = getHotelGtaDetails.Prices?.Price?.TotalFixAmounts?.Gross
+    //     const hotelCode = getHotelGtaDetails.Code
+    //     const formData = new FormData()
+    //     formData.append('RatePlanCode', roomOption.RatePlanCode)
+    //     formData.append('StartDate', this.hotelStartDate)
+    //     formData.append('EndDate', this.hotelEndDate)
+    //     formData.append('HotelCode', hotelCode)
+
+    //     const promise = hotelsServices.getBookingRules(formData)
+    //     const response = await promise
+    //     // eslint-disable-next-line no-console
+    //     console.log(response)
+    //     const results = response.data.BookingRulesRS
+
+    //     if (results.Errors !== undefined) {
+    //       this.snackbar = true
+    //       this.color = 'error'
+    //       this.text = results.Errors.Error.Text
+    //       this.loaded = false
+    //       this.checkResponseCode = false
+    //     } else {
+    //       this.getbookingRule = results.Results.HotelResult
+    //       this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
+    //       // eslint-disable-next-line no-console
+    //       console.log(this.getbookingRule)
+    //       this.confirmedSelectedRoom = true
+
+    //       this.$nextTick(() => {
+    //         if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
+    //           const targetEl = this.$refs.targetDiv.$el
+    //           if (targetEl) {
+    //             targetEl.scrollIntoView({ behavior: 'smooth' })
+    //           }
+    //         }
+    //       })
+    //     }
+    //   } catch (error) {
+    //     // eslint-disable-next-line no-console
+    //     console.error('Error during booking:', error)
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'Something went wrong while booking the room.'
+    //   } finally {
+    //     this.isLoading = false
+    //   }
+    // },
+    // async bookRoom (roomOption, hotelIndex) {
+    //   try {
+    //     console.log('roomOption:', roomOption) // Confirm roomOption data is correct
+
+    //     this.isLoading = true
+    //     const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
+
+    //     // Set selected room, rate plan code, and pricing information
+    //     this.selectedRoomGta = roomOption
+    //     this.selectedRoomGtaArray.push(roomOption)
+    //     this.getRatePlanCode = roomOption.RatePlanCode
+    //     this.hotelPrices = roomOption.Prices?.Price?.TotalFixAmounts?.Nett || 0 // Ensure it has a fallback value
+
+    //     // Set hotel codes based on the updated structure
+    //     this.selectedHotelCode = getHotelGtaDetails.Code
+    //     this.selectedHotelJPCode = getHotelGtaDetails.JPCode
+    //     this.selectedHotelJPDCode = getHotelGtaDetails.JPDCode
+
+    //     // Form data and proceed with the booking rules request
+    //     const formData = new FormData()
+    //     formData.append('RatePlanCode', roomOption.RatePlanCode)
+    //     formData.append('StartDate', this.hotelStartDate)
+    //     formData.append('EndDate', this.hotelEndDate)
+    //     formData.append('HotelCode', this.selectedHotelCode)
+
+    //     const promise = hotelsServices.getBookingRules(formData)
+    //     const response = await promise
+    //     console.log('Booking Rules Response:', response)
+
+    //     const results = response.data.BookingRulesRS
+
+    //     if (results.Errors !== undefined) {
+    //       this.snackbar = true
+    //       this.color = 'error'
+    //       this.text = results.Errors.Error.Text
+    //       this.loaded = false
+    //       this.checkResponseCode = false
+    //     } else {
+    //       this.getbookingRule = results.Results.HotelResult
+    //       this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
+    //       this.confirmedSelectedRoom = true
+
+    //       this.$nextTick(() => {
+    //         if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
+    //           const targetEl = this.$refs.targetDiv.$el
+    //           if (targetEl) {
+    //             targetEl.scrollIntoView({ behavior: 'smooth' })
+    //           }
+    //         }
+    //       })
+    //     }
+    //   } catch (error) {
+    //     console.error('Error during booking:', error)
+    //     this.snackbar = true
+    //     this.color = 'error'
+    //     this.text = 'Something went wrong while booking the room.'
+    //   } finally {
+    //     this.isLoading = false
+    //   }
+    // },
     async bookRoom (roomOption, hotelIndex) {
       try {
+        console.log('Room Option:', roomOption) // Confirm roomOption data
+        console.log('Hotel Index:', hotelIndex) // Confirm hotel index
+
         this.isLoading = true
-        const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
-        const hotelCode = getHotelGtaDetails.Code
+
+        // Access the selected hotel using hotelIndex
+        const selectedHotel = this.listGtaHotelDetails[hotelIndex]
+        console.log('Selected Hotel Details:', selectedHotel) // Confirm hotel data is correct
+
+        // Set selected room and hotel details
+        this.selectedRoomGta = roomOption
+        this.selectedRoomGtaArray.push(roomOption)
+        this.getRatePlanCode = roomOption.RatePlanCode
+        this.hotelPrices = roomOption.Prices?.Price?.TotalFixAmounts?.Nett || 0
+
+        // Set hotel codes based on the current hotel data structure
+        this.selectedHotelForBooking = selectedHotel
+        this.selectedHotelCode = selectedHotel.Code
+        this.selectedHotelJPCode = selectedHotel.JPCode
+        this.selectedHotelJPDCode = selectedHotel.JPDCode
+
+        // Prepare form data for booking rules request
         const formData = new FormData()
         formData.append('RatePlanCode', roomOption.RatePlanCode)
         formData.append('StartDate', this.hotelStartDate)
         formData.append('EndDate', this.hotelEndDate)
-        formData.append('HotelCode', hotelCode)
+        formData.append('HotelCode', this.selectedHotelCode)
 
+        // Make the request to get booking rules
         const promise = hotelsServices.getBookingRules(formData)
         const response = await promise
-        // eslint-disable-next-line no-console
-        console.log(response)
+        console.log('Booking Rules Response:', response)
+
         const results = response.data.BookingRulesRS
 
         if (results.Errors !== undefined) {
+          // Handle errors
           this.snackbar = true
           this.color = 'error'
           this.text = results.Errors.Error.Text
           this.loaded = false
           this.checkResponseCode = false
         } else {
+          // Set booking rule data and selected hotel option
           this.getbookingRule = results.Results.HotelResult
           this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
-          // eslint-disable-next-line no-console
-          console.log(this.getbookingRule)
           this.confirmedSelectedRoom = true
 
+          // Smooth scroll to target element if needed
           this.$nextTick(() => {
             if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
               const targetEl = this.$refs.targetDiv.$el
@@ -2673,7 +3124,6 @@ export default {
           })
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error('Error during booking:', error)
         this.snackbar = true
         this.color = 'error'
@@ -3065,13 +3515,63 @@ export default {
       this.openProceed = true
       this.showCheckout = true
     },
+    // bookAdventures () {
+    //   const selectedHotelDetails = this.getHotelGtaDetails
+    //   console.log('Selected Hotel Details:', selectedHotelDetails)
+
+    //   this.$store.dispatch('setTravellersNumber', {
+    //     adults: this.travellers,
+    //     children: this.children,
+    //     totalPrice: this.hotelPrices,
+    //     packageStartDay: this.packageStartDay,
+    //     packageDetails: this.getHotelGtaDetails, // Replacing hotelAvails with getHotelGtaDetails
+    //     priceSessionId: this.priceSessionId,
+    //     ratePlanCode: this.getRatePlanCode,
+    //     bookingRule: this.getbookingRule,
+    //     bookingInfo: this.getBookingCode,
+    //     hotelStartDate: this.hotelStartDate,
+    //     hotelEndDate: this.hotelEndDate,
+    //     finalBookHotelFormData: this.finalBookHotelFormData
+    //   })
+
+    //   this.$router.push({ name: 'booking-module', params: { module: 'hotel' } })
+    // },
+    // bookAdventures () {
+    //   // Ensure that required room and hotel data are available
+    //   if (!this.selectedRoomGta || !this.selectedHotelCode) {
+    //     console.warn('Required room or hotel data is missing')
+    //     return
+    //   }
+
+    //   // Dispatch existing data structure to the Vuex store
+    //   this.$store.dispatch('setTravellersNumber', {
+    //     adults: this.travellers,
+    //     children: this.children,
+    //     totalPrice: this.hotelPrices, // Selected room price
+    //     packageStartDay: this.packageStartDay,
+    //     packageDetails: this.getbookingRule, // Booking rule details
+    //     priceSessionId: this.priceSessionId,
+    //     ratePlanCode: this.getRatePlanCode, // Room rate plan code
+    //     bookingInfo: this.selectedHotelOption, // Selected hotel option info
+    //     hotelStartDate: this.hotelStartDate,
+    //     hotelEndDate: this.hotelEndDate,
+    //     finalBookHotelFormData: this.finalBookHotelFormData
+    //   })
+
+    //   // Redirect to booking module with existing parameters
+    //   this.$router.push({ name: 'booking-module', params: { module: 'hotel' } })
+    // },
     bookAdventures () {
+      if (!this.selectedRoomGta || !this.selectedHotelCode) {
+        console.warn('Required room or hotel data is missing')
+        return
+      }
       this.$store.dispatch('setTravellersNumber', {
         adults: this.travellers,
         children: this.children,
         totalPrice: this.hotelPrices,
         packageStartDay: this.packageStartDay,
-        packageDetails: this.hotelAvails,
+        packageDetails: this.selectedHotelForBooking,
         priceSessionId: this.priceSessionId,
         ratePlanCode: this.RatePlanCode,
         bookingRule: this.getbookingRule,
@@ -3082,6 +3582,7 @@ export default {
       })
       this.$router.push({ name: 'booking-module', params: { module: 'hotel' } })
     },
+
     searchCountries () {
       console.log(this.searchTerm)
       if (!this.searchTerm) {
@@ -3133,8 +3634,7 @@ export default {
 }
 
 .hotel-image {
-  border-top-left-radius: 12px;
-  border-bottom-left-radius: 12px;
+  border-radius: 12px;
 }
 
 .price-wrapper {

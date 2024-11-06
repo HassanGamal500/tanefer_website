@@ -173,7 +173,7 @@
             <div v-else-if="$route.params.module === 'hotel'" class="flight-review-border stiky">
               <div class="summry-title">
                 <span v-if="packageActivities">
-                  <h3>{{ packageActivities.HotelInfo.Name }}</h3>
+                  <h3>{{ packageActivities.HotelInfo?.Name }}</h3>
                 </span>
               </div>
               <div v-if="packageActivities">
@@ -530,7 +530,7 @@
           </div>
           <div v-if="packageActivities">
             <h2>
-              Hotel Name: <strong>{{ packageActivities.HotelInfo.Name }}</strong>
+              Hotel Name: <strong>{{ packageActivities.HotelInfo?.Name }}</strong>
             </h2>
             <h4 class="mb-5">
               Number of Adults: <strong>{{ numberOfPassenger.adults }}</strong>
@@ -945,8 +945,8 @@ export default {
             contact_email: this.contactInfo.email
           },
           start_date: this.packageStartDay,
-          sessionId: this.$store.state.travellersNumber.priceSessionId,
-          package_id: this.packageActivities.packageID,
+          sessionId: this.$store.state.travellersNumber?.priceSessionId,
+          package_id: this.packageActivities?.packageID,
           total_price: this.packageTotalPrice,
           final_price: this.packageTotalAllPrice,
           adults: this.numberOfPassenger.adults,
@@ -977,7 +977,7 @@ export default {
           if (this.checkHasCruise === false) {
             form.insertAdjacentHTML('beforeend', `<input type="hidden" name="sessionId" value="${this.$store.state.travellersNumber.priceSessionId}">`)
             form.insertAdjacentHTML('beforeend', `<input type="hidden" name="price" value="${this.packageTotalPrice}">`)
-            form.insertAdjacentHTML('beforeend', `<input type="hidden" name="final_price" value="${this.packageTotalAllPrice}">`)
+            form.insertAdjacentHTML('beforeend', `<input type="hidden" name="final_price" value="${this.packageTotalPrice}">`)
             form.insertAdjacentHTML('beforeend', `<input type="hidden" name="url" value="${window.location.origin + '/booking/trip'}">`)
             form.insertAdjacentHTML('beforeend', `<input type="hidden" name="bookingId" value="${bookingData.booking_id}">`)
             form.submit()
@@ -1018,7 +1018,7 @@ export default {
           bookingData = response.data.data
           form.insertAdjacentHTML('beforeend', `<input type="hidden" name="sessionId" value="${this.$store.state.travellersNumber.priceSessionId}">`)
           form.insertAdjacentHTML('beforeend', `<input type="hidden" name="price" value="${this.packageTotalPrice}">`)
-          form.insertAdjacentHTML('beforeend', `<input type="hidden" name="final_price" value="${this.packageTotalAllPrice}">`)
+          form.insertAdjacentHTML('beforeend', `<input type="hidden" name="final_price" value="${this.packageTotalPrice}">`)
           form.insertAdjacentHTML('beforeend', `<input type="hidden" name="url" value="${window.location.origin + '/booking/hotel'}">`)
           form.insertAdjacentHTML('beforeend', `<input type="hidden" name="bookingId" value="${bookingData.booking_id}">`)
           form.submit()
