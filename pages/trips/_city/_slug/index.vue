@@ -372,255 +372,218 @@
                         class="mb-12"
                       >
                         <!-- Main Hotel Loop -->
-                        <v-row v-for="(hotel, h) in listGtaHotelDetails" :key="h" class="mb-6">
-                          <!-- Hotel Image -->
+                        <v-col v-for="(hotels, zoneName) in hotelsGroupedByZone" :key="zoneName" class="mb-6">
                           <v-col cols="12" class="mb-2">
                             <p class="font-weight-bold late--text text-h6">
-                              Our Top Pick for:  <span class="late--text"> {{ hotel.Zone?.Name || 'Zone Not Available' }} </span>
+                              Our Top Pick For: <span class="late--text">{{ zoneName }}</span>
                             </p>
                           </v-col>
-                          <v-col cols="12" md="4" class="p-0">
-                            <v-img
-                              :src="hotel.Images?.Image[1]?.Type === 'BIG' ? hotel.Images?.Image[1]?.FileName : hotel.Images?.Image[2]?.FileName"
-                              alt="Hotel Image"
-                              style="width: 100%; height: 260px; object-fit: cover;"
-                              class="rounded-lg"
-                            />
-                          </v-col>
+                          <v-row
+                            v-for="(hotel, h) in hotels"
+                            :key="hotel.Code || h"
+                            class="mb-6"
+                          >
+                            <!-- Hotel Image -->
+                            <v-col cols="12" md="4" class="p-0">
+                              <v-img
+                                :src="hotel.Images?.Image[1]?.Type === 'BIG' ? hotel.Images?.Image[1]?.FileName : hotel.Images?.Image[2]?.FileName"
+                                alt="Hotel Image"
+                                style="width: 100%; height: 260px; object-fit: cover;"
+                                class="rounded-lg"
+                              />
+                            </v-col>
 
-                          <!-- Hotel Content -->
-                          <v-col cols="12" md="8" class="pt-0 pl-md-4">
-                            <!-- Hotel Name and Change Hotel Button on the Same Line -->
-                            <div class="d-flex justify-space-between align-center mb-1">
-                              <div>
-                                <h4 class="mb-0 font-weight-bold">
-                                  {{ hotel.HotelName || 'Hotel Name' }}
-                                </h4>
-                                <v-icon color="red" class="mr-1">
-                                  mdi-map-marker
-                                </v-icon>
-                                <span class="grey--text text-caption">{{ hotel.Address?.Address || 'City Name' }}</span>
+                            <!-- Hotel Content -->
+                            <v-col cols="12" md="8" class="pt-0 pl-md-4">
+                              <!-- Hotel Name and Change Hotel Button on the Same Line -->
+                              <div class="d-flex justify-space-between align-center mb-1">
+                                <div>
+                                  <h4 class="mb-0 font-weight-bold">
+                                    {{ hotel.HotelName || 'Hotel Name' }}
+                                  </h4>
+                                  <v-icon color="red" class="mr-1">
+                                    mdi-map-marker
+                                  </v-icon>
+                                  <span class="grey--text text-caption">{{ hotel.Address?.Address || 'City Name' }}</span>
+                                </div>
+
+                                <!-- Change Hotel Button -->
+                                <v-btn small class="v-btn-brown" @click="showHotels(h)">
+                                  Change Hotel
+                                </v-btn>
                               </div>
 
-                              <!-- Change Hotel Button -->
-                              <v-btn small class="v-btn-brown" @click="showHotels(h)">
-                                Change Hotel
-                              </v-btn>
-                            </div>
-
-                            <!-- Rating -->
-                            <v-rating
-                              :value="getRatingFromCategory(hotel.HotelCategory._)"
-                              color="yellow"
-                              dense
-                              readonly
-                            />
-                            <div class="my-3">
-                              <v-btn small outlined color="brown" @click="showHotelDetailsObject(hotel.Code)">
-                                Info
-                              </v-btn>
-                            </div>
-                            <!-- Start and End Dates Selection -->
-                            <!-- <v-row>
-                            <v-col cols="12" md="6">
-                              <v-menu v-model="menuStartDates[h]" :close-on-content-click="false">
-                                <template #activator="{ on }">
-                                  <v-text-field
-                                    v-model="hotelStartDatesText[h]"
-                                    label="Start Date"
-                                    prepend-inner-icon="mdi-calendar"
-                                    outlined
-                                    readonly
-                                    v-on="on"
-                                  />
-                                </template>
-                                <v-date-picker
-                                  v-model="hotelStartDates[h]"
-                                  color="primary"
-                                  @input="menuStartDates[h] = false; formatDate(hotelStartDates[h], 1, 'hotelStartDate', h)"
-                                />
-                              </v-menu>
-                            </v-col>
-                            <v-col cols="12" md="6">
-                              <v-menu v-model="menuEndDates[h]" :close-on-content-click="false">
-                                <template #activator="{ on }">
-                                  <v-text-field
-                                    v-model="hotelEndDatesText[h]"
-                                    label="End Date"
-                                    prepend-inner-icon="mdi-calendar"
-                                    outlined
-                                    readonly
-                                    v-on="on"
-                                  />
-                                </template>
-                                <v-date-picker
-                                  v-model="hotelEndDates[h]"
-                                  color="primary"
-                                  @input="menuEndDates[h] = false; formatDate(hotelEndDates[h], 1, 'hotelEndDate', h)"
-                                />
-                              </v-menu>
-                            </v-col>
-                          </v-row> -->
-                            <v-row>
-                              <!-- Start Date Picker -->
-                              <!-- Start Date Picker -->
-                              <v-col cols="12" md="6">
-                                <v-menu v-model="menuStartDates[h]" :close-on-content-click="false">
-                                  <template #activator="{ on }">
-                                    <v-text-field
-                                      :value="hotelStartDatesText[h] || todayFormatted"
-                                      label="Start Date"
-                                      prepend-inner-icon="mdi-calendar"
-                                      outlined
-                                      readonly
-                                      v-on="on"
+                              <!-- Rating -->
+                              <v-rating
+                                :value="getRatingFromCategory(hotel.HotelCategory._)"
+                                color="yellow"
+                                dense
+                                readonly
+                              />
+                              <div class="my-3">
+                                <v-btn small outlined color="brown" @click="showHotelDetailsObject(hotel.Code)">
+                                  Info
+                                </v-btn>
+                              </div>
+                              <v-row>
+                                <v-col cols="12" md="6">
+                                  <v-menu v-model="menuStartDates[h]" :close-on-content-click="false">
+                                    <template #activator="{ on }">
+                                      <v-text-field
+                                        :value="hotelStartDatesText[h] || todayFormatted"
+                                        label="Start Date"
+                                        prepend-inner-icon="mdi-calendar"
+                                        outlined
+                                        readonly
+                                        v-on="on"
+                                      />
+                                    </template>
+                                    <v-date-picker
+                                      v-model="hotelStartDates[h]"
+                                      :min="packageStartDay"
+                                      color="late"
+                                      @input="menuStartDates[h] = false; handleStartDateChange(h); formatDate(hotelStartDates[h], 1, 'hotelStartDate', h)"
                                     />
-                                  </template>
-                                  <v-date-picker
-                                    v-model="hotelStartDates[h]"
-                                    :min="packageStartDay"
-                                    color="late"
-                                    @input="menuStartDates[h] = false; handleStartDateChange(h); formatDate(hotelStartDates[h], 1, 'hotelStartDate', h)"
-                                  />
-                                </v-menu>
-                              </v-col>
+                                  </v-menu>
+                                </v-col>
 
-                              <!-- End Date Picker -->
-                              <v-col cols="12" md="6">
-                                <v-menu v-model="menuEndDates[h]" :close-on-content-click="false">
-                                  <template #activator="{ on }">
-                                    <v-text-field
-                                      :value="hotelEndDatesText[h] || endDateFormatted"
-                                      label="End Date"
-                                      prepend-inner-icon="mdi-calendar"
-                                      outlined
-                                      readonly
-                                      v-on="on"
+                                <!-- End Date Picker -->
+                                <v-col cols="12" md="6">
+                                  <v-menu v-model="menuEndDates[h]" :close-on-content-click="false">
+                                    <template #activator="{ on }">
+                                      <v-text-field
+                                        :value="hotelEndDatesText[h] || endDateFormatted"
+                                        label="End Date"
+                                        prepend-inner-icon="mdi-calendar"
+                                        outlined
+                                        readonly
+                                        v-on="on"
+                                      />
+                                    </template>
+                                    <v-date-picker
+                                      v-model="hotelEndDates[h]"
+                                      :min="minEndDate[h] || packageStartDay"
+                                      color="late"
+                                      @input="menuEndDates[h] = false; formatDate(hotelEndDates[h], 1, 'hotelEndDate', h)"
                                     />
-                                  </template>
-                                  <v-date-picker
-                                    v-model="hotelEndDates[h]"
-                                    :min="minEndDate[h] || packageStartDay"
-                                    color="late"
-                                    @input="menuEndDates[h] = false; formatDate(hotelEndDates[h], 1, 'hotelEndDate', h)"
-                                  />
-                                </v-menu>
-                              </v-col>
-                            </v-row>
+                                  </v-menu>
+                                </v-col>
+                              </v-row>
 
-                            <!-- Availability and Actions -->
-                            <div class="d-flex justify-space-between align-center mt-3">
-                              <!-- <v-chip :color="isAvailables[h] ? 'green' : 'red'" text-color="white">
+                              <!-- Availability and Actions -->
+                              <div class="d-flex justify-space-between align-center mt-3">
+                                <!-- <v-chip :color="isAvailables[h] ? 'green' : 'red'" text-color="white">
                               {{ isAvailables[h] ? 'Available' : 'Not Available' }}
                             </v-chip> -->
-                              <v-btn
-                                class="white--text text-capitalize v-btn-brown"
-                                color="primary"
-                                elevation="6"
-                                x-large
-                                block
-                                raised
-                                rounded-lg
-                                @click="checkHotelAvailabilityByHotel(hotel, h)"
-                              >
-                                Check Availability
-                              </v-btn>
-                            </div>
-                            <p class="mt-1 text-caption grey--text">
-                              *Please select occupancy and dates before checking availability
-                            </p>
-                          <!-- Room Options -->
-                          </v-col>
-                          <v-col cols="12" md="12">
-                            <v-expand-transition>
-                              <v-card v-if="singleHotelData.index === h && isAvailables[h] && getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)?.length" width="100%" class="mt-2" elevation="2">
-                                <v-card-text>
-                                  <v-row
-                                    v-for="(roomOption, index) in getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)"
-                                    :key="index"
-                                    class="room-card mb-3"
-                                  >
-                                    <v-col cols="12">
-                                      <v-row justify="space-between">
-                                        <v-col cols="12" md="6">
-                                          <h5 class="mb-0 brown--text text-decoration-underline">
-                                            {{ roomOption.HotelRooms?.HotelRoom?.Name || 'Room Name Not Available' }}
-                                          </h5>
-                                        </v-col>
-                                        <v-col cols="12" md="6" class="text-right">
-                                          <p class="mr-3 font-weight-bold text-subtitle-1">
-                                            $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
-                                          </p>
-                                        </v-col>
-                                      </v-row>
+                                <v-btn
+                                  class="white--text text-capitalize v-btn-brown"
+                                  color="primary"
+                                  elevation="6"
+                                  x-large
+                                  block
+                                  raised
+                                  rounded-lg
+                                  @click="checkHotelAvailabilityByHotel(hotel, h)"
+                                >
+                                  Check Availability
+                                </v-btn>
+                              </div>
+                              <p class="mt-1 text-caption grey--text">
+                                *Please select occupancy and dates before checking availability
+                              </p>
+                              <!-- Room Options -->
+                            </v-col>
+                            <v-col cols="12" md="12">
+                              <v-expand-transition>
+                                <v-card v-if="singleHotelData.index === h && isAvailables[h] && getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)?.length" width="100%" class="mt-2" elevation="2">
+                                  <v-card-text>
+                                    <v-row
+                                      v-for="(roomOption, index) in getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)"
+                                      :key="index"
+                                      class="room-card mb-3"
+                                    >
+                                      <v-col cols="12">
+                                        <v-row justify="space-between">
+                                          <v-col cols="12" md="6">
+                                            <h5 class="mb-0 brown--text text-decoration-underline">
+                                              {{ roomOption.HotelRooms?.HotelRoom?.Name || 'Room Name Not Available' }}
+                                            </h5>
+                                          </v-col>
+                                          <v-col cols="12" md="6" class="text-right">
+                                            <p class="mr-3 font-weight-bold text-subtitle-1">
+                                              $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                            </p>
+                                          </v-col>
+                                        </v-row>
 
-                                      <v-row class="d-flex align-center justify-space-between mt-2" no-gutters>
-                                        <v-col cols="4">
-                                          <p class="mb-0 font-weight-medium">
-                                            <span class="grey--text">
-                                              {{ roomOption.Board?._ || 'Board not available' }}
-                                            </span>
-                                          </p>
-                                        </v-col>
-                                        <v-col cols="4" class="d-flex align-start">
-                                          <v-btn
-                                            small
-                                            text
-                                            :color="isNonRefundable(index) ? 'red' : 'green'"
-                                            class="text-decoration-underline"
-                                            @click="toggleCancellationPolicy(index)"
-                                          >
-                                            {{ isNonRefundable(index) ? 'Non-refundable' : 'Cancellation Available' }}
-                                            <v-icon small class="ml-1">
-                                              {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                                            </v-icon>
-                                          </v-btn>
-                                        </v-col>
-                                        <v-col cols="4" class="d-flex justify-end">
-                                          <v-btn
-                                            small
-                                            class="mr-2 px-2 py-4 no-wrap v-btn-brown"
-                                            :disabled="isRoomSelected[h]?.[index]"
-                                            @click="selectRoomHotelGta(h, index)"
-                                          >
-                                            Select Room
-                                          </v-btn>
-                                        </v-col>
-                                      </v-row>
+                                        <v-row class="d-flex align-center justify-space-between mt-2" no-gutters>
+                                          <v-col cols="4">
+                                            <p class="mb-0 font-weight-medium">
+                                              <span class="grey--text">
+                                                {{ roomOption.Board?._ || 'Board not available' }}
+                                              </span>
+                                            </p>
+                                          </v-col>
+                                          <v-col cols="4" class="d-flex align-start">
+                                            <v-btn
+                                              small
+                                              text
+                                              :color="isNonRefundable(index) ? 'red' : 'green'"
+                                              class="text-decoration-underline"
+                                              @click="toggleCancellationPolicy(index)"
+                                            >
+                                              {{ isNonRefundable(index) ? 'Non-refundable' : 'Cancellation Available' }}
+                                              <v-icon small class="ml-1">
+                                                {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                              </v-icon>
+                                            </v-btn>
+                                          </v-col>
+                                          <v-col cols="4" class="d-flex justify-end">
+                                            <v-btn
+                                              small
+                                              class="mr-2 px-2 py-4 no-wrap v-btn-brown"
+                                              :disabled="isRoomSelected[h]?.[index]"
+                                              @click="selectRoomHotelGta(h, index)"
+                                            >
+                                              Select Room
+                                            </v-btn>
+                                          </v-col>
+                                        </v-row>
 
-                                      <v-row v-if="showFullCancellationPolicy[index]">
-                                        <v-col cols="12">
-                                          <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
-                                            <tr style="background-color: #eaeaea;">
-                                              <td style="padding: 10px;">
-                                                <strong>Cancellation Charges:</strong>
-                                              </td>
-                                            </tr>
-                                            <tr style="background-color: rgb(255,239.5,193);">
-                                              <td style="padding: 10px; color: rgb(134.5,100.875,0);">
-                                                <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
-                                                  mdi-alert
-                                                </v-icon>
-                                                Booking subject to cancellation charges
-                                              </td>
-                                            </tr>
-                                            <tr>
-                                              <td style="padding: 10px;">
-                                                <span class="grey--text">
-                                                  <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
-                                                </span>
-                                              </td>
-                                            </tr>
-                                          </table>
-                                        </v-col>
-                                      </v-row>
-                                    </v-col>
-                                  </v-row>
-                                </v-card-text>
-                              </v-card>
-                            </v-expand-transition>
-                          </v-col>
-                        </v-row>
+                                        <v-row v-if="showFullCancellationPolicy[index]">
+                                          <v-col cols="12">
+                                            <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
+                                              <tr style="background-color: #eaeaea;">
+                                                <td style="padding: 10px;">
+                                                  <strong>Cancellation Charges:</strong>
+                                                </td>
+                                              </tr>
+                                              <tr style="background-color: rgb(255,239.5,193);">
+                                                <td style="padding: 10px; color: rgb(134.5,100.875,0);">
+                                                  <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
+                                                    mdi-alert
+                                                  </v-icon>
+                                                  Booking subject to cancellation charges
+                                                </td>
+                                              </tr>
+                                              <tr>
+                                                <td style="padding: 10px;">
+                                                  <span class="grey--text">
+                                                    <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                                                  </span>
+                                                </td>
+                                              </tr>
+                                            </table>
+                                          </v-col>
+                                        </v-row>
+                                      </v-col>
+                                    </v-row>
+                                  </v-card-text>
+                                </v-card>
+                              </v-expand-transition>
+                            </v-col>
+                          </v-row>
+                        </v-col>
                       </v-card>
                       <v-card
                         class="mb-12"
@@ -3302,6 +3265,20 @@ export default {
     } else { this.$router.go(-1) }
   },
   computed: {
+    hotelsGroupedByZone () {
+      const grouped = {}
+
+      this.listGtaHotelDetails.forEach((hotel) => {
+        const zoneName = hotel.Zone?.Name || 'Unknown Zone'
+
+        if (!grouped[zoneName]) {
+          grouped[zoneName] = []
+        }
+        grouped[zoneName].push(hotel)
+      })
+
+      return grouped
+    },
 
     isNonRefundable () {
       return (roomIndex) => {

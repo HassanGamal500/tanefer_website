@@ -1649,12 +1649,12 @@ export default {
 
   async created () {
     await this.getMetaData()
-    // this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
-    // this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
-    if (this.filteredHotels.length > 1) {
-      this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
-      this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
-    }
+    this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
+    this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
+    // if (this.listGtaHotelDetails.length > 1) {
+    //   this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
+    //   this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
+    // }
   },
   methods: {
     async processHotelBooking () {
