@@ -1498,7 +1498,6 @@ export default {
   },
   computed: {
     nonRefundableStatus () {
-    // Returns an object with roomIndex as the key and a boolean indicating non-refundable status
       return (roomOption) => {
         const description = roomOption?.CancellationPolicy?.Description || ''
         return !/0(?:\s|&nbsp;)+usd/i.test(description)
@@ -1600,12 +1599,11 @@ export default {
     },
     priceRange: {
       handler (newVal) {
-      // Ensure min and max values are properly set and filter only when priceRange is valid
         if (newVal[0] !== null && newVal[1] !== null) {
           this.applyCombinedFilters()
         }
       },
-      deep: true // Ensure nested array changes are tracked
+      deep: true
     },
     menu (val) {
       if (val) {
@@ -1651,10 +1649,6 @@ export default {
     await this.getMetaData()
     this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
     this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
-    // if (this.listGtaHotelDetails.length > 1) {
-    //   this.debouncedApplyPriceFilter = _.debounce(this.applyPriceFilter, 300)
-    //   this.debouncedApplyCombinedFilters = _.debounce(this.applyCombinedFilters, 300)
-    // }
   },
   methods: {
     async processHotelBooking () {
@@ -1885,25 +1879,10 @@ export default {
           const promise = hotelsServices.finalBookHotel(formData)
           const response = await promise
           console.log(response)
-          // const results = response.data.BookingRS
           const resultFormData = response.data.formDataId
           this.finalBookHotelFormData = resultFormData
           this.isBooked = true
           this.isLoading = false
-          // if (results.Errors !== undefined) {
-          //   this.snackbar = true
-          //   this.color = 'error'
-          //   this.text = results.Errors.Error.Text
-          //   this.loaded = false
-          //   this.checkResponseCode = false
-          //   this.isBooked = true
-          //   this.isLoading = false
-          // } else {
-          //   this.getBookingCode = results
-          //   this.finalBookHotelFormData = resultFormData
-          //   this.isBooked = true
-          //   this.isLoading = false
-          // }
         } catch (error) {
           this.snackbar = true
           this.color = 'error'
@@ -1914,106 +1893,6 @@ export default {
         }
       }
     },
-    // async finalBookHotel () {
-    //   this.isLoading = true
-
-    //   try {
-    //     if (!this.selectedHotelOption || !this.getbookingRule) {
-    //       this.snackbar = true
-    //       this.color = 'error'
-    //       this.text = 'Please select a room before proceeding with the booking.'
-    //       this.isLoading = false
-    //       return
-    //     }
-
-    //     const adults = this.rooms.reduce((total, room) => total + room.travelers, 0)
-    //     const children = this.rooms.reduce((total, room) => total + room.children, 0)
-
-    //     const priceInfo = this.selectedHotelOption?.PriceInformation?.Prices?.Price
-    //     const totalPrice = priceInfo.TotalFixAmounts.Gross
-    //     const taxesAndFees = priceInfo.TotalFixAmounts.Service.Amount
-    //     const currency = priceInfo.Currency
-
-    //     const body = {
-    //       bookingCode: this.selectedHotelOption?.BookingCode?._,
-    //       startDate: this.hotelStartDate,
-    //       endDate: this.hotelEndDate,
-    //       HotelCode: this.selectedHotelOption?.PriceInformation.HotelContent?.Code,
-    //       minimumPrice: totalPrice.toFixed(2),
-    //       maximumPrice: (totalPrice + taxesAndFees).toFixed(2),
-    //       currency,
-    //       phone_number: this.phone.formattedNumber || this.phone.e164,
-    //       title: this.title || 'Mr',
-    //       name: this.name || 'Guest',
-    //       surname: this.surname || 'Unknown',
-    //       age: this.age || '30',
-    //       email: this.email || 'guest@example.com',
-    //       nationality: this.issueCountry || 'EG', // Ensure consistency
-    //       CountryOfResidence: this.issueCountry || 'EG', // Ensure consistency with nationality
-    //       board: this.selectedBoard || 'all',
-    //       hotel_name: this.selectedHotelName || 'Hotel Default',
-    //       hotel_category: this.selectedHotelCategory || '3-star',
-    //       hotel_type_category: this.selectedHotelTypeCategory || 'all',
-    //       identification_document_pax: this.identification_document_pax || 'ID123456789',
-    //       address_pax: this.address_pax || '123 Default St',
-    //       city_pax: this.city_pax || 'Cairo',
-    //       country_pax: this.country_pax || 'EG',
-    //       postal_code_pax: this.postal_code_pax || '12345',
-    //       book_after_payment: '0',
-    //       rooms: this.rooms.map(room => ({
-    //         travellers: room.travelers.toString(),
-    //         children: room.children.toString(),
-    //         category: this.selectedCategory || 'all'
-    //       })),
-    //       adults,
-    //       children
-    //     }
-
-    //     const bookingResponse = await hotelsServices.finalBookHotel(body)
-    //     const resultFormData = bookingResponse.data.formDataId
-
-    //     this.finalBookHotelFormData = resultFormData
-    //     this.isBooked = true
-    //     this.isLoading = false
-
-    //     console.log('Booking confirmed with payload:', body)
-
-    //     return resultFormData
-    //   } catch (error) {
-    //     console.error('Error during hotel booking:', error)
-    //     this.snackbar = true
-    //     this.color = 'error'
-    //     this.text = 'Something went wrong while processing your booking.'
-    //     this.isLoading = false
-    //   }
-    // },
-    // generateTravellerDetails () {
-    //   const bookingHolder = {
-    //     title: this.title,
-    //     name: this.name,
-    //     surname: this.surname,
-    //     age: this.age,
-    //     email: this.email,
-    //     phone: this.phone,
-    //     nationality: this.selectedNationality,
-    //     identification_document: this.identification_document_pax,
-    //     issueCountry: this.issueCountry
-    //   }
-
-    //   const otherTravellers = this.otherTravellers.map((traveller, index) => ({
-    //     name: this.bNames[index],
-    //     surname: this.bSurnames[index],
-    //     age: this.bAges[index]
-    //   }))
-
-    //   const otherChildren = this.otherChildren.map((child, index) => ({
-    //     name: this.bNamesChild[index],
-    //     surname: this.bSurnamesChild[index],
-    //     age: this.bAgesChild[index]
-    //   }))
-
-    //   return [bookingHolder, ...otherTravellers, ...otherChildren]
-    // },
     generateTravellerDetails () {
       // First, map the booking holder (main traveler) to the backend's expected structure
       const bookingHolder = {
@@ -2091,7 +1970,6 @@ export default {
         : hotel.HotelOptions.HotelOption?.Prices.Price.TotalFixAmounts.Gross)
     },
     disableStartDate (date) {
-    // This will disable the exact start date for selection
       return date !== this.hotelStartDate
     },
     calculateRatingOptions () {
@@ -2325,10 +2203,6 @@ export default {
         return !this.selectedPointOfInterest || hotel.PointsOfInterest.includes(this.selectedPointOfInterest)
       })
     },
-    // extractNumericRating (category) {
-    //   const match = category.match(/(\d)/)
-    //   return match ? parseInt(match[1], 10) : null
-    // },
     extractNumericRating (category) {
       const match = category.match(/\d+/)
       return match ? parseInt(match[0]) : category
@@ -2425,14 +2299,13 @@ export default {
       this.isLoading = false
     },
     handleInput: _.debounce(async function () {
-      // Prevent the input handler from running if a selection is being made
       if (this.isSelecting) {
         return
       }
 
       if (this.query.length >= 3) {
         this.loading = true
-        this.menu = true // Only open the menu if not in selecting mode
+        this.menu = true
         await this.searchZones()
         this.loading = false
       } else {
@@ -2455,23 +2328,10 @@ export default {
         console.error(error)
       }
     },
-    // handleZoneSelection (zone) {
-    //   this.selectZone(zone)
-    //   this.menu = false
-    //   if (zone.area_type === 'CTY') {
-    //     this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
-    //       this.getGtaHotelsPerCity(cityId)
-    //     })
-    //   } else if (zone.area_type === 'REG' || zone.area_type === 'LOC') {
-    //     this.searchHotelsByAddress(zone.name)
-    //   } else {
-    //     this.getGtaHotelsPerZone(zone.id)
-    //   }
-    // },
     handleZoneSelection (zone) {
-      this.isSelecting = true // Set the flag to indicate selection is in progress
+      this.isSelecting = true
 
-      this.selectZone(zone) // Set the selected zone and close the menu
+      this.selectZone(zone)
 
       if (zone.area_type === 'CTY') {
         this.getCityIdByJpdCode(zone.jpd_code).then((cityId) => {
@@ -2482,8 +2342,6 @@ export default {
       } else {
         this.getGtaHotelsPerZone(zone.id)
       }
-
-      // After selection, reset the flag to allow future searches
       this.$nextTick(() => {
         this.isSelecting = false
       })
@@ -2540,7 +2398,6 @@ export default {
       // eslint-disable-next-line no-console
       console.log(rooms)
       this.room_count = rooms.length
-      // Assuming rooms is an array of objects
       this.rooms = rooms.map((room) => {
         return {
           travelers: room.adults,
@@ -2552,7 +2409,6 @@ export default {
       console.log(rooms)
       this.travellers = this.totalTravelers
       this.children = this.totalChildren
-      // await this.calculateAllPrice(this.packageStartDay)
       this.otherTravellers = []
       this.otherChildren = []
       for (let x = 1; x <= this.totalTravelers - 1; x++) {
@@ -2667,8 +2523,6 @@ export default {
     showHotelDetailsObject (hotelIndex) {
       const getHotelGtaDetails = this.filteredHotels[hotelIndex]
       const hotelCode = getHotelGtaDetails.Code
-      // const cancellationPolicy = getHotelGtaDetails.HotelOptions.HotelOption[0]?.CancellationPolicy?.Description || 'No cancellation policy available.'
-
       const url = this.$router.resolve({
         path: '/hotels/hotelInfo',
         query: {
@@ -2705,8 +2559,7 @@ export default {
         return
       }
       this.isLoading = true
-      // Simulate loading by waiting for 5 seconds before starting the actual process
-      await new Promise(resolve => setTimeout(resolve, 10000)) // Wait for 5 seconds
+      await new Promise(resolve => setTimeout(resolve, 10000))
 
       this.hotelAvailsArray = []
       this.hotelAvails = null
@@ -2799,29 +2652,12 @@ export default {
               this.applyCombinedFilters()
 
               this.showSearch = false
-              // const results = Array.isArray(availabilityRS?.Results?.HotelResult)
-              //   ? availabilityRS.Results.HotelResult
-              //   : []
-
-              // if (results.length > 0) {
-              //   // Push results to all relevant arrays
-              //   this.hotelAvailsArray.push(...results)
-              //   this.listGtaHotelDetails.push(...results)
-              //   // Set filteredHotels directly to results for immediate display
-              //   this.filteredHotels = results
-              //   console.log(this.filteredHotels)
-              //   this.calculatePriceRange()
-              //   this.applyCombinedFilters()
-
-            //   this.showSearch = false
             } else {
               console.log('No matching hotels found.')
               this.filteredHotels = []
             }
-
             totalPages = availabilityRS?.pagination?.total_pages || 1
           }
-
           page++
 
           if (page > totalPages) {
@@ -2876,7 +2712,6 @@ export default {
             this.selectedHotelJPDCode = null
             this.getbookingRuleArray = []
             this.confirmedSelectedRoom = false
-
             const formData = new FormData()
             formData.append('start_date', this.hotelStartDate)
             formData.append('end_date', this.hotelEndDate)
@@ -2953,147 +2788,27 @@ export default {
         this.showRoomsDialog = true
       }
     },
-    // async bookRoom (roomOption, hotelIndex) {
-    //   try {
-    //     this.isLoading = true
-    //     const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
-    //     // this.hotelPrices = getHotelGtaDetails.Prices?.Price?.TotalFixAmounts?.Gross
-    //     const hotelCode = getHotelGtaDetails.Code
-    //     const formData = new FormData()
-    //     formData.append('RatePlanCode', roomOption.RatePlanCode)
-    //     formData.append('StartDate', this.hotelStartDate)
-    //     formData.append('EndDate', this.hotelEndDate)
-    //     formData.append('HotelCode', hotelCode)
-
-    //     const promise = hotelsServices.getBookingRules(formData)
-    //     const response = await promise
-    //     // eslint-disable-next-line no-console
-    //     console.log(response)
-    //     const results = response.data.BookingRulesRS
-
-    //     if (results.Errors !== undefined) {
-    //       this.snackbar = true
-    //       this.color = 'error'
-    //       this.text = results.Errors.Error.Text
-    //       this.loaded = false
-    //       this.checkResponseCode = false
-    //     } else {
-    //       this.getbookingRule = results.Results.HotelResult
-    //       this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
-    //       // eslint-disable-next-line no-console
-    //       console.log(this.getbookingRule)
-    //       this.confirmedSelectedRoom = true
-
-    //       this.$nextTick(() => {
-    //         if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
-    //           const targetEl = this.$refs.targetDiv.$el
-    //           if (targetEl) {
-    //             targetEl.scrollIntoView({ behavior: 'smooth' })
-    //           }
-    //         }
-    //       })
-    //     }
-    //   } catch (error) {
-    //     // eslint-disable-next-line no-console
-    //     console.error('Error during booking:', error)
-    //     this.snackbar = true
-    //     this.color = 'error'
-    //     this.text = 'Something went wrong while booking the room.'
-    //   } finally {
-    //     this.isLoading = false
-    //   }
-    // },
-    // async bookRoom (roomOption, hotelIndex) {
-    //   try {
-    //     console.log('roomOption:', roomOption) // Confirm roomOption data is correct
-
-    //     this.isLoading = true
-    //     const getHotelGtaDetails = this.listGtaHotelDetails[hotelIndex]
-
-    //     // Set selected room, rate plan code, and pricing information
-    //     this.selectedRoomGta = roomOption
-    //     this.selectedRoomGtaArray.push(roomOption)
-    //     this.getRatePlanCode = roomOption.RatePlanCode
-    //     this.hotelPrices = roomOption.Prices?.Price?.TotalFixAmounts?.Nett || 0 // Ensure it has a fallback value
-
-    //     // Set hotel codes based on the updated structure
-    //     this.selectedHotelCode = getHotelGtaDetails.Code
-    //     this.selectedHotelJPCode = getHotelGtaDetails.JPCode
-    //     this.selectedHotelJPDCode = getHotelGtaDetails.JPDCode
-
-    //     // Form data and proceed with the booking rules request
-    //     const formData = new FormData()
-    //     formData.append('RatePlanCode', roomOption.RatePlanCode)
-    //     formData.append('StartDate', this.hotelStartDate)
-    //     formData.append('EndDate', this.hotelEndDate)
-    //     formData.append('HotelCode', this.selectedHotelCode)
-
-    //     const promise = hotelsServices.getBookingRules(formData)
-    //     const response = await promise
-    //     console.log('Booking Rules Response:', response)
-
-    //     const results = response.data.BookingRulesRS
-
-    //     if (results.Errors !== undefined) {
-    //       this.snackbar = true
-    //       this.color = 'error'
-    //       this.text = results.Errors.Error.Text
-    //       this.loaded = false
-    //       this.checkResponseCode = false
-    //     } else {
-    //       this.getbookingRule = results.Results.HotelResult
-    //       this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
-    //       this.confirmedSelectedRoom = true
-
-    //       this.$nextTick(() => {
-    //         if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
-    //           const targetEl = this.$refs.targetDiv.$el
-    //           if (targetEl) {
-    //             targetEl.scrollIntoView({ behavior: 'smooth' })
-    //           }
-    //         }
-    //       })
-    //     }
-    //   } catch (error) {
-    //     console.error('Error during booking:', error)
-    //     this.snackbar = true
-    //     this.color = 'error'
-    //     this.text = 'Something went wrong while booking the room.'
-    //   } finally {
-    //     this.isLoading = false
-    //   }
-    // },
     async bookRoom (roomOption, hotelIndex) {
       try {
-        console.log('Room Option:', roomOption) // Confirm roomOption data
-        console.log('Hotel Index:', hotelIndex) // Confirm hotel index
+        console.log('Room Option:', roomOption)
+        console.log('Hotel Index:', hotelIndex)
 
         this.isLoading = true
-
-        // Access the selected hotel using hotelIndex
         const selectedHotel = this.listGtaHotelDetails[hotelIndex]
-        console.log('Selected Hotel Details:', selectedHotel) // Confirm hotel data is correct
-
-        // Set selected room and hotel details
+        console.log('Selected Hotel Details:', selectedHotel)
         this.selectedRoomGta = roomOption
         this.selectedRoomGtaArray.push(roomOption)
         this.getRatePlanCode = roomOption.RatePlanCode
         this.hotelPrices = roomOption.Prices?.Price?.TotalFixAmounts?.Nett || 0
-
-        // Set hotel codes based on the current hotel data structure
         this.selectedHotelForBooking = selectedHotel
         this.selectedHotelCode = selectedHotel.Code
         this.selectedHotelJPCode = selectedHotel.JPCode
         this.selectedHotelJPDCode = selectedHotel.JPDCode
-
-        // Prepare form data for booking rules request
         const formData = new FormData()
         formData.append('RatePlanCode', roomOption.RatePlanCode)
         formData.append('StartDate', this.hotelStartDate)
         formData.append('EndDate', this.hotelEndDate)
         formData.append('HotelCode', this.selectedHotelCode)
-
-        // Make the request to get booking rules
         const promise = hotelsServices.getBookingRules(formData)
         const response = await promise
         console.log('Booking Rules Response:', response)
@@ -3101,19 +2816,15 @@ export default {
         const results = response.data.BookingRulesRS
 
         if (results.Errors !== undefined) {
-          // Handle errors
           this.snackbar = true
           this.color = 'error'
           this.text = results.Errors.Error.Text
           this.loaded = false
           this.checkResponseCode = false
         } else {
-          // Set booking rule data and selected hotel option
           this.getbookingRule = results.Results.HotelResult
           this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
           this.confirmedSelectedRoom = true
-
-          // Smooth scroll to target element if needed
           this.$nextTick(() => {
             if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
               const targetEl = this.$refs.targetDiv.$el
@@ -3224,216 +2935,6 @@ export default {
     assignPhone (phone) {
       this.phone = phone
     },
-    // async finalBookHotel () {
-    //   this.isLoading = true
-    //   if (this.getbookingRuleArray.length > 0) {
-    //     for (let x = 0; x < this.getbookingRuleArray.length; x++) {
-    //       const formData = new FormData()
-    //       const bookingCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
-    //       const startDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
-    //       const endDate = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
-    //       const HotelCode = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
-    //       const minimumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
-    //       const maximumPrice = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
-    //       const currency = this.getbookingRuleArray[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
-    //       formData.append('bookingCode', bookingCode)
-    //       formData.append('startDate', startDate)
-    //       formData.append('endDate', endDate)
-    //       formData.append('HotelCode', HotelCode)
-    //       formData.append('minimumPrice', minimumPrice)
-    //       formData.append('maximumPrice', maximumPrice)
-    //       formData.append('currency', currency)
-    //       formData.append('phone_number', this.phone.formattedNumber)
-    //       formData.append('title', this.title)
-    //       formData.append('name', this.name)
-    //       formData.append('surname', this.surname)
-    //       formData.append('age', this.age)
-    //       formData.append('email', this.email)
-    //       formData.append('nationality', this.issueCountry)
-    //       formData.append('board', this.selectedBoard)
-    //       formData.append('hotel_name', this.selectedHotelName)
-    //       formData.append('hotel_category', this.selectedHotelCategory)
-    //       formData.append('hotel_type_category', this.selectedHotelTypeCategory)
-    //       formData.append('identification_document_pax', this.identification_document_pax)
-    //       formData.append('address_pax', this.address_pax)
-    //       // formData.append('city_pax', this.city_pax)
-    //       // formData.append('country_pax', this.country_pax)
-    //       formData.append('postal_code_pax', this.postal_code_pax)
-    //       formData.append('book_after_payment', '1')
-    //       if (this.rooms.length > 0) {
-    //         for (let r = 0; r < this.rooms.length; r++) {
-    //           formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-    //           formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-    //           if (this.rooms[r].ageSelects.length > 0) {
-    //             for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-    //               formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
-    //             }
-    //           }
-    //           // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-    //           formData.append('rooms[' + r + '][category]', this.selectedCategory)
-    //         }
-    //       }
-    //       if (this.bNames.length > 0) {
-    //         for (let x = 0; x < this.bNames.length; x++) {
-    //           formData.append('names[' + x + ']', this.bNames[x])
-    //         }
-    //       }
-    //       if (this.bSurnames.length > 0) {
-    //         for (let y = 0; y < this.bSurnames.length; y++) {
-    //           formData.append('surnames[' + y + ']', this.bSurnames[y])
-    //         }
-    //       }
-    //       if (this.bAges.length > 0) {
-    //         for (let z = 0; z < this.bAges.length; z++) {
-    //           formData.append('ages[' + z + ']', this.bAges[z])
-    //         }
-    //       }
-    //       if (this.bNamesChild.length > 0) {
-    //         for (let xx = 0; xx < this.bNamesChild.length; xx++) {
-    //           formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
-    //         }
-    //       }
-    //       if (this.bSurnamesChild.length > 0) {
-    //         for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
-    //           formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
-    //         }
-    //       }
-    //       if (this.bAgesChild.length > 0) {
-    //         for (let zz = 0; zz < this.bAgesChild.length; zz++) {
-    //           formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
-    //         }
-    //       }
-
-    //       try {
-    //         const promise = hotelsServices.finalBookHotel(formData)
-    //         const response = await promise
-    //         console.log(response)
-    //         // const results = response.data.BookingRS
-    //         const resultFormData = response.data.formDataId
-    //         this.finalBookHotelFormData = resultFormData
-    //         this.finalBookHotelsFormData[x] = resultFormData
-    //         this.isBooked = true
-    //         this.isLoading = false
-    //       } catch (error) {
-    //         this.snackbar = true
-    //         this.color = 'error'
-    //         this.text = 'Something went wrong'
-    //         this.loaded = false
-    //         this.checkResponseCode = false
-    //         this.isLoading = false
-    //       }
-    //     }
-    //   }
-    //   if (this.getbookingRuleArray.length === 0 && this.getbookingRule) {
-    //     const formData = new FormData()
-    //     const bookingCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
-    //     const startDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
-    //     const endDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
-    //     const HotelCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
-    //     const minimumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
-    //     const maximumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
-    //     const currency = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
-    //     formData.append('bookingCode', bookingCode)
-    //     formData.append('startDate', startDate)
-    //     formData.append('endDate', endDate)
-    //     formData.append('HotelCode', HotelCode)
-    //     formData.append('minimumPrice', minimumPrice)
-    //     formData.append('maximumPrice', maximumPrice)
-    //     formData.append('currency', currency)
-    //     formData.append('phone_number', this.phone.formattedNumber)
-    //     formData.append('title', this.title)
-    //     formData.append('name', this.name)
-    //     formData.append('surname', this.surname)
-    //     formData.append('age', this.age)
-    //     formData.append('email', this.email)
-    //     formData.append('nationality', this.issueCountry)
-    //     formData.append('board', this.selectedBoard)
-    //     formData.append('hotel_name', this.selectedHotelName)
-    //     formData.append('hotel_category', this.selectedHotelCategory)
-    //     formData.append('hotel_type_category', this.selectedHotelTypeCategory)
-    //     formData.append('identification_document_pax', this.identification_document_pax)
-    //     formData.append('address_pax', this.address_pax)
-    //     formData.append('city_pax', this.city_pax)
-    //     formData.append('country_pax', this.country_pax)
-    //     formData.append('postal_code_pax', this.postal_code_pax)
-    //     formData.append('book_after_payment', '1')
-    //     if (this.rooms.length > 0) {
-    //       for (let r = 0; r < this.rooms.length; r++) {
-    //         formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-    //         formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-    //         if (this.rooms[r].ageSelects.length > 0) {
-    //           for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-    //             formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
-    //           }
-    //         }
-    //         // formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-    //         formData.append('rooms[' + r + '][category]', this.selectedCategory)
-    //       }
-    //     }
-    //     if (this.bNames.length > 0) {
-    //       for (let x = 0; x < this.bNames.length; x++) {
-    //         formData.append('names[' + x + ']', this.bNames[x])
-    //       }
-    //     }
-    //     if (this.bSurnames.length > 0) {
-    //       for (let y = 0; y < this.bSurnames.length; y++) {
-    //         formData.append('surnames[' + y + ']', this.bSurnames[y])
-    //       }
-    //     }
-    //     if (this.bAges.length > 0) {
-    //       for (let z = 0; z < this.bAges.length; z++) {
-    //         formData.append('ages[' + z + ']', this.bAges[z])
-    //       }
-    //     }
-    //     if (this.bNamesChild.length > 0) {
-    //       for (let xx = 0; xx < this.bNamesChild.length; xx++) {
-    //         formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
-    //       }
-    //     }
-    //     if (this.bSurnamesChild.length > 0) {
-    //       for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
-    //         formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
-    //       }
-    //     }
-    //     if (this.bAgesChild.length > 0) {
-    //       for (let zz = 0; zz < this.bAgesChild.length; zz++) {
-    //         formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
-    //       }
-    //     }
-
-    //     try {
-    //       const promise = hotelsServices.finalBookHotel(formData)
-    //       const response = await promise
-    //       console.log(response)
-    //       // const results = response.data.BookingRS
-    //       const resultFormData = response.data.formDataId
-    //       this.finalBookHotelFormData = resultFormData
-    //       this.isBooked = true
-    //       this.isLoading = false
-    //       // if (results.Errors !== undefined) {
-    //       //   this.snackbar = true
-    //       //   this.color = 'error'
-    //       //   this.text = results.Errors.Error.Text
-    //       //   this.loaded = false
-    //       //   this.checkResponseCode = false
-    //       //   this.isBooked = true
-    //       //   this.isLoading = false
-    //       // } else {
-    //       //   this.getBookingCode = results
-    //       //   this.finalBookHotelFormData = resultFormData
-    //       //   this.isBooked = true
-    //       //   this.isLoading = false
-    //       // }
-    //     } catch (error) {
-    //       this.snackbar = true
-    //       this.color = 'error'
-    //       this.text = 'Something went wrong'
-    //       this.loaded = false
-    //       this.checkResponseCode = false
-    //       this.isLoading = false
-    //     }
-    //   }
-    // },
     changeCounterRoom (index, type, value) {
       if (!this.hotelStartDate) {
         this.snackbar = true
@@ -3502,7 +3003,7 @@ export default {
     },
     getRoomAgeSelectErrorMessages (roomIndex, childIndex) {
       if (!this.showAgesSelects) {
-        return [] // Skip error messages if age selects are hidden
+        return []
       }
       const ageSelect = this.rooms[roomIndex].ageSelects[childIndex]
       if (ageSelect && ageSelect.age === null) {
@@ -3515,52 +3016,6 @@ export default {
       this.openProceed = true
       this.showCheckout = true
     },
-    // bookAdventures () {
-    //   const selectedHotelDetails = this.getHotelGtaDetails
-    //   console.log('Selected Hotel Details:', selectedHotelDetails)
-
-    //   this.$store.dispatch('setTravellersNumber', {
-    //     adults: this.travellers,
-    //     children: this.children,
-    //     totalPrice: this.hotelPrices,
-    //     packageStartDay: this.packageStartDay,
-    //     packageDetails: this.getHotelGtaDetails, // Replacing hotelAvails with getHotelGtaDetails
-    //     priceSessionId: this.priceSessionId,
-    //     ratePlanCode: this.getRatePlanCode,
-    //     bookingRule: this.getbookingRule,
-    //     bookingInfo: this.getBookingCode,
-    //     hotelStartDate: this.hotelStartDate,
-    //     hotelEndDate: this.hotelEndDate,
-    //     finalBookHotelFormData: this.finalBookHotelFormData
-    //   })
-
-    //   this.$router.push({ name: 'booking-module', params: { module: 'hotel' } })
-    // },
-    // bookAdventures () {
-    //   // Ensure that required room and hotel data are available
-    //   if (!this.selectedRoomGta || !this.selectedHotelCode) {
-    //     console.warn('Required room or hotel data is missing')
-    //     return
-    //   }
-
-    //   // Dispatch existing data structure to the Vuex store
-    //   this.$store.dispatch('setTravellersNumber', {
-    //     adults: this.travellers,
-    //     children: this.children,
-    //     totalPrice: this.hotelPrices, // Selected room price
-    //     packageStartDay: this.packageStartDay,
-    //     packageDetails: this.getbookingRule, // Booking rule details
-    //     priceSessionId: this.priceSessionId,
-    //     ratePlanCode: this.getRatePlanCode, // Room rate plan code
-    //     bookingInfo: this.selectedHotelOption, // Selected hotel option info
-    //     hotelStartDate: this.hotelStartDate,
-    //     hotelEndDate: this.hotelEndDate,
-    //     finalBookHotelFormData: this.finalBookHotelFormData
-    //   })
-
-    //   // Redirect to booking module with existing parameters
-    //   this.$router.push({ name: 'booking-module', params: { module: 'hotel' } })
-    // },
     bookAdventures () {
       if (!this.selectedRoomGta || !this.selectedHotelCode) {
         console.warn('Required room or hotel data is missing')

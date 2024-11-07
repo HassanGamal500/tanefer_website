@@ -26,7 +26,6 @@
               'line-height': $vuetify.breakpoint.mdAndUp ? '8rem' : '2rem'
             }"
           >
-            <!-- {{ packageDetails.packageTitle }} - {{ packageDetails.packageDuration }} Days / {{ packageDetails.packageNightsNumber }} Nights -->
             {{ packageDetails.packageTitle }}
           </h1>
         </v-col>
@@ -152,7 +151,6 @@
                                 <v-col cols="12" lg="4" md="8" sm="8" xs="12">
                                   <span style="float: right;">
                                     <v-row class="align-center">
-                                      <!-- Conditional to hide the + days - section when the current or next activity is a cruise -->
                                       <template v-if="activity.type !== 'cruise' && (packageDetails.activities[i + 1] ? packageDetails.activities[i + 1].type !== 'cruise' : true)">
                                         <v-col cols="auto" class="d-inline-flex align-center">
                                           <v-btn
@@ -327,9 +325,6 @@
                                                     {{ cruise.name }}
                                                   </h5>
                                                 </div>
-                                                <!-- <div class="black--text">
-                                                  <h5 class="text-h5 font-weight-bold"></h5>
-                                                </div> -->
                                               </div>
                                             </v-col>
                                             <v-col cols="10" :md="cruise.master_image ? 2 : 10">
@@ -372,218 +367,204 @@
                         class="mb-12"
                       >
                         <!-- Main Hotel Loop -->
-                        <v-col v-for="(hotels, zoneName) in hotelsGroupedByZone" :key="zoneName" class="mb-6">
+                        <v-row v-for="(hotel, h) in listGtaHotelDetails" :key="h" class="mb-6">
+                          <!-- Hotel Image -->
                           <v-col cols="12" class="mb-2">
                             <p class="font-weight-bold late--text text-h6">
-                              Our Top Pick For: <span class="late--text">{{ zoneName }}</span>
+                              Our Top Pick For:  <span class="late--text"> {{ hotel.Zone?.Name || 'Zone Not Available' }} </span>
                             </p>
                           </v-col>
-                          <v-row
-                            v-for="(hotel, h) in hotels"
-                            :key="hotel.Code || h"
-                            class="mb-6"
-                          >
-                            <!-- Hotel Image -->
-                            <v-col cols="12" md="4" class="p-0">
-                              <v-img
-                                :src="hotel.Images?.Image[1]?.Type === 'BIG' ? hotel.Images?.Image[1]?.FileName : hotel.Images?.Image[2]?.FileName"
-                                alt="Hotel Image"
-                                style="width: 100%; height: 260px; object-fit: cover;"
-                                class="rounded-lg"
-                              />
-                            </v-col>
+                          <v-col cols="12" md="4" class="p-0">
+                            <v-img
+                              :src="hotel.Images?.Image[1]?.Type === 'BIG' ? hotel.Images?.Image[1]?.FileName : hotel.Images?.Image[2]?.FileName"
+                              alt="Hotel Image"
+                              style="width: 100%; height: 260px; object-fit: cover;"
+                              class="rounded-lg"
+                            />
+                          </v-col>
 
-                            <!-- Hotel Content -->
-                            <v-col cols="12" md="8" class="pt-0 pl-md-4">
-                              <!-- Hotel Name and Change Hotel Button on the Same Line -->
-                              <div class="d-flex justify-space-between align-center mb-1">
-                                <div>
-                                  <h4 class="mb-0 font-weight-bold">
-                                    {{ hotel.HotelName || 'Hotel Name' }}
-                                  </h4>
-                                  <v-icon color="red" class="mr-1">
-                                    mdi-map-marker
-                                  </v-icon>
-                                  <span class="grey--text text-caption">{{ hotel.Address?.Address || 'City Name' }}</span>
-                                </div>
-
-                                <!-- Change Hotel Button -->
-                                <v-btn small class="v-btn-brown" @click="showHotels(h)">
-                                  Change Hotel
-                                </v-btn>
+                          <!-- Hotel Content -->
+                          <v-col cols="12" md="8" class="pt-0 pl-md-4">
+                            <!-- Hotel Name and Change Hotel Button on the Same Line -->
+                            <div class="d-flex justify-space-between align-center mb-1">
+                              <div>
+                                <h4 class="mb-0 font-weight-bold">
+                                  {{ hotel.HotelName || 'Hotel Name' }}
+                                </h4>
+                                <v-icon color="red" class="mr-1">
+                                  mdi-map-marker
+                                </v-icon>
+                                <span class="grey--text text-caption">{{ hotel.Address?.Address || 'City Name' }}</span>
                               </div>
 
-                              <!-- Rating -->
-                              <v-rating
-                                :value="getRatingFromCategory(hotel.HotelCategory._)"
-                                color="yellow"
-                                dense
-                                readonly
-                              />
-                              <div class="my-3">
-                                <v-btn small outlined color="brown" @click="showHotelDetailsObject(hotel.Code)">
-                                  Info
-                                </v-btn>
-                              </div>
-                              <v-row>
-                                <v-col cols="12" md="6">
-                                  <v-menu v-model="menuStartDates[h]" :close-on-content-click="false">
-                                    <template #activator="{ on }">
-                                      <v-text-field
-                                        :value="hotelStartDatesText[h] || todayFormatted"
-                                        label="Start Date"
-                                        prepend-inner-icon="mdi-calendar"
-                                        outlined
-                                        readonly
-                                        v-on="on"
-                                      />
-                                    </template>
-                                    <v-date-picker
-                                      v-model="hotelStartDates[h]"
-                                      :min="packageStartDay"
-                                      color="late"
-                                      @input="menuStartDates[h] = false; handleStartDateChange(h); formatDate(hotelStartDates[h], 1, 'hotelStartDate', h)"
+                              <!-- Change Hotel Button -->
+                              <v-btn small class="v-btn-brown" @click="showHotels(h)">
+                                Change Hotel
+                              </v-btn>
+                            </div>
+
+                            <!-- Rating -->
+                            <v-rating
+                              :value="getRatingFromCategory(hotel.HotelCategory._)"
+                              color="yellow"
+                              dense
+                              readonly
+                            />
+                            <div class="my-3">
+                              <v-btn small outlined color="brown" @click="showHotelDetailsObject(hotel.Code)">
+                                Info
+                              </v-btn>
+                            </div>
+                            <v-row>
+                              <v-col cols="12" md="6">
+                                <v-menu v-model="menuStartDates[h]" :close-on-content-click="false">
+                                  <template #activator="{ on }">
+                                    <v-text-field
+                                      :value="hotelStartDatesText[h] || todayFormatted"
+                                      label="Start Date"
+                                      prepend-inner-icon="mdi-calendar"
+                                      outlined
+                                      readonly
+                                      v-on="on"
                                     />
-                                  </v-menu>
-                                </v-col>
-
-                                <!-- End Date Picker -->
-                                <v-col cols="12" md="6">
-                                  <v-menu v-model="menuEndDates[h]" :close-on-content-click="false">
-                                    <template #activator="{ on }">
-                                      <v-text-field
-                                        :value="hotelEndDatesText[h] || endDateFormatted"
-                                        label="End Date"
-                                        prepend-inner-icon="mdi-calendar"
-                                        outlined
-                                        readonly
-                                        v-on="on"
-                                      />
-                                    </template>
-                                    <v-date-picker
-                                      v-model="hotelEndDates[h]"
-                                      :min="minEndDate[h] || packageStartDay"
-                                      color="late"
-                                      @input="menuEndDates[h] = false; formatDate(hotelEndDates[h], 1, 'hotelEndDate', h)"
+                                  </template>
+                                  <v-date-picker
+                                    v-model="hotelStartDates[h]"
+                                    :min="packageStartDay"
+                                    color="late"
+                                    @input="menuStartDates[h] = false; handleStartDateChange(h); formatDate(hotelStartDates[h], 1, 'hotelStartDate', h)"
+                                  />
+                                </v-menu>
+                              </v-col>
+                              <v-col cols="12" md="6">
+                                <v-menu v-model="menuEndDates[h]" :close-on-content-click="false">
+                                  <template #activator="{ on }">
+                                    <v-text-field
+                                      :value="hotelEndDatesText[h] || endDateFormatted"
+                                      label="End Date"
+                                      prepend-inner-icon="mdi-calendar"
+                                      outlined
+                                      readonly
+                                      v-on="on"
                                     />
-                                  </v-menu>
-                                </v-col>
-                              </v-row>
+                                  </template>
+                                  <v-date-picker
+                                    v-model="hotelEndDates[h]"
+                                    :min="minEndDate[h] || packageStartDay"
+                                    color="late"
+                                    @input="menuEndDates[h] = false; formatDate(hotelEndDates[h], 1, 'hotelEndDate', h)"
+                                  />
+                                </v-menu>
+                              </v-col>
+                            </v-row>
+                            <div class="d-flex justify-space-between align-center mt-3">
+                              <v-btn
+                                class="white--text text-capitalize v-btn-brown"
+                                color="primary"
+                                elevation="6"
+                                x-large
+                                block
+                                raised
+                                rounded-lg
+                                @click="checkHotelAvailabilityByHotel(hotel, h)"
+                              >
+                                Check Availability
+                              </v-btn>
+                            </div>
+                            <p class="mt-1 text-caption grey--text">
+                              *Please select occupancy and dates before checking availability
+                            </p>
+                          </v-col>
+                          <v-col cols="12" md="12">
+                            <v-expand-transition>
+                              <v-card v-if="singleHotelData.index === h && isAvailables[h] && getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)?.length" width="100%" class="mt-2" elevation="2">
+                                <v-card-text>
+                                  <v-row
+                                    v-for="(roomOption, index) in getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)"
+                                    :key="index"
+                                    class="room-card mb-3"
+                                  >
+                                    <v-col cols="12">
+                                      <v-row justify="space-between">
+                                        <v-col cols="12" md="6">
+                                          <h5 class="mb-0 brown--text text-decoration-underline">
+                                            {{ roomOption.HotelRooms?.HotelRoom?.Name || 'Room Name Not Available' }}
+                                          </h5>
+                                        </v-col>
+                                        <v-col cols="12" md="6" class="text-right">
+                                          <p class="mr-3 font-weight-bold text-subtitle-1">
+                                            $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
+                                          </p>
+                                        </v-col>
+                                      </v-row>
 
-                              <!-- Availability and Actions -->
-                              <div class="d-flex justify-space-between align-center mt-3">
-                                <!-- <v-chip :color="isAvailables[h] ? 'green' : 'red'" text-color="white">
-                              {{ isAvailables[h] ? 'Available' : 'Not Available' }}
-                            </v-chip> -->
-                                <v-btn
-                                  class="white--text text-capitalize v-btn-brown"
-                                  color="primary"
-                                  elevation="6"
-                                  x-large
-                                  block
-                                  raised
-                                  rounded-lg
-                                  @click="checkHotelAvailabilityByHotel(hotel, h)"
-                                >
-                                  Check Availability
-                                </v-btn>
-                              </div>
-                              <p class="mt-1 text-caption grey--text">
-                                *Please select occupancy and dates before checking availability
-                              </p>
-                              <!-- Room Options -->
-                            </v-col>
-                            <v-col cols="12" md="12">
-                              <v-expand-transition>
-                                <v-card v-if="singleHotelData.index === h && isAvailables[h] && getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)?.length" width="100%" class="mt-2" elevation="2">
-                                  <v-card-text>
-                                    <v-row
-                                      v-for="(roomOption, index) in getRoomOptions(singleHotelData?.data?.HotelOptions?.HotelOption)"
-                                      :key="index"
-                                      class="room-card mb-3"
-                                    >
-                                      <v-col cols="12">
-                                        <v-row justify="space-between">
-                                          <v-col cols="12" md="6">
-                                            <h5 class="mb-0 brown--text text-decoration-underline">
-                                              {{ roomOption.HotelRooms?.HotelRoom?.Name || 'Room Name Not Available' }}
-                                            </h5>
-                                          </v-col>
-                                          <v-col cols="12" md="6" class="text-right">
-                                            <p class="mr-3 font-weight-bold text-subtitle-1">
-                                              $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
-                                            </p>
-                                          </v-col>
-                                        </v-row>
+                                      <v-row class="d-flex align-center justify-space-between mt-2" no-gutters>
+                                        <v-col cols="4">
+                                          <p class="mb-0 font-weight-medium">
+                                            <span class="grey--text">
+                                              {{ roomOption.Board?._ || 'Board not available' }}
+                                            </span>
+                                          </p>
+                                        </v-col>
+                                        <v-col cols="4" class="d-flex align-start">
+                                          <v-btn
+                                            small
+                                            text
+                                            :color="isNonRefundable(index) ? 'red' : 'green'"
+                                            class="text-decoration-underline"
+                                            @click="toggleCancellationPolicy(index)"
+                                          >
+                                            {{ isNonRefundable(index) ? 'Non-refundable' : 'Cancellation Available' }}
+                                            <v-icon small class="ml-1">
+                                              {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                            </v-icon>
+                                          </v-btn>
+                                        </v-col>
+                                        <v-col cols="4" class="d-flex justify-end">
+                                          <v-btn
+                                            small
+                                            class="mr-2 px-2 py-4 no-wrap v-btn-brown"
+                                            :disabled="isRoomSelected[h]?.[index]"
+                                            @click="selectRoomHotelGta(h, index)"
+                                          >
+                                            Select Room
+                                          </v-btn>
+                                        </v-col>
+                                      </v-row>
 
-                                        <v-row class="d-flex align-center justify-space-between mt-2" no-gutters>
-                                          <v-col cols="4">
-                                            <p class="mb-0 font-weight-medium">
-                                              <span class="grey--text">
-                                                {{ roomOption.Board?._ || 'Board not available' }}
-                                              </span>
-                                            </p>
-                                          </v-col>
-                                          <v-col cols="4" class="d-flex align-start">
-                                            <v-btn
-                                              small
-                                              text
-                                              :color="isNonRefundable(index) ? 'red' : 'green'"
-                                              class="text-decoration-underline"
-                                              @click="toggleCancellationPolicy(index)"
-                                            >
-                                              {{ isNonRefundable(index) ? 'Non-refundable' : 'Cancellation Available' }}
-                                              <v-icon small class="ml-1">
-                                                {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                                              </v-icon>
-                                            </v-btn>
-                                          </v-col>
-                                          <v-col cols="4" class="d-flex justify-end">
-                                            <v-btn
-                                              small
-                                              class="mr-2 px-2 py-4 no-wrap v-btn-brown"
-                                              :disabled="isRoomSelected[h]?.[index]"
-                                              @click="selectRoomHotelGta(h, index)"
-                                            >
-                                              Select Room
-                                            </v-btn>
-                                          </v-col>
-                                        </v-row>
-
-                                        <v-row v-if="showFullCancellationPolicy[index]">
-                                          <v-col cols="12">
-                                            <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
-                                              <tr style="background-color: #eaeaea;">
-                                                <td style="padding: 10px;">
-                                                  <strong>Cancellation Charges:</strong>
-                                                </td>
-                                              </tr>
-                                              <tr style="background-color: rgb(255,239.5,193);">
-                                                <td style="padding: 10px; color: rgb(134.5,100.875,0);">
-                                                  <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
-                                                    mdi-alert
-                                                  </v-icon>
-                                                  Booking subject to cancellation charges
-                                                </td>
-                                              </tr>
-                                              <tr>
-                                                <td style="padding: 10px;">
-                                                  <span class="grey--text">
-                                                    <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
-                                                  </span>
-                                                </td>
-                                              </tr>
-                                            </table>
-                                          </v-col>
-                                        </v-row>
-                                      </v-col>
-                                    </v-row>
-                                  </v-card-text>
-                                </v-card>
-                              </v-expand-transition>
-                            </v-col>
-                          </v-row>
-                        </v-col>
+                                      <v-row v-if="showFullCancellationPolicy[index]">
+                                        <v-col cols="12">
+                                          <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
+                                            <tr style="background-color: #eaeaea;">
+                                              <td style="padding: 10px;">
+                                                <strong>Cancellation Charges:</strong>
+                                              </td>
+                                            </tr>
+                                            <tr style="background-color: rgb(255,239.5,193);">
+                                              <td style="padding: 10px; color: rgb(134.5,100.875,0);">
+                                                <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
+                                                  mdi-alert
+                                                </v-icon>
+                                                Booking subject to cancellation charges
+                                              </td>
+                                            </tr>
+                                            <tr>
+                                              <td style="padding: 10px;">
+                                                <span class="grey--text">
+                                                  <span v-html="formatCancellationPolicy(roomOption.CancellationPolicy?.Description)" />
+                                                </span>
+                                              </td>
+                                            </tr>
+                                          </table>
+                                        </v-col>
+                                      </v-row>
+                                    </v-col>
+                                  </v-row>
+                                </v-card-text>
+                              </v-card>
+                            </v-expand-transition>
+                          </v-col>
+                        </v-row>
                       </v-card>
                       <v-card
                         class="mb-12"
@@ -654,7 +635,6 @@
                         </div>
                       </v-card>
                     </div>
-                    <!-- here -->
                     <v-card
                       class="mb-12"
                     >
@@ -754,24 +734,18 @@
                     <v-card
                       class="mb-12"
                     >
-                      <!-- temp false -->
                       <div v-if="confirmedSelectedRoom">
                         <div v-for="(roomsArray, hotelIndex) in selectedRoomGtaArray" :key="hotelIndex" class="selected-room-card">
                           <h4 class="font-weight-bold late--text mb-3">
                             Your Room Selection for Hotel {{ hotelIndex + 1 }}
                           </h4>
-
-                          <!-- Check if roomsArray is undefined or empty and display "None" -->
                           <div v-if="!roomsArray || roomsArray.length === 0" class="font-weight-medium grey--text">
                             None
                           </div>
-
-                          <!-- If roomsArray is defined and not empty, display room details -->
                           <div v-else>
                             <div v-for="(gta, roomIndex) in roomsArray" :key="roomIndex" class="bordered-room" style="padding: 10px; margin: 10px 0; border-radius: 12px;">
                               <v-row>
                                 <v-col cols="12" md="12">
-                                  <!-- Board Information -->
                                   <v-row class="mb-1 d-flex align-start">
                                     <v-col cols="12" class="d-flex align-start">
                                       <v-icon color="brown" class="mr-1">
@@ -780,8 +754,6 @@
                                       <span class="text-h6 font-weight-medium brown--text">{{ gta.Board?._ || 'Not Specified' }}</span>
                                     </v-col>
                                   </v-row>
-
-                                  <!-- Hotel Rooms -->
                                   <v-row class="mb-1 d-flex align-start">
                                     <v-col cols="12" class="d-flex align-start">
                                       <v-icon color="brown" class="mr-1">
@@ -801,8 +773,6 @@
                                       </div>
                                     </v-col>
                                   </v-row>
-
-                                  <!-- Prices -->
                                   <v-row class="mb-1 d-flex align-start">
                                     <v-col cols="12" class="d-flex align-start">
                                       <v-icon color="green" class="mr-1">
@@ -825,7 +795,6 @@
                                 </p>
                                 <v-card class="pa-6 mb-5 rounded-xl" elevation="6">
                                   <v-row dense>
-                                    <!-- Title and Full Name Fields -->
                                     <v-col cols="4" md="2">
                                       <v-combobox
                                         v-model="title"
@@ -860,8 +829,6 @@
                                         class="rounded-lg"
                                       />
                                     </v-col>
-
-                                    <!-- Mobile Input and Email -->
                                     <v-col cols="12" md="6">
                                       <mobile-input @update="assignPhone" />
                                     </v-col>
@@ -876,8 +843,6 @@
                                         class="rounded-lg"
                                       />
                                     </v-col>
-
-                                    <!-- Age -->
                                     <v-col cols="6" md="3">
                                       <v-text-field
                                         v-model="age"
@@ -888,8 +853,6 @@
                                         class="rounded-lg"
                                       />
                                     </v-col>
-
-                                    <!-- Identification Document and Issuing Country -->
                                     <v-col cols="6" md="4">
                                       <v-text-field
                                         v-model="identification_document_pax"
@@ -914,51 +877,6 @@
                                         class="rounded-lg"
                                       />
                                     </v-col>
-
-                                    <!-- Address and City -->
-                                    <!-- <v-col cols="12" md="8">
-                                      <v-text-field
-                                        v-model="address_pax"
-                                        outlined
-                                        label="Address"
-                                        required
-                                        color="blue"
-                                        class="rounded-lg"
-                                      />
-                                    </v-col>
-                                    <v-col cols="12" md="4">
-                                      <v-text-field
-                                        v-model="city_pax"
-                                        outlined
-                                        label="City"
-                                        required
-                                        color="blue"
-                                        class="rounded-lg"
-                                      />
-                                    </v-col> -->
-
-                                    <!-- Country and Postal Code -->
-                                    <!-- <v-col cols="6" md="4">
-                                      <v-text-field
-                                        v-model="country_pax"
-                                        outlined
-                                        label="Country"
-                                        required
-                                        color="blue"
-                                        class="rounded-lg"
-                                      />
-                                    </v-col>
-                                    <v-col cols="6" md="4">
-                                      <v-text-field
-                                        v-model="postal_code_pax"
-                                        outlined
-                                        :rules="[v => (v.length <= 12) || 'Max 12 characters']"
-                                        label="Postal Code"
-                                        required
-                                        color="blue"
-                                        class="rounded-lg"
-                                      />
-                                    </v-col> -->
                                   </v-row>
                                 </v-card>
                               </v-form>
@@ -1576,41 +1494,6 @@
                           </v-row>
                         </div>
                         <v-divider class="my-2" />
-                        <!-- <p class="font-weight-bold">
-                          Select Category
-                          <v-select
-                            v-model="room.roomCategory"
-                            :items="roomCategoriesWithAll"
-                            item-text="_"
-                            item-value="Type"
-                            required
-                            label="Select Category"
-                            persistent-hint
-                            return-object
-                            single-line
-                            dense
-                            outlined
-                          />
-                        </p> -->
-                        <!-- <div v-if="ageSelects.length > 0">
-                          Children's Ages
-                          <v-row>
-                            <v-col v-for="(ageSelect, index) in ageSelects" :key="index" cols="4">
-                              <v-select
-                                v-model="ageSelect.age"
-                                :items="ages"
-                                required
-                                :error-messages="getAgeSelectErrorMessages(index)"
-                                label="0"
-                                persistent-hint
-                                return-object
-                                single-line
-                                dense
-                                outlined
-                              />
-                            </v-col>
-                          </v-row>
-                        </div> -->
                       </v-card-text>
                     </v-card>
                   </p>
@@ -1707,30 +1590,6 @@
                       <span class="quantity px-2 font-weight-bold">$ {{ initialPrice }}</span>
                     </span>
                   </p>
-                  <!-- <v-btn
-                    v-if="e1 === 2"
-                    class="white--text"
-                    color="#4f3316"
-                    elevation="6"
-                    large
-                    block
-                    raised
-                  >
-                    Save Trip
-                  </v-btn> -->
-                  <!-- <v-divider class="my-2" />
-                  <v-btn
-                    v-if="e1 === 2"
-                    class="white--text"
-                    color="#4f3316"
-                    elevation="6"
-                    large
-                    block
-                    raised
-                    @click="openBookFlight"
-                  >
-                    Book Flight
-                  </v-btn> -->
                 </v-card-text>
                 <v-row class="">
                   <v-col cols="12" md="12">
@@ -1829,18 +1688,8 @@
             </v-row>
             <div>
               <div>
-                <!-- <p class="font-weight-bold" style="font-size: 25px;color: #000;">
-                  Adventures
-                </p> -->
                 <v-row class="mt-4">
                   <v-col cols="9" md="9">
-                    <!-- <div v-for="(activity, a) in packageDetails.activities" :key="a">
-                      <div v-for="(day, d) in packageDetails.activities[a].days" :key="d">
-                        <div v-for="(adventure, d2) in packageDetails.activities[a].days[d].days" :key="d2">
-                          <p>{{ packageDetails.activities[a].days[d].days[d2].adventrue.activityTitle }}</p>
-                        </div>
-                      </div>
-                    </div> -->
                     <p class="font-weight-bold" style="font-size: 25px;color: #000;">
                       Adventures
                     </p>
@@ -1851,19 +1700,6 @@
                 </v-row>
               </div>
               <v-divider class="mb-4" />
-              <!-- <div>
-                <v-row class="mt-4">
-                  <v-col cols="12" md="9">
-                    <p class="font-weight-bold" style="font-size: 25px;color: #000;">
-                      Hotels
-                    </p>
-                  </v-col>
-                  <v-col cols="12" md="3">
-                    <p>$ {{ getTotalHotelPrices() }}</p>
-                  </v-col>
-                </v-row>
-              </div>
-              <v-divider class="mb-4" /> -->
               <div>
                 <v-row class="mt-4">
                   <v-col cols="9" md="9">
@@ -1947,48 +1783,10 @@
             </v-btn>
           </v-card-title>
           <v-card-text class="pt-4">
-            <div v-for="(hotel, h) in listGtaHotelJpds" :key="h">
-              <!-- <v-row class="" style="padding: 5px;margin: 10px 0">
-                <v-col cols="12" md="4" class="pt-4">
-                  <v-img
-                    max-height="400"
-                    :src="hotel.Images?.Image[1].Type === 'THB' ? hotel.Images?.Image[1].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
-                    max-width="400"
-                    class="rounded-lg"
-                  />
-                </v-col>
-                <v-col cols="12" md="6">
-                  <div class="cruise-result-trip justify-space-between">
-                    <div>
-                      <h6 class="text-h6 font-weight-bold">
-                        {{ hotel.HotelName }}
-                      </h6>
-                    </div>
-                    <div class="black--text">
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Address:</strong> {{ hotel.Address?.Address }}
-                      </p>
-                      <p class="" style="font-size: 15px;margin: 2px 0;">
-                        <strong>Category:</strong> {{ hotel.HotelCategory?._ }}
-                      </p>
-                    </div>
-                  </div>
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-btn
-                    class="rounded"
-                    large
-                    tile
-                    elevation="0"
-                    dark
-                    color="#4f3316"
-                    block
-                    @click="selectHotelGta(h)"
-                  >
-                    Select
-                  </v-btn>
-                </v-col>
-              </v-row> -->
+      <v-row v-if="isHotelsLoading" align="center" justify="center">
+        <v-progress-circular indeterminate color="brown"></v-progress-circular>
+      </v-row>
+            <div v-else v-for="(hotel, h) in listGtaHotelJpds" :key="h">
               <v-row class="hotel-card mb-4" style="padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                 <!-- Hotel Image -->
                 <v-col cols="12" md="4" class="p-0">
@@ -2016,10 +1814,6 @@
                         dense
                         readonly
                       />
-                      <!-- Change Hotel Button -->
-                      <!-- <v-btn small outlined color="brown" @click="showHotels(h)">
-                        Change Hotel
-                      </v-btn> -->
                     </div>
 
                     <!-- Address -->
@@ -2087,145 +1881,6 @@
           <v-card-text class="pt-4">
             <p>hello</p>
           </v-card-text>
-          <!-- <v-card-text class="pt-4">
-            <div v-if="singleHotelData !== null">
-              <div v-if="Array.isArray(singleHotelData.HotelOptions?.HotelOption)">
-                <div v-for="(hotelOption, hO) in singleHotelData.HotelOptions.HotelOption" :key="hO">
-                  <v-card v-if="hotelOption" class="my-4">
-                    <v-card-title class="white--text" style="background-color: #4f3316;">
-                      Board: <span v-if="hotelOption.Board && hotelOption.Board?._">{{ hotelOption.Board._ }}, </span><span v-if="hotelOption.HotelRooms && hotelOption.HotelRooms.HotelRoom">{{ hotelOption.HotelRooms.HotelRoom.Name }}</span>
-                    </v-card-title>
-                    <v-card-text class="pt-4">
-                      <v-row class="" style="padding: 5px;margin: 10px 0">
-                        <v-col cols="12" md="10">
-                          <div class="cruise-result-trip justify-space-between">
-                            <div class="black--text">
-                              <p v-if="hotelOption.HotelRooms && hotelOption.HotelRooms?.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
-                                <span v-if="Array.isArray(hotelOption.HotelRooms?.HotelRoom)">
-                                  <div v-for="(room, r) in hotelOption.HotelRooms?.HotelRoom" :key="r">
-                                    <strong>Room Name:</strong> {{ room.Name }} <br>
-                                    <strong>Room Category:</strong> {{ room.RoomCategory?._ }} <br>
-                                    <strong v-if="hotelOption.Board">Board:</strong> {{ hotelOption.Board._ }} <br>
-                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy?.Adults">
-                                      <strong>Number of Adults:</strong> {{ room.RoomOccupancy?.Adults }} <br>
-                                    </span>
-                                    <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children">
-                                      <strong v-if="room.RoomOccupancy && room.RoomOccupancy.Children">Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
-                                    </span>
-                                    <hr>
-                                  </div>
-                                </span>
-                                <span v-else>
-                                  <strong>Room Name:</strong> {{ hotelOption.HotelRooms.HotelRoom.Name }} <br>
-                                  <strong>Room Category:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomCategory._ }} <br>
-                                  <strong v-if="hotelOption.Board">Board:</strong> {{ hotelOption.Board._ }} <br>
-                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults">
-                                    <strong>Number of Adults:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                  </span>
-                                  <span v-if="hotelOption.HotelRooms.HotelRoom.RoomOccupancy && hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children">
-                                    <strong>Number of Children:</strong> {{ hotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
-                                  </span>
-                                </span>
-                              </p>
-                              <p v-if="hotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">
-                                <strong>Hotel Offer:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
-                                <strong>Hotel Offer Description:</strong> {{ hotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
-                              </p>
-                              <v-divider class="mb-4" />
-                              <p v-if="hotelOption.CancellationPolicy" class="" style="font-size: 18px;margin: 2px 0;">
-                                <strong>Cancellation Policy</strong>
-                                <strong>Description:</strong> {{ hotelOption.CancellationPolicy.Description }} <br>
-                                <strong>First Day Cost Cancellation (Hour):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation.Hour }} <br>
-                                <strong>First Day Cost Cancellation (Date):</strong> {{ hotelOption.CancellationPolicy.FirstDayCostCancellation._ }} <br>
-                              </p>
-                              <v-divider class="mb-4" />
-                              <p v-if="hotelOption.Prices && hotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
-                                <strong>Prices:</strong> {{ hotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ hotelOption.Prices.Price.Currency }}
-                              </p>
-                            </div>
-                          </div>
-                        </v-col>
-                        <v-col cols="12" md="2">
-                          <v-btn
-                            class="rounded"
-                            large
-                            tile
-                            elevation="0"
-                            dark
-                            color="#4f3316"
-                            block
-                            @click="selectRoomHotelGta(hO, selectedHotelIndex)"
-                          >
-                            Select
-                          </v-btn>
-                        </v-col>
-                      </v-row>
-                    </v-card-text>
-                  </v-card>
-                </div>
-              </div>
-              <div v-else>
-                <v-card v-if="singleHotelData.HotelOptions.HotelOption" class="my-4">
-                  <v-card-title class="white--text" style="background-color: #4f3316;">
-                    Board: <span v-if="singleHotelData.HotelOptions.HotelOption.Board && singleHotelData.HotelOptions.HotelOption.Board._">{{ singleHotelData.HotelOptions.HotelOption.Board._ }}, </span><span v-if="singleHotelData.HotelOptions.HotelOption.HotelRooms && singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom">{{ singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom.Name }}</span>
-                  </v-card-title>
-                  <v-card-text class="pt-4">
-                    <v-row class="" style="padding: 5px;margin: 10px 0">
-                      <v-col cols="12" md="10">
-                        <div class="cruise-result-trip justify-space-between">
-                          <div class="black--text">
-                            <p v-if="singleHotelData.HotelOptions.HotelOption.HotelRooms && singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom" class="" style="font-size: 15px;margin: 2px 0;">
-                              <span v-if="Array.isArray(singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom)">
-                                <div v-for="(room, r) in singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom" :key="r">
-                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Adults">
-                                    <strong>Number of Adults:</strong> {{ room.RoomOccupancy.Adults }} <br>
-                                  </span>
-                                  <span v-if="room.RoomOccupancy && room.RoomOccupancy.Children">
-                                    <strong>Number of Children:</strong> {{ room.RoomOccupancy.Children }} <br>
-                                  </span>
-                                  <hr>
-                                </div>
-                              </span>
-                              <span v-else>
-                                <span v-if="singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults">
-                                  <strong>Number of Adults:</strong> {{ singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Adults }} <br>
-                                </span>
-                                <span v-if="singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy && singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children">
-                                  <strong>Number of Children:</strong> {{ singleHotelData.HotelOptions.HotelOption.HotelRooms.HotelRoom.RoomOccupancy.Children }} <br>
-                                </span>
-                              </span>
-                            </p>
-                            <p v-if="singleHotelData.HotelOptions.HotelOption.AdditionalElements" class="" style="font-size: 18px;margin: 2px 0;">
-                              <strong>Hotel Offer:</strong> {{ singleHotelData.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Name }} <br>
-                              <strong>Hotel Offer Description:</strong> {{ singleHotelData.HotelOptions.HotelOption.AdditionalElements.HotelOffers.HotelOffer.Description }} <br>
-                            </p>
-                            <v-divider class="mb-4" />
-                            <p v-if="singleHotelData.HotelOptions.HotelOption.Prices && singleHotelData.HotelOptions.HotelOption.Prices.Price" class="" style="font-size: 15px;margin: 2px 0;">
-                              <strong>Prices:</strong> {{ singleHotelData.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett }} {{ singleHotelData.HotelOptions.HotelOption.Prices.Price.Currency }}
-                            </p>
-                          </div>
-                        </div>
-                      </v-col>
-                      <v-col cols="12" md="2">
-                        <v-btn
-                          class="rounded"
-                          large
-                          tile
-                          elevation="0"
-                          dark
-                          color="#4f3316"
-                          block
-                          @click="selectRoomHotelGta(hO, selectedHotelIndex)"
-                        >
-                          Select
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                </v-card>
-              </div>
-            </div>
-          </v-card-text> -->
         </v-card>
       </v-dialog>
       <v-dialog v-model="showAddNewAdventuresDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
@@ -2406,7 +2061,6 @@
                           </v-col>
                         </v-row>
                       </v-card-actions>
-                      <!-- <p class="mx-4 mt-0 pb-3 text-left">{{ getDateHint(adventure) }}</p> -->
                     </v-card>
                   </div>
                 </v-col>
@@ -2766,7 +2420,6 @@
                           </v-col>
                         </v-row>
                       </v-card-actions>
-                      <!-- <p class="mx-4 mt-0 pb-3 text-left">{{ getDateHint(adventure) }}</p> -->
                     </v-card>
                   </div>
                 </v-col>
@@ -3109,35 +2762,35 @@ export default {
               Price: {
                 TotalFixAmounts: {
                   Service: {
-                    Amount: 62.24
+                    Amount: ''
                   },
-                  Gross: 62.24,
-                  Nett: 62.24
+                  Gross: '',
+                  Nett: ''
                 },
                 Type: 'S',
-                Currency: 'EUR'
+                Currency: 'USD'
               }
             },
             CancellationPolicy: {
               FirstDayCostCancellation: {
-                _: '2023-11-13',
-                Hour: '00:00'
+                _: '',
+                Hour: ''
               },
-              Description: 'xxxx',
+              Description: '',
               PolicyRules: {
                 Rule: [
                   {
-                    From: 0,
-                    To: 3,
-                    DateFrom: '2023-11-17',
-                    DateFromHour: '00:00',
-                    DateTo: '2023-11-21',
-                    DateToHour: '00:00',
+                    From: '',
+                    To: '',
+                    DateFrom: '',
+                    DateFromHour: '',
+                    DateTo: '',
+                    DateToHour: '',
                     Type: 'V',
                     FixedPrice: 0,
-                    PercentPrice: 100,
-                    Nights: 0,
-                    ApplicationTypeNights: 'Average'
+                    PercentPrice: '',
+                    Nights: '',
+                    ApplicationTypeNights: ''
                   }
                 ]
               },
@@ -3152,9 +2805,9 @@ export default {
                   Type: '187'
                 },
                 RoomOccupancy: {
-                  Occupancy: 2,
-                  MaxOccupancy: 5,
-                  Adults: 2,
+                  Occupancy: '',
+                  MaxOccupancy: '',
+                  Adults: '',
                   Children: 0
                 },
                 Units: 1,
@@ -3253,7 +2906,8 @@ export default {
       showHotelCards: true,
       isSelectionConfirmed: false,
       showInfoOfRooms: false,
-      isRoomSelected: []
+      isRoomSelected: [],
+      isHotelsLoading: true
     }
   },
   async fetch () {
@@ -3265,20 +2919,6 @@ export default {
     } else { this.$router.go(-1) }
   },
   computed: {
-    hotelsGroupedByZone () {
-      const grouped = {}
-
-      this.listGtaHotelDetails.forEach((hotel) => {
-        const zoneName = hotel.Zone?.Name || 'Unknown Zone'
-
-        if (!grouped[zoneName]) {
-          grouped[zoneName] = []
-        }
-        grouped[zoneName].push(hotel)
-      })
-
-      return grouped
-    },
 
     isNonRefundable () {
       return (roomIndex) => {
@@ -3287,53 +2927,10 @@ export default {
         return !/0(?:\s|&nbsp;)+usd/i.test(description) // Returns false if "0&nbsp;USD" or "0 USD" is present
       }
     },
-    //   isNonRefundable () {
-    //   return (hotelIndex, roomIndex) => {
-    //     const description = this.singleHotelData?.data?.HotelOptions?.HotelOption[roomIndex]?.CancellationPolicy?.Description || '';
-    //     return !/0\s{1,}\s+usd/i.test(description); // Returns false if "0 USD" is present
-    //   }
-    // },
-    // isButtonEnabled () {
-    //   const getCountOfChildren = this.children
-    //   const ageSelects = this.ageSelects
-    //   let checkCountofAges = 0
-    //   let childrenValidate = false
-    //   let initialPriceValidate = false
-    //   if (ageSelects.length) {
-    //     for (const ageSelect of ageSelects) {
-    //       if (ageSelect && ageSelect.age !== null) {
-    //         checkCountofAges++
-    //       }
-    //     }
-    //   }
-    //   if (getCountOfChildren > 0) {
-    //     if (getCountOfChildren === checkCountofAges) {
-    //       childrenValidate = true
-    //     } else {
-    //       childrenValidate = false
-    //     }
-    //   } else {
-    //     childrenValidate = true
-    //   }
-    //   if (this.initialPrice > 0) {
-    //     initialPriceValidate = true
-    //   } else {
-    //     initialPriceValidate = false
-    //   }
-
-    //   return childrenValidate && initialPriceValidate
-    // },
     isButtonEnabled () {
       const getCountOfChildren = this.children
       const rooms = this.rooms
       let checkCountofAges = 0
-
-      // Check if all children have selected ages
-      // const childrenValidate = rooms.every((room) => {
-      //   const ageSelects = room.ageSelects || []
-      //   return getCountOfChildren === ageSelects.filter(ageSelect => ageSelect && ageSelect.age !== null).length
-      // })
-
       if (rooms.length) {
         for (const room of rooms) {
           if (room.ageSelects.length) {
@@ -3345,14 +2942,8 @@ export default {
           }
         }
       }
-
-      // Check if all children have selected ages
       const childrenValidate = checkCountofAges === getCountOfChildren
-
-      // Check if initialPrice is greater than 0
       const initialPriceValidate = this.initialPrice > 0
-
-      // Return true if both conditions are met for all rooms
       return childrenValidate && initialPriceValidate
     },
     countries () {
@@ -3398,40 +2989,16 @@ export default {
 
     packageStartDay (newDate) {
       if (newDate) {
-      // Format the start date
         const startDateFormatted = this.formatDate(newDate, 1, 'hotelStartDate')
-
-        // Set start dates to the formatted package start day
         this.hotelStartDates = Array(this.listGtaHotelDetails.length).fill(newDate)
         this.hotelStartDatesText = Array(this.listGtaHotelDetails.length).fill(startDateFormatted)
-
-        // Calculate end date as 3 days after the start date
         const endDate = new Date(new Date(newDate).getTime() + 3 * 24 * 60 * 60 * 1000)
         const endDateFormatted = this.formatDate(endDate, 1, 'hotelEndDate')
-
-        // Set end dates to 3 days after the package start day
         this.hotelEndDates = Array(this.listGtaHotelDetails.length).fill(endDate.toISOString().substr(0, 10))
         this.hotelEndDatesText = Array(this.listGtaHotelDetails.length).fill(endDateFormatted)
       }
     }
   },
-  // created () {
-  //   // await this.getPackage()
-  //   const today = new Date().toISOString().substr(0, 10) // Today's date in YYYY-MM-DD format
-  //   return {
-  //     today,
-  //     hotelStartDates: Array(this.listGtaHotelDetails.length).fill(today),
-  //     hotelEndDates: Array(this.listGtaHotelDetails.length).fill(
-  //       new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10)
-  //     ),
-  //     hotelStartDatesText: Array(this.listGtaHotelDetails.length).fill(today),
-  //     hotelEndDatesText: Array(this.listGtaHotelDetails.length).fill(
-  //       new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().substr(0, 10)
-  //     ),
-  //     menuStartDates: [],
-  //     menuEndDates: []
-  //   }
-  // },
   mounted () {
     this.checkIfMobile()
     window.addEventListener('resize', this.checkIfMobile)
@@ -3465,15 +3032,11 @@ export default {
       this.$set(this.showAllRoomsForHotel, hotelIndex, !this.showAllRoomsForHotel[hotelIndex])
     },
     toggleCancellationPolicy (roomIndex) {
-    // Toggle the state of the specific room option based on its index
       this.$set(this.showFullCancellationPolicy, roomIndex, !this.showFullCancellationPolicy[roomIndex])
     },
-    // getRoomOptions (roomOptions) {
-    //   return Array.isArray(roomOptions) ? roomOptions : [roomOptions]
-    // },
     getRoomOptions (roomOptions) {
       if (!roomOptions) {
-        return [] // Return an empty array if roomOptions is undefined or null
+        return []
       }
       return Array.isArray(roomOptions) ? roomOptions : [roomOptions]
     },
@@ -3487,18 +3050,13 @@ export default {
 
     handleStartDateChange (index) {
       if (this.hotelStartDates[index]) {
-      // Convert the start date to ISO format string
         const startDate = new Date(this.hotelStartDates[index])
         this.hotelStartDates[index] = startDate.toISOString().split('T')[0]
-
-        // Set end date to 3 days after start date
         const endDate = new Date(startDate)
         endDate.setDate(startDate.getDate() + 3)
         this.hotelEndDates[index] = endDate.toISOString().split('T')[0]
-
         this.hotelStartDatesText[index] = this.formatDate(this.hotelStartDates[index])
         this.hotelEndDatesText[index] = this.formatDate(this.hotelEndDates[index])
-
         const minEndDate = new Date(startDate)
         minEndDate.setDate(startDate.getDate() + 1)
         this.minEndDate[index] = minEndDate.toISOString().split('T')[0]
@@ -3510,7 +3068,6 @@ export default {
     hiddenRoomCount (roomOptions) {
       return roomOptions.length - 2
     },
-    // formatCancellationPolicy (description) {
     //   if (typeof description !== 'string') {
     //     return 'No cancellation policy available'
     //   }
@@ -3563,16 +3120,12 @@ export default {
         .split('\n')
         .map((line) => {
           const normalizedLine = normalizeText(line)
-
-          // Check if the line contains "0 USD" to indicate "Cancellation Available"
           if (/0\s+\s+usd/i.test(normalizedLine)) {
             return wrapGreen('Cancellation Available')
           }
-
           const highlightedLine = normalizedLine
             .replace(percentagePattern, wrapRed)
             .replace(pricePattern, (match, amount) => {
-              // If the amount is greater than 0, format it in red; otherwise, return "Cancellation Available" in green
               return amount > 0 ? wrapRed(match) : wrapGreen('Cancellation Available')
             })
             .replace(nightPattern, wrapRed)
@@ -3583,11 +3136,8 @@ export default {
         .join('<br>')
     },
     setDefaultHotelDates () {
-    // Loop over each hotel card to set default start and end dates
       this.hotelStartDates = this.hotelStartDates.map(() => this.packageStartDay)
       this.hotelEndDates = this.hotelEndDates.map(() => this.activity.package_text_day)
-
-      // Format dates for display
       this.hotelStartDatesText = this.hotelStartDates.map(date => this.formatDate(date, 1, 'hotelStartDate'))
       this.hotelEndDatesText = this.hotelEndDates.map(date => this.formatDate(date, 1, 'hotelEndDate'))
     },
@@ -3606,10 +3156,7 @@ export default {
       this.isMobile = window.innerWidth <= 600
     },
     formatDate (date, formatType, targetField, index) {
-    // Ensure date is a Date object
       const d = new Date(date)
-
-      // Format as YYYY-MM-DD
       const formattedDate = d.toISOString().substr(0, 10)
 
       if (targetField === 'hotelStartDate') {
@@ -3634,8 +3181,6 @@ export default {
         const newDate = `${parseInt(day) + parseInt(num) - 1} ${months[month - 1]} ${year}`
         return newDate
       }
-      // const newDate = `${day}-${month}-${year}`
-      // if (type === 'packageStartDay') { this.packageStartDayText = newDate }
     },
     formatDays (day, type) {
       // let dayString = 0
@@ -3752,9 +3297,8 @@ export default {
       }
     },
     async showHotels (indexCity) {
-      // this.hotelStartDateText = this.packageStartDayText
-      // this.hotelStartDate = this.packageStartDay
-      // this.hotelEndDateText = this.packageEndDay
+      this.showHotelsDialog = true
+      this.isHotelsLoading = true
       this.listGtaHotelJpds = []
       const getHotels = this.listGtaHotelDetails[indexCity]
       if (getHotels.hotelJpds.length > 0) {
@@ -3771,12 +3315,38 @@ export default {
             results2.isAvailable = false
             results2.isAvailableText = 'Not Checked with Dates'
             this.listGtaHotelJpds.push(results2)
+            this.isHotelsLoading = false
           }
         }
       }
       this.selectedCityHotelIndex = indexCity
-      this.showHotelsDialog = true
     },
+    // async getZonesperHotels (indexCity) {
+    //   // this.hotelStartDateText = this.packageStartDayText
+    //   // this.hotelStartDate = this.packageStartDay
+    //   // this.hotelEndDateText = this.packageEndDay
+    //   this.listGtaHotelJpds = []
+    //   const getHotels = this.listGtaHotelDetails[indexCity]
+    //   if (getHotels.hotelJpds.length > 0) {
+    //     for (let index = 0; index < getHotels.hotelJpds.length; index++) {
+    //       if (getHotels.hotelJpds[index]) {
+    //         const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
+    //         const response2 = await promise2
+    //         const results2 = response2.data.ContentRS.Contents.HotelContent
+    //         console.log('results: ', results2)
+    //         results2.city_id = getHotels.city_id
+    //         results2.city_name = getHotels.city_name
+    //         results2.hotelIDs = getHotels.hotelIDs
+    //         results2.hotelJpds = getHotels.hotelJpds
+    //         results2.isAvailable = false
+    //         results2.isAvailableText = 'Not Checked with Dates'
+    //         this.listGtaHotelJpds.push(results2)
+    //       }
+    //     }
+    //   }
+    //   this.selectedCityHotelIndex = indexCity
+    //   // this.showHotelsDialog = true
+    // },
     showRooms (HotelIndex) {
       // if (this.listGtaHotelDetails.length > 1) {
       //   this.hotelAvails = this.hotelAvailsArray[HotelIndex]
@@ -3859,11 +3429,8 @@ export default {
       }
     },
     getRoomAgeSelectErrorMessages (roomIndex, childIndex) {
-      // Implement this method to provide error messages if needed
-      // For example, you can check if the age selected for a child is valid
-      // and return an array of error messages
       if (!this.showAgesSelects) {
-        return [] // Skip error messages if age selects are hidden
+        return []
       }
       const ageSelect = this.rooms[roomIndex].ageSelects[childIndex]
       if (ageSelect && ageSelect.age === null) {
@@ -3960,12 +3527,10 @@ export default {
     },
     getAllTitles (objectList) {
       const titles = []
-      const separator = ', ' // Specify the separator you want
-      // Loop through each object in the list
+      const separator = ', '
       for (const obj of objectList) {
-        // Check if the object has a 'title' property
         if (obj.adventrue.activityTitle != null) {
-          titles.push(obj.adventrue.activityTitle) // Push the title to the 'titles' array
+          titles.push(obj.adventrue.activityTitle)
         }
       }
       const resultString = titles.join(separator)
@@ -4013,22 +3578,12 @@ export default {
         this.dayIndex = dayIndex
         this.selectedDateForAddNewAdventure = day
         this.dayActivities = []
-        // console.log(this.packageDetails.activities[activityIndex].days[dayIndex].days)
-        // console.log(activityIndex, dayIndex)
-        // for (let x = 0; x < dayActivities.length; x++) {
-        //   if (dayActivities[x].adventure_id > 0) {
-        //     this.dayActivities.push(dayActivities[x].adventure_id)
-        //   }
-        // }
         const days = this.packageDetails.activities[activityIndex].days[dayIndex].days
-        // console.log(this.packageDetails.activities[activityIndex].days[dayIndex].days.length)
         for (let x = 0; x < days.length; x++) {
-          // console.log(this.packageDetails.activities[activityIndex].days[dayIndex].days[x].adventure_id)
           if (days[x].adventrue_id > 0) {
             this.dayActivities.push(days[x].adventrue_id)
           }
         }
-        // console.log(this.dayActivities.join(','))
         await this.getAdventures(cityId, day, this.dayActivities.join(','))
         this.showAddNewAdventuresDialog = true
       }
@@ -4037,9 +3592,6 @@ export default {
       this.isLoading = true
       // console.log(cityId)
       try {
-      // let cityId
-      // this.$route.query.cityId ? cityId = this.$route.query.cityId : cityId = this.cities.find(city => city.CityName === this.$route.params.city).CityID
-        // const promise = adventureServices.getCityAdventures(cityId, 1, this.packageStartDay)
         const promise = adventureServices.getCityAdventures(cityId, 1, day, activities)
         const response = await promise
         const results = response.data
@@ -4087,14 +3639,11 @@ export default {
       let allowedDay = false
       let allowedDate = false
 
-      // Check if the date falls within any of the availabilities
       for (const availability of availabilities) {
         const fromDate = new Date(availability.from_date.replaceAll('-', '/'))
         const toDate = new Date(availability.to_date.replaceAll('-', '/'))
-        // Get today's date and set the time to 00:00:00 to represent the start of the day
         const today = new Date()
         today.setHours(0, 0, 0, 0)
-        // Adjust toDate to make it inclusive of the end of the day
         toDate.setHours(23, 59, 59, 999)
         if (date > today && date >= fromDate && date <= toDate) {
           allowedDate = true
@@ -4105,9 +3654,7 @@ export default {
       return allowedDay && allowedDate
     },
     uniqueAndFilter (arr) {
-      // Remove duplicates using Set
       let uniqueArr = [...new Set(arr)]
-      // Filter out empty arrays
       uniqueArr = uniqueArr.filter(item => item.length > 0)
       return uniqueArr
     },
@@ -4175,18 +3722,6 @@ export default {
       }
       let indexCount = 0
       const activities = this.packageDetails.activities
-      // console.log(activities)
-      // for (let i = 0; i < activities.length; i++) {
-      //   const activity = activities[i].days
-      //   for (let x = 0; x < activity.length; x++) {
-      //     const days = activity[x].days
-      //     for (let y = 0; y < days.length; y++) {
-      //       const adventures = days[y]
-      //       formData.append('adventures[' + indexCount + ']', adventures.adventrue_id)
-      //       indexCount++
-      //     }
-      //   }
-      // }
       for (let i = 0; i < activities.length; i++) {
         const activity = activities[i].days
         for (let x = 0; x < activity.length; x++) {
@@ -4198,11 +3733,6 @@ export default {
             formData.append('activities[' + indexCount + '][adventures][' + y + ']', adventures.adventrue_id)
           }
           indexCount++
-          // for (let y = 0; y < days.length; y++) {
-          //   const adventures = days[y]
-          //   formData.append('adventures[' + indexCount + ']', adventures.adventrue_id)
-          //   indexCount++
-          // }
         }
       }
       try {
@@ -4215,9 +3745,6 @@ export default {
           this.priceSessionId = results.sessionId
           this.checkResponseCode = true
         } else {
-          // this.snackbar = true
-          // this.color = 'error'
-          // this.text = results.errors
           this.loaded = false
           this.checkResponseCode = false
         }
@@ -4252,11 +3779,8 @@ export default {
       }
     },
     bookAdventures () {
-      // Calculate the total price based on all components in the booking page
       const calculatedTotalPrice = this.getFinalTotalPrices() // Ensure this returns the correct total
       const calculatedFinalPrice = calculatedTotalPrice // Or apply any final adjustments
-
-      // Pass the correct total and final prices when dispatching to the store
       this.$store.dispatch('setTravellersNumber', {
         adults: this.travellers,
         children: this.children,
@@ -4281,30 +3805,6 @@ export default {
         hotelJPCodes: this.selectedHotelCodes,
         checkHasCruise: this.checkHasCruise
       })
-      // this.$store.dispatch('setTravellersNumber', {
-      //   adults: this.travellers,
-      //   children: this.children,
-      //   totalPrice: this.initialPrice,
-      //   totalAllPrices: this.totalAllPrices,
-      //   packageStartDay: this.packageStartDay,
-      //   packageDetails: this.packageDetails,
-      //   priceSessionId: this.priceSessionId,
-      //   ratePlanCode: this.RatePlanCode,
-      //   bookingRule: this.getbookingRule,
-      //   bookingInfo: this.getBookingCode,
-      //   hotelStartDate: this.hotelStartDate,
-      //   hotelEndDate: this.hotelEndDate,
-      //   ratePlanCodes: this.RatePlanCodes,
-      //   bookingRules: this.getbookingRules,
-      //   bookingInfos: this.getBookingCodes,
-      //   hotelStartDates: this.hotelStartDates,
-      //   hotelEndDates: this.hotelEndDates,
-      //   finalBookHotelFormData: this.finalBookHotelFormData,
-      //   finalBookHotelsFormData: this.finalBookHotelsFormData,
-      //   hotelJPCode: this.selectedHotelJPCode,
-      //   hotelJPCodes: this.selectedHotelCodes,
-      //   checkHasCruise: this.checkHasCruise
-      // })
       this.$router.push({ name: 'booking-module', params: { module: 'trip' } })
     },
     openGallery () {
@@ -4367,7 +3867,6 @@ export default {
         }
         try {
           const promise = tripsServices.checkHotelAvailabilities(formData)
-          // const promise = tripsServices.checkHotelAvailabilitiesTest(formData)
           const response = await promise
           console.log(response)
           const results = response.data.AvailabilityRS
@@ -4384,9 +3883,7 @@ export default {
             console.log(hotelResults)
             if (hotels.length > 1) {
               for (let index = 0; index < hotelResults.length; index++) {
-                // this.hotelAvails = hotelResults[index]
                 this.hotelAvailsArray.push(hotelResults[index])
-                // this.selectedHotelStartDateArray.push(hotelResults[index])
                 this.selectedHotelStartDate = this.hotelStartDate
                 this.selectedHotelEndDate = this.hotelEndDate
               }
@@ -4456,7 +3953,6 @@ export default {
           const errorResponse = response.data.data?.AvailabilityRS?.Errors?.Error
 
           if (errorResponse) {
-            // Error Handling: Display specific error message from response
             this.snackbar = true
             this.color = 'error'
             this.text = errorResponse.Text || 'An error occurred'
@@ -4464,7 +3960,6 @@ export default {
             this.checkResponseCode = false
             this.isLoading = false
           } else {
-            // Success Handling: No errors, process results
             const singleHotelDataResponse = results
             this.singleHotelData = {
               data: singleHotelDataResponse,
@@ -4480,7 +3975,6 @@ export default {
             this.isLoading = false
           }
         } catch (error) {
-          // Fallback error handling if API call fails
           this.snackbar = true
           this.color = 'error'
           this.text = 'Something went wrong'

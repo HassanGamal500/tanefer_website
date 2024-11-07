@@ -30,25 +30,23 @@
           <!-- Main Image Display with Scroll Arrows -->
           <div class="main-image-container">
             <v-img :src="currentMainImage" class="main-image" contain />
-            <v-btn icon class="scroll-btn-left" @click="prevImage">
+            <v-btn
+              icon
+              :style="{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', zIndex: 10 }"
+              class="scroll-btn-left"
+              @click="prevImage"
+            >
               <v-icon>mdi-chevron-left</v-icon>
             </v-btn>
-            <v-btn icon class="scroll-btn-right" @click="nextImage">
+            <v-btn
+              icon
+              :style="{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', zIndex: 10 }"
+              class="scroll-btn-right"
+              @click="nextImage"
+            >
               <v-icon>mdi-chevron-right</v-icon>
             </v-btn>
           </div>
-
-          <!-- Thumbnails Row -->
-          <!-- <div class="thumbnails-container">
-            <v-img
-              v-for="(image, index) in gtaHotelDetails.Images.Image"
-              :key="index"
-              :src="image.FileName"
-              class="thumbnail"
-              @click="selectImage(index)"
-            />
-          </div> -->
-          <!-- Thumbnails Row within Row and Col for Better Containment -->
           <v-row justify="center">
             <v-col cols="12" md="12">
               <!-- Contain within a specific width -->
@@ -2659,38 +2657,62 @@ export default {
   transform: scale(1.03); /* Slight zoom effect for smoothness */
 }
 
-.scroll-btn-left,
-.scroll-btn-right {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  transition: background-color 0.2s ease-in-out;
-}
-
 .scroll-btn-left:hover,
 .scroll-btn-right:hover {
   background-color: rgba(0, 0, 0, 0.7); /* Darker shade on hover */
 }
 
+.scroll-btn-left,
+.scroll-btn-right {
+  position: absolute;
+  top: 50%;
+  width: 40px; /* Set a fixed width */
+  height: 40px; /* Set a fixed height */
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  z-index: 10;
+  cursor: pointer;
+  pointer-events: auto; /* Ensure they remain clickable */
+}
+
 .scroll-btn-left {
-  left: 5px;
+  left: 10px; /* Ensure visible within container */
 }
 
 .scroll-btn-right {
-  right: 5px;
+  right: 10px; /* Ensure visible within container */
 }
 
 /* Centered Thumbnails Container with Fixed Width */
 /* Centered Thumbnails Container */
 .thumbnails-container {
   display: flex;
-  justify-content: center; /* Center the thumbnails within the container */
-  gap: 10px; /* Add spacing between thumbnails */
+  justify-content: center;
+  gap: 10px;
   margin-top: 10px;
-  overflow-x: auto; /* Add horizontal scroll if needed */
+  overflow-x: auto;
   padding: 0 10px;
+  scroll-behavior: smooth; /* Smooth scrolling for better experience */
+}
+
+/* Hide scrollbar in most browsers */
+.thumbnails-container::-webkit-scrollbar {
+  width: 8px; /* Slimmer scrollbar width */
+  height: 8px;
+}
+
+.thumbnails-container::-webkit-scrollbar-track {
+  background: transparent; /* Transparent background for scrollbar track */
+}
+
+.thumbnails-container::-webkit-scrollbar-thumb {
+  background-color: #999; /* Custom color for scrollbar thumb */
+  border-radius: 4px; /* Rounded edges */
+}
+
+.thumbnails-container::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Darker shade on hover */
 }
 
 .thumbnail {

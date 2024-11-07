@@ -24,28 +24,42 @@
         </p>
       </div>
     </div>
-
-    <v-carousel hide-delimiters height="100%" show-arrows>
-      <v-carousel-item
-        v-for="(imageGroup, index) in chunkImages(gtaHotelDetails?.Images?.Image.filter(img => img.Type === 'BIG') || [], isMobile ? 1 : 2)"
-        :key="index"
-      >
-        <v-row>
-          <v-col
-            v-for="(img, imgIndex) in imageGroup"
-            :key="imgIndex"
-            :cols="isMobile ? 12 : 6"
-          >
+    <div v-if="gtaHotelDetails?.Images?.Image?.length" class="gallery-container">
+      <!-- Main Image Display with Scroll Arrows -->
+      <div class="main-image-container">
+        <v-img :src="currentMainImage" class="main-image" contain />
+        <v-btn
+          icon
+          :style="{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', zIndex: 10 }"
+          class="scroll-btn-left"
+          @click="prevImage"
+        >
+          <v-icon>mdi-chevron-left</v-icon>
+        </v-btn>
+        <v-btn
+          icon
+          :style="{ position: 'absolute', top: '50%', right: '10px', transform: 'translateY(-50%)', zIndex: 10 }"
+          class="scroll-btn-right"
+          @click="nextImage"
+        >
+          <v-icon>mdi-chevron-right</v-icon>
+        </v-btn>
+      </div>
+      <v-row justify="center">
+        <v-col cols="12" md="12">
+          <!-- Contain within a specific width -->
+          <div class="thumbnails-container">
             <v-img
-              :src="img.FileName || 'https://source.unsplash.com/user/c_v_r/1900x800'"
-              height="500px"
-              width="100%"
-              @click="openImageModal(img.FileName)"
+              v-for="(image, index) in gtaHotelDetails.Images.Image"
+              :key="index"
+              :src="image.FileName"
+              class="thumbnail"
+              @click="selectImage(index)"
             />
-          </v-col>
-        </v-row>
-      </v-carousel-item>
-    </v-carousel>
+          </div>
+        </v-col>
+      </v-row>
+    </div>
     <v-dialog v-model="imageDialog" max-width="800px" z-index="600">
       <v-img :src="dialogImage" @click.stop />
     </v-dialog>
@@ -125,10 +139,14 @@ export default {
       imageDialog: false,
       dialogImage: '',
       cancellationPolicy: null,
-      isLoading: true
+      isLoading: true,
+      currentImageIndex: 0
     }
   },
   computed: {
+    currentMainImage () {
+      return this.gtaHotelDetails.Images.Image[this.currentImageIndex]?.FileName || 'default-image-url'
+    },
     isMobile () {
       return this.$vuetify.breakpoint.smAndDown
     }
@@ -158,6 +176,18 @@ export default {
   },
 
   methods: {
+    selectImage (index) {
+      this.currentImageIndex = index
+    },
+    nextImage () {
+      this.currentImageIndex =
+        (this.currentImageIndex + 1) % this.gtaHotelDetails.Images.Image.length
+    },
+    prevImage () {
+      this.currentImageIndex =
+        (this.currentImageIndex - 1 + this.gtaHotelDetails.Images.Image.length) %
+        this.gtaHotelDetails.Images.Image.length
+    },
     bookRoom (roomCode) {
       // Implement booking logic
       // eslint-disable-next-line no-console
@@ -193,4 +223,107 @@ export default {
   .v-btn-brown:hover {
     background-color: #A0522D !important; /* Lighter brown on hover */
   }
-  </style>
+
+.gallery-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.main-image-container {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  background-color: #f3f3f3;
+}
+
+.main-image {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease-in-out;
+  filter: blur(0.5px);
+}
+
+.main-image:hover {
+  transform: scale(1.03); /* Slight zoom effect for smoothness */
+}
+
+.scroll-btn-left:hover,
+.scroll-btn-right:hover {
+  background-color: rgba(0, 0, 0, 0.7); /* Darker shade on hover */
+}
+
+.scroll-btn-left,
+.scroll-btn-right {
+  position: absolute;
+  top: 50%;
+  width: 40px; /* Set a fixed width */
+  height: 40px; /* Set a fixed height */
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  z-index: 10;
+  cursor: pointer;
+  pointer-events: auto; /* Ensure they remain clickable */
+}
+
+.scroll-btn-left {
+  left: 10px; /* Ensure visible within container */
+}
+
+.scroll-btn-right {
+  right: 10px; /* Ensure visible within container */
+}
+
+/* Centered Thumbnails Container with Fixed Width */
+/* Centered Thumbnails Container */
+.thumbnails-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding: 0 10px;
+  scroll-behavior: smooth; /* Smooth scrolling for better experience */
+}
+
+/* Hide scrollbar in most browsers */
+.thumbnails-container::-webkit-scrollbar {
+  width: 8px; /* Slimmer scrollbar width */
+  height: 8px;
+}
+
+.thumbnails-container::-webkit-scrollbar-track {
+  background: transparent; /* Transparent background for scrollbar track */
+}
+
+.thumbnails-container::-webkit-scrollbar-thumb {
+  background-color: #999; /* Custom color for scrollbar thumb */
+  border-radius: 4px; /* Rounded edges */
+}
+
+.thumbnails-container::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Darker shade on hover */
+}
+
+.thumbnail {
+  cursor: pointer;
+  width: 70px; /* Set a fixed width */
+  height: 70px; /* Set a fixed height */
+  object-fit: cover; /* Ensure the image fills the thumbnail area */
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.thumbnail:hover {
+  border: 2px solid #cc9900;
+  transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+</style>
