@@ -2825,6 +2825,8 @@ export default {
           this.getbookingRule = results.Results.HotelResult
           this.selectedHotelOption = results.Results.HotelResult.HotelOptions.HotelOption
           this.confirmedSelectedRoom = true
+          console.log('Booking Rules Response Results for storing:', results)
+          this.$store.dispatch('modules/booking/setBookingResponse', results)
           this.$nextTick(() => {
             if (this.confirmedSelectedRoom && this.$refs.targetDiv) {
               const targetEl = this.$refs.targetDiv.$el

@@ -522,44 +522,244 @@
             </div>
           </div>
         </div>
-        <div v-if="$route.params.module === 'hotel'" class="flight-review-border">
-          <div class="airline-head">
-            <div class="airline-head-title">
-              Your Hotel was booked successfully
-            </div>
-          </div>
-          <div v-if="packageActivities">
-            <h2>
-              Hotel Name: <strong>{{ packageActivities.HotelInfo?.Name }}</strong>
-            </h2>
-            <h4 class="mb-5">
-              Number of Adults: <strong>{{ numberOfPassenger.adults }}</strong>
-            </h4>
-            <h4 class="mb-5">
-              Number of Children: <strong>{{ numberOfPassenger.children }}</strong>
-            </h4>
-            <h4 class="mb-5">
-              Check In: <strong>{{ $store.state.travellersNumber.hotelStartDate }}</strong>
-            </h4>
-            <h4 class="mb-5">
-              Check Out: <strong>{{ $store.state.travellersNumber.hotelEndDate }}</strong>
-            </h4>
-            <h4 class="mb-5">
-              Price: <strong>${{ packageTotalPrice }}</strong>
-            </h4>
-          </div>
-          <v-btn class="brown white--text py-5 mt-5 mr-5 px-12" @click="redirectPageHotels">
-            Check Hotels
-          </v-btn>
-        </div>
-        <v-btn class="brown white--text py-5 mt-5 mr-5 px-12" @click="handleLinkClick('home')">
-          Continue Browsing
-        </v-btn>
-        <!-- </NuxtLink> -->
-      </div>
-    </div>
+        <div v-if="$route.params.module === 'hotel'">
+          <div>
+            <v-card class="mx-auto pa-5" max-width="800" outlined>
+              <!-- Removed background with outlined -->
+              <v-row align="center">
+                <v-col cols="12">
+                  <h2 class="text-h4 font-weight-bold text-center mb-5">
+                    Hotel Booking Confirmation
+                  </h2>
+                </v-col>
+                <v-col cols="12" md="8">
+                  <v-card-title class="text-subtitle-1 font-weight-bold">
+                    Your Hotel was booked successfully!
+                  </v-card-title>
+                  <v-card-subtitle>
+                    Thank you for choosing Tanefer. You will receive an email with the confirmation code shortly.
+                  </v-card-subtitle>
+                </v-col>
+              </v-row>
 
-    <form id="payment-form" method="POST" action="" />
+              <v-divider class="my-4" />
+
+              <v-simple-table>
+                <template #default>
+                  <thead>
+                    <tr>
+                      <th class="text-h6 font-weight-bold">
+                        Details
+                      </th> <!-- Vuetify utility classes -->
+                      <th class="text-h6 font-weight-bold">
+                        Information
+                      </th> <!-- Vuetify utility classes -->
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- Hotel Information -->
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-hotel
+                        </v-icon> <strong>Hotel Name</strong>
+                      </td>
+                      <td>{{ packageActivities.HotelInfo?.Name || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-map-marker
+                        </v-icon> <strong>Address</strong>
+                      </td>
+                      <td>{{ bookingResponse.address || 'N/A' }}</td>
+                    </tr>
+
+                    <!-- Number of Passengers and Dates -->
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-account-multiple
+                        </v-icon> <strong>Number of Adults</strong>
+                      </td>
+                      <td>{{ numberOfPassenger.adults }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-baby-face-outline
+                        </v-icon> <strong>Number of Children</strong>
+                      </td>
+                      <td>{{ numberOfPassenger.children }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-calendar-check
+                        </v-icon> <strong>Arrival Time</strong>
+                      </td>
+                      <td>{{ $store.state.travellersNumber.hotelStartDate }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-calendar-check
+                        </v-icon> <strong>Departure Time</strong>
+                      </td>
+                      <td>{{ $store.state.travellersNumber.hotelEndDate }}</td>
+                    </tr>
+
+                    <!-- Room and Pricing Information -->
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-currency-usd
+                        </v-icon> <strong>Total Price</strong>
+                      </td>
+                      <td>${{ packageTotalPrice }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-bed
+                        </v-icon> <strong>Room Type</strong>
+                      </td>
+                      <td>{{ bookingResponse.roomType || 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-star
+                        </v-icon> <strong>Board</strong>
+                      </td>
+                      <td>{{ bookingResponse.board || 'N/A' }}</td>
+                    </tr>
+                    <!-- Cancellation Policy -->
+                    <!-- <tr>
+                        <td>
+                          <v-icon class="mr-2" small>
+                            mdi-information-outline
+                          </v-icon> <strong>Cancellation Policy</strong>
+                        </td>
+                        <td>{{ bookingResponse.cancellationPolicy || 'N/A' }}</td>
+                      </tr> -->
+
+                    <!-- Comments -->
+                    <tr>
+                      <td>
+                        <v-icon class="mr-2" small>
+                          mdi-comment-text-outline
+                        </v-icon> <strong>Comments</strong>
+                      </td>
+                      <td>
+                        <div v-html="bookingResponse.comments" />
+                      </td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
+
+              <v-divider class="my-4" />
+
+              <v-col cols="12" class="text-center">
+                <p>Thank you for choosing Tanefer! We hope you have a pleasant stay.</p>
+              </v-col>
+
+              <v-btn class="brown white--text py-5 mt-5 mr-5 px-12" outlined color="primary" @click="redirectPageHotels">
+                Check More Hotels
+              </v-btn>
+            </v-card>
+
+            <!-- <v-container class="py-10">
+              <v-card class="mx-auto pa-5 elevation-2" max-width="800">
+                <v-row align="center">
+                  <v-col cols="12">
+                    <h2 class="text-h4 font-weight-bold text-center mb-5">
+                      Hotel Booking Confirmation
+                    </h2>
+                  </v-col>
+                  <v-col cols="12" md="8">
+                    <v-card-title class="headline font-weight-bold">
+                      Your Hotel was booked successfully!
+                    </v-card-title>
+                    <v-card-subtitle>
+                      Thank you for booking with us. Here are your booking details.
+                    </v-card-subtitle>
+                  </v-col>
+                </v-row>
+                <v-divider class="my-4" />
+
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-icon class="mr-2">
+                      mdi-hotel
+                    </v-icon>
+                    <strong>Hotel Name:</strong> {{ bookingResponse?.HotelContent?.HotelName || 'N/A' }}
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-icon class="mr-2">
+                      mdi-star
+                    </v-icon>
+                    <strong>Category:</strong> {{ bookingResponse?.HotelCategory?._ || 'N/A' }}
+                  </v-col>
+                  <v-col cols="12">
+                    <v-icon class="mr-2">
+                      mdi-map-marker
+                    </v-icon>
+                    <strong>Address:</strong> {{ bookingResponse?.Address?.Address || 'N/A' }}
+                  </v-col>
+                </v-row>
+
+                <v-divider class="my-4" />
+
+                <v-row>
+                  <v-col cols="12" md="6">
+                    <v-icon class="mr-2">
+                      mdi-currency-usd
+                    </v-icon>
+                    <strong>Total Price:</strong> ${{ bookingResponse?.Prices?.Price?.TotalFixAmounts?.Nett || 'N/A' }}
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-icon class="mr-2">
+                      mdi-bed
+                    </v-icon>
+                    <strong>Room Type:</strong> {{ bookingResponse?.HotelRooms?.HotelRoom?.Name || 'N/A' }}
+                  </v-col>
+                </v-row>
+
+                <v-divider class="my-4" />
+
+                <v-row>
+                  <v-col cols="12">
+                    <v-icon class="mr-2">
+                      mdi-information-outline
+                    </v-icon>
+                    <strong>Cancellation Policy:</strong> {{ bookingResponse?.CancellationPolicy?.Description || 'N/A' }}
+                  </v-col>
+                </v-row>
+
+                <v-divider class="my-4" />
+
+                <v-btn
+                  class="brown white--text py-5 mt-5 mr-5 px-12"
+                  outlined
+                  color="primary"
+                  @click="redirectPageHotels"
+                >
+                  Check More Hotels
+                </v-btn>
+                <v-btn class="brown white--text py-5 mt-5 mr-5 px-12" @click="handleLinkClick('home')">
+                  Continue Browsing
+                </v-btn>
+              </v-card>
+            </v-container> -->
+          </div>
+        <!-- </NuxtLink> -->
+        </div>
+      </div>
+
+      <form id="payment-form" method="POST" action="" />
+    </div>
   </div>
 </template>
 
@@ -638,6 +838,11 @@ export default {
       title: 'Booking ' + this.$route.params.module
     }
   },
+  computed: {
+    bookingResponse () {
+      return this.$store.getters['modules/booking/getBookingResponse']
+    }
+  },
   beforeMount () {
     this.bookFor = localStorage.getItem('bookFor')
     this.packagePrice = localStorage.getItem('packagePrice')
@@ -667,6 +872,7 @@ export default {
     // }
   },
   mounted () {
+    console.log('Stored booking response in Vuex:', this.$store.getters['modules/booking/getBookingResponse'])
     // const queryParams = this.$route.query
     // console.log(queryParams)
     if (this.$route.params.module === 'cruise') {

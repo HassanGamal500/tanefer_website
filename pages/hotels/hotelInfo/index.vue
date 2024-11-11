@@ -481,7 +481,7 @@
                   :disabled="!isButtonEnabledFormValidation || isBooked"
                   @click="finalBookHotel"
                 >
-                  <span>finalise Booking</span>
+                  <span>finalize Booking</span>
                   <!-- <span v-else>Booked Successfully</span> -->
                 </v-btn>
                 <v-btn
@@ -1143,17 +1143,14 @@ export default {
           return
         }
 
-        // Calculate total travelers and children
         const adults = this.rooms.reduce((total, room) => total + room.travelers, 0)
         const children = this.rooms.reduce((total, room) => total + room.children, 0)
 
-        // Get price information and booking details
         const priceInfo = this.selectedHotelOption?.PriceInformation?.Prices?.Price
         const totalPrice = priceInfo.TotalFixAmounts.Gross
         const taxesAndFees = priceInfo.TotalFixAmounts.Service.Amount
         const currency = priceInfo.Currency
 
-        // Generate the payload with sensible defaults for pax details
         const body = {
           bookingCode: this.selectedHotelOption?.BookingCode?._,
           startDate: this.hotelStartDate,
@@ -1185,11 +1182,10 @@ export default {
             children: room.children.toString(),
             category: this.selectedCategory || 'all'
           })),
-          adults, // Number of adults calculated from rooms
-          children // Number of children calculated from rooms
+          adults,
+          children
         }
 
-        // Send booking request to register it
         const bookingResponse = await hotelsServices.finalBookHotel(body)
         const resultFormData = bookingResponse.data.formDataId
 
