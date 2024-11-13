@@ -1636,9 +1636,20 @@ export default {
       this.handleInput()
     }
   },
+  // beforeMount () {
+  //   window.location.reload()
+  // },
   mounted () {
     window.addEventListener('popstate', this.handleBackButton)
     this.priceSessionId = localStorage.getItem('priceSessionId')
+    // eslint-disable-next-line nuxt/no-env-in-hooks
+    // if (process.client) {
+    //   this.$router.replace({
+    //     path: this.$route.path,
+    //     query: this.$route.query,
+    //     hash: this.$route.hash
+    //   })
+    // }
   },
 
   beforeDestroy () {
@@ -2559,7 +2570,7 @@ export default {
         return
       }
       this.isLoading = true
-      await new Promise(resolve => setTimeout(resolve, 10000))
+      await new Promise(resolve => setTimeout(resolve, 15000))
 
       this.hotelAvailsArray = []
       this.hotelAvails = null

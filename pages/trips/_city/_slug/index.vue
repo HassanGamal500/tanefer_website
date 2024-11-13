@@ -371,7 +371,7 @@
                           <!-- Hotel Image -->
                           <v-col cols="12" class="mb-2">
                             <p class="font-weight-bold late--text text-h6">
-                              Our Top Pick For:  <span class="late--text"> {{ hotel.Zone?.Name || 'Zone Not Available' }} </span>
+                              Our Top Pick For:  <span class="late--text"> {{ hotel.city_name || 'City Name' }} City</span>
                             </p>
                           </v-col>
                           <v-col cols="12" md="4" class="p-0">
@@ -1783,10 +1783,10 @@
             </v-btn>
           </v-card-title>
           <v-card-text class="pt-4">
-      <v-row v-if="isHotelsLoading" align="center" justify="center">
-        <v-progress-circular indeterminate color="brown"></v-progress-circular>
-      </v-row>
-            <div v-else v-for="(hotel, h) in listGtaHotelJpds" :key="h">
+            <v-row v-if="isHotelsLoading" align="center" justify="center">
+              <v-progress-circular indeterminate color="brown" />
+            </v-row>
+            <div v-for="(hotel, h) in listGtaHotelJpds" v-else :key="h">
               <v-row class="hotel-card mb-4" style="padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                 <!-- Hotel Image -->
                 <v-col cols="12" md="4" class="p-0">
@@ -3296,29 +3296,65 @@ export default {
         this.showCheckout = false
       }
     },
+    // async showHotels (indexCity) {
+    //   this.showHotelsDialog = true
+    //   this.isHotelsLoading = true
+    //   this.listGtaHotelJpds = []
+    //   const getHotels = this.listGtaHotelDetails[indexCity]
+    //   if (getHotels.hotelJpds.length > 0) {
+    //     for (let index = 0; index < getHotels.hotelJpds.length; index++) {
+    //       if (getHotels.hotelJpds[index]) {
+    //         const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
+    //         const response2 = await promise2
+    //         const results2 = response2?.data?.ContentRS?.Contents?.HotelContent
+    //         console.log('results: ', results2)
+    //         results2.city_id = getHotels.city_id
+    //         results2.city_name = getHotels.city_name
+    //         results2.hotelIDs = getHotels.hotelIDs
+    //         results2.hotelJpds = getHotels.hotelJpds
+    //         results2.isAvailable = false
+    //         results2.isAvailableText = 'Not Checked with Dates'
+    //         this.listGtaHotelJpds.push(results2)
+    //         this.isHotelsLoading = false
+    //       }
+    //     }
+    //   }
+    //   this.selectedCityHotelIndex = indexCity
+    // },
     async showHotels (indexCity) {
       this.showHotelsDialog = true
       this.isHotelsLoading = true
       this.listGtaHotelJpds = []
+
       const getHotels = this.listGtaHotelDetails[indexCity]
       if (getHotels.hotelJpds.length > 0) {
         for (let index = 0; index < getHotels.hotelJpds.length; index++) {
           if (getHotels.hotelJpds[index]) {
-            const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
-            const response2 = await promise2
-            const results2 = response2.data.ContentRS.Contents.HotelContent
-            console.log('results: ', results2)
-            results2.city_id = getHotels.city_id
-            results2.city_name = getHotels.city_name
-            results2.hotelIDs = getHotels.hotelIDs
-            results2.hotelJpds = getHotels.hotelJpds
-            results2.isAvailable = false
-            results2.isAvailableText = 'Not Checked with Dates'
-            this.listGtaHotelJpds.push(results2)
-            this.isHotelsLoading = false
+            try {
+              const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
+              const response2 = await promise2
+              const results2 = response2?.data?.ContentRS?.Contents?.HotelContent
+
+              if (!results2) {
+                console.warn('No hotel data found for this ID, skipping...')
+                continue // Skip this iteration if results2 is undefined
+              }
+
+              results2.city_id = getHotels.city_id
+              results2.city_name = getHotels.city_name
+              results2.hotelIDs = getHotels.hotelIDs
+              results2.hotelJpds = getHotels.hotelJpds
+              results2.isAvailable = false
+              results2.isAvailableText = 'Not Checked with Dates'
+              this.listGtaHotelJpds.push(results2)
+              this.isHotelsLoading = false
+            } catch (error) {
+              console.warn(`Failed to retrieve hotel data: ${error.message}`)
+            }
           }
         }
       }
+      // this.isHotelsLoading = false
       this.selectedCityHotelIndex = indexCity
     },
     // async getZonesperHotels (indexCity) {
@@ -3462,23 +3498,52 @@ export default {
           src: image.image
         }))
       }
+      // if (this.packageDetails.package_hotel.length > 0) {
+      //   const packageHotel = this.packageDetails.package_hotel
+      //   console.log(packageHotel)
+      //   for (let index = 0; index < packageHotel.length; index++) {
+      //     if (packageHotel[index].hotel.Jpd_code) {
+      //       const promise2 = tripsServices.getGtaHotelDetails(packageHotel[index].hotel.Jpd_code)
+      //       const response2 = await promise2
+      //       const results2 = response2.data.ContentRS.Contents.HotelContent
+      //       results2.city_id = packageHotel[index].city_id
+      //       results2.city_name = packageHotel[index].city_name
+      //       results2.hotelIDs = packageHotel[index].hotelIDs
+      //       results2.hotelJpds = packageHotel[index].hotelJpds
+      //       results2.isAvailable = false
+      //       results2.isAvailableText = 'Not Checked with Dates'
+      //       this.listGtaHotelDetails.push(results2)
+      //     }
+      //   }
+      // }
       if (this.packageDetails.package_hotel.length > 0) {
-        const packageHotel = this.packageDetails.package_hotel
-        for (let index = 0; index < packageHotel.length; index++) {
-          if (packageHotel[index].hotel.Jpd_code) {
-            const promise2 = tripsServices.getGtaHotelDetails(packageHotel[index].hotel.Jpd_code)
-            const response2 = await promise2
-            const results2 = response2.data.ContentRS.Contents.HotelContent
-            results2.city_id = packageHotel[index].city_id
-            results2.city_name = packageHotel[index].city_name
-            results2.hotelIDs = packageHotel[index].hotelIDs
-            results2.hotelJpds = packageHotel[index].hotelJpds
-            results2.isAvailable = false
-            results2.isAvailableText = 'Not Checked with Dates'
-            this.listGtaHotelDetails.push(results2)
+        const packageHotel = this.packageDetails.package_hotel[0] // Assuming you're only dealing with the first item in `package_hotel`
+        const accommodations = packageHotel.accommodations
+
+        for (let i = 0; i < accommodations.length; i++) {
+          const accommodation = accommodations[i]
+
+          if (accommodation.recommended_hotel && accommodation.recommended_hotel.Jpd_code) {
+            try {
+              const response = await tripsServices.getGtaHotelDetails(accommodation.recommended_hotel.Jpd_code)
+              console.log('response: ', response)
+              const hotelDetails = response.data.ContentRS.Contents.HotelContent
+
+              hotelDetails.city_id = accommodation.city_id
+              hotelDetails.city_name = accommodation.city_name
+              hotelDetails.hotelIDs = accommodation.hotels.map(hotel => hotel.id)
+              hotelDetails.hotelJpds = accommodation.hotels.map(hotel => hotel.Jpd_code)
+              hotelDetails.isAvailable = false
+              hotelDetails.isAvailableText = 'Not Checked with Dates'
+
+              this.listGtaHotelDetails.push(hotelDetails)
+            } catch (error) {
+              console.error('Error fetching hotel details:', error)
+            }
           }
         }
       }
+
       if (this.packageDetails.availabilities.length > 0) {
         const availabilities = this.packageDetails.availabilities
         for (let indexA = 0; indexA < availabilities.length; indexA++) {

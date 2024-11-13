@@ -22,7 +22,7 @@
         <v-card-text style="max-height: 500px; overflow: auto;">
           <!-- Single Rooms Counter at the Top -->
           <div class="rooms mb-3">
-            <span class="label">Rooms</span>
+            <span class="label">ROOMS</span>
             <v-icon small color="white" class="minus" @click="decrease('rooms')">
               mdi-minus
             </v-icon>
@@ -37,13 +37,13 @@
             <v-row class="align-center no-gutters mb-3" dense>
               <!-- Room Label -->
               <v-col cols="12" class="mb-2 d-flex align-center justify-center room-label">
-                <span class="room-text">Room {{ roomIndex + 1 }}</span>
+                <span class="room-text">ROOM {{ roomIndex + 1 }}</span>
               </v-col>
 
               <!-- Adults Section -->
               <v-col cols="5" class="d-flex align-center justify-center">
-                <div class="adults">
-                  <span class="label">Adults</span>
+                <div class="adults mr-4">
+                  <span class="label">ADUTLS(+18)</span>
                   <v-icon small color="white" class="minus" @click="decrease('adults', roomIndex)">
                     mdi-minus
                   </v-icon>
@@ -56,8 +56,8 @@
 
               <!-- Children Section -->
               <v-col cols="5" class="d-flex align-center justify-center">
-                <div class="children">
-                  <span class="label">Children</span>
+                <div class="children pa-0">
+                  <span class="label">CHILD(0-17)</span>
                   <v-icon small color="white" class="minus" @click="decrease('children', roomIndex)">
                     mdi-minus
                   </v-icon>
@@ -71,13 +71,15 @@
               <!-- Children's Ages (Appears Only If Children Count > 0) -->
               <v-col v-if="children[roomIndex] > 0" cols="12" class="d-flex align-center justify-center mt-2">
                 <v-row dense>
+                  <span class="label mt-1">CHILDREN AGES:</span>
+                  <span class="text--caption mt-1">Enter children ages on the date of the trip to get the best prices</span>
+                  <br>
                   <v-col
                     v-for="(age, ageIndex) in childrenAges[roomIndex]"
                     :key="ageIndex"
                     class="d-flex align-center justify-center"
                     style="width: 80px;"
                   >
-                    <span class="label">Age</span>
                     <v-icon small color="white" class="minus" @click="decrease('age', roomIndex, ageIndex)">
                       mdi-minus
                     </v-icon>
@@ -118,7 +120,7 @@ export default {
       } else if (type === 'adults') {
         this.$set(this.adults, roomIndex, Math.min(this.adults[roomIndex] + 1, 6))
       } else if (type === 'children') {
-        this.$set(this.children, roomIndex, Math.min(this.children[roomIndex] + 1, 4))
+        this.$set(this.children, roomIndex, Math.min(this.children[roomIndex] + 1, 5))
         this.$set(this.childrenAges, roomIndex, Array(this.children[roomIndex]).fill(1))
       } else if (type === 'age' && ageIndex !== undefined) {
         this.$set(this.childrenAges[roomIndex], ageIndex, Math.min(this.childrenAges[roomIndex][ageIndex] + 1, 17))
@@ -189,8 +191,8 @@ export default {
 }
 .label {
   font-weight: bold;
-  font-size: 14px;
-  margin-right: 10px;
+  font-size: 12px;
+  margin-right: 5px;
 }
 .number {
   width: 35px;

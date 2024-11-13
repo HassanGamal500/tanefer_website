@@ -649,7 +649,7 @@
                       <td>
                         <v-icon class="mr-2" small>
                           mdi-comment-text-outline
-                        </v-icon> <strong>Comments</strong>
+                        </v-icon> <strong>Others</strong>
                       </td>
                       <td>
                         <div v-html="bookingResponse.comments" />
