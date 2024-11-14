@@ -3174,7 +3174,7 @@ export default {
 }
 
 ::v-deep button.primary--text {
-  color: gold !important;
+  color: #DAA520 !important;
 }
 
 ::v-deep div.v-input__slot {

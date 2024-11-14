@@ -406,7 +406,6 @@
                             <!-- Rating -->
                             <v-rating
                               :value="getRatingFromCategory(hotel.HotelCategory._)"
-                              color="yellow"
                               dense
                               readonly
                             />
@@ -1786,6 +1785,7 @@
             <v-row v-if="isHotelsLoading" align="center" justify="center">
               <v-progress-circular indeterminate color="brown" />
             </v-row>
+            <!-- ** make sure retrieved hotels are per city   -->
             <div v-for="(hotel, h) in listGtaHotelJpds" v-else :key="h">
               <v-row class="hotel-card mb-4" style="padding: 10px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
                 <!-- Hotel Image -->
@@ -1810,7 +1810,6 @@
                       <!-- <span class="mr-2 font-weight-bold" style="font-size: 15px;">Category:</span> -->
                       <v-rating
                         :value="getRatingFromCategory(hotel.HotelCategory?._)"
-                        color="yellow"
                         dense
                         readonly
                       />
@@ -4160,7 +4159,7 @@ export default {
       console.log('Additional Price:', additionalPrice)
       console.log('Discount Percentage:', percentagePrice)
 
-      const getAllPositivePrices = initialPrice + hotelPrice + hotelAvailPrices + additionalPrice
+      const getAllPositivePrices = initialPrice + hotelPrice + additionalPrice
       const getDiscountPercentagePrice = percentagePrice === 0 ? 0 : (getAllPositivePrices * percentagePrice / 100)
       const totalAllPrices = getAllPositivePrices - getDiscountPercentagePrice
 
@@ -5088,4 +5087,9 @@ export default {
 ::v-deep .v-text-field.v-text-field--enclosed .v-text-field__details {
   margin-bottom: 0px;
 }
+
+::v-deep button.primary--text {
+  color: #DAA520 !important;
+}
+
 </style>
