@@ -2,7 +2,7 @@ import axios from 'axios'
 
 export default {
   ssr: true,
-  target: 'server',
+  // target: 'server',
   router: {
     // base: '/public/'
     base: ''
@@ -153,7 +153,7 @@ export default {
     }
   },
 
-  // target: 'static',
+  target: 'static',
   // generate: {
   //   // interval: 100,
   //   fallback: true,
@@ -206,6 +206,7 @@ export default {
         '/booking/trip',
         '/adventures',
         '/booking/adventure',
+        '/booking/cruise',
         '/comingSoon',
         '/hotels',
         '/cruises'

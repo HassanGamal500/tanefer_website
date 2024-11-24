@@ -1096,9 +1096,9 @@ export default {
     //   this.text = this.$route.query.response_message
     // }
   },
-  beforeDestroy () {
-    window.location.reload()
-  },
+  //  beforeDestroy () {
+  //    window.location.reload()
+  //  },
   methods: {
     adventuresTotalPrice () {
       return this.$store.state.travellersNumber.totalPrice

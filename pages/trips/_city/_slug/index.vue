@@ -967,6 +967,9 @@
                                           required
                                           color="blue"
                                           class="rounded-lg"
+                                          :rules="[
+                                            v => (v <= 17 || v === null || v === '') || 'Age must not exceed 17'
+                                          ]"
                                         />
                                       </v-col>
                                     </v-row>
@@ -1707,7 +1710,7 @@
                     </p>
                   </v-col>
                   <v-col cols="3" md="3">
-                    <p>$ {{ hotelPrices }}</p>
+                    <p>$ {{ hotelPrices.toFixed(2) }}</p>
                   </v-col>
                 </v-row>
               </div>
@@ -2684,7 +2687,7 @@ export default {
       menu: null,
       travellers: 0,
       children: 0,
-      ages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+      ages: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
       ageSelects: [],
       showAgesSelects: false,
       selectedAdventures: [],
