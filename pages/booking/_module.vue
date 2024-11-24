@@ -251,12 +251,12 @@
           </div>
           <div v-if="packageActivities">
             <h2>
-              Package Name: <strong>{{ packageActivities.packageTitle }}</strong>
+              <strong>{{ packageActivities.packageTitle }}</strong>
             </h2>
             <h5>Start on: <strong>{{ packageStartDay }}</strong> for <strong>{{ packageActivities.packageDuration }}</strong> Days / <strong>{{ packageActivities.packageNightsNumber }}</strong> Nights</h5>
             <h5 class="mb-5">
               <!-- Price: <strong>${{ packageTotalPrice }}</strong> -->
-              Price: <strong>${{ packageTotalAllPrice }}</strong>
+              Price: <strong>${{ packageTotalAllPrice.toFixed(2) }}</strong>
             </h5>
             <div v-for="(activity, i) in packageActivities.activities" :key="i">
               <v-expansion-panels v-model="panelExpandedActivities[i]" focusable class="mb-5">
@@ -345,7 +345,9 @@
                 </v-expansion-panel>
               </v-expansion-panels>
             </div>
-            <div v-if="numberOfPassenger.hotelJPCode !== NULL && numberOfPassenger.bookingRule">
+            <!-- confirmation of accommodation -->
+            <div>
+              <!-- <div v-if="numberOfPassenger.hotelJPCode !== NULL && numberOfPassenger.bookingRule"> -->
               <v-expansion-panels v-model="numberOfPassenger.hotelJPCode" focusable class="mb-5">
                 <v-expansion-panel style="border-radius: 18px;">
                   <v-expansion-panel-header class="font-weight-bold text-h6 change-icon-style" style="border-radius: 8px;">
@@ -356,51 +358,123 @@
                     </v-row>
                   </v-expansion-panel-header>
                   <v-expansion-panel-content class="my-8">
-                    <v-card class="my-2">
-                      <v-card-title class="white--text" style="background-color: #4f3316;">
-                        <span v-if="numberOfPassenger.bookingRule"> {{ numberOfPassenger.bookingRule.HotelOptions.HotelOption.PriceInformation.HotelContent.HotelName }} </span>
-                      </v-card-title>
-                      <v-card-text class="pt-4">
-                        <v-row>
-                          <v-col cols="12">
-                            <v-row>
-                              <!-- <v-col cols="12">
-                                Number of Adults: <strong>{{ numberOfPassenger.adults }}</strong>
-                              </v-col>
-                              <v-col cols="12">
-                                Number of Children: <strong>{{ numberOfPassenger.children }}</strong>
-                              </v-col> -->
-                              <v-col cols="12">
-                                Check In: <strong>{{ numberOfPassenger.hotelStartDate }}</strong>
-                              </v-col>
-                              <v-col cols="12">
-                                Check Out: <strong>{{ numberOfPassenger.hotelEndDate }}</strong>
-                              </v-col>
-                              <!-- <v-col cols="12">
-                                Price: <strong>${{ numberOfPassenger.bookingRule.HotelOptions.HotelOption.PriceInformation.Prices.Price.TotalFixAmounts.Nett }}</strong>
-                              </v-col> -->
-                            </v-row>
-                          </v-col>
-                        </v-row>
-                      </v-card-text>
-                    </v-card>
+                    <!-- my new design -->
+                    <v-row>
+                      <!-- Loop through the multipleBookingResponse array -->
+                      <v-col
+                        v-for="(booking, index) in multipleBookingResponse"
+                        :key="index"
+                        cols="12"
+                        md="12"
+                      >
+                        <v-card outlined class="pa-3 mb-4">
+                          <!-- Display booking details -->
+                          <!-- <h3 class="text-h6 font-weight-bold mb-3">
+                            Booking {{ index + 1 }}
+                          </h3> -->
+                          <v-list dense>
+                            <v-list-item>
+                              <v-list-item-icon>
+                                <v-icon>mdi-hotel</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-content>
+                                <v-list-item-title>
+                                  <strong class="text-h6"> {{ booking.hotelName || 'N/A' }} </strong>
+                                </v-list-item-title>
+                              </v-list-item-content>
+                            </v-list-item>
+
+                            <!-- <v-list-item>
+                              <v-list-item-icon>
+                                <v-icon>mdi-star</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-content>
+                                <v-list-item-title>
+                                  <strong>Category:</strong> {{ booking.hotelCategory || 'N/A' }}
+                                </v-list-item-title>
+                              </v-list-item-content>
+                            </v-list-item> -->
+
+                            <v-list-item>
+                              <v-list-item-icon>
+                                <v-icon>mdi-map-marker</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-content>
+                                <v-list-item-title>
+                                  <strong>Address:</strong> {{ booking.address || 'N/A' }}
+                                </v-list-item-title>
+                              </v-list-item-content>
+                            </v-list-item>
+
+                            <v-list-item>
+                              <v-list-item-icon>
+                                <v-icon>mdi-currency-usd</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-content>
+                                <v-list-item-title>
+                                  <strong>Total Price:</strong> ${{ booking.totalPrice || 'N/A' }}
+                                </v-list-item-title>
+                              </v-list-item-content>
+                            </v-list-item>
+
+                            <v-list-item>
+                              <v-list-item-icon>
+                                <v-icon>mdi-bed</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-content>
+                                <v-list-item-title>
+                                  <strong> {{ booking.board || 'N/A' }} - </strong> {{ booking.roomType || 'N/A' }}
+                                </v-list-item-title>
+                              </v-list-item-content>
+                            </v-list-item>
+
+                            <v-list-item>
+                              <v-list-item-icon>
+                                <v-icon>mdi-alert-circle-outline</v-icon>
+                              </v-list-item-icon>
+                              <v-list-item-content>
+                                <v-list-item-title>
+                                  <strong>Others:</strong>
+                                  <div v-html="booking.comments || 'N/A'" />
+                                </v-list-item-title>
+                              </v-list-item-content>
+                            </v-list-item>
+
+                            <!-- <v-list-item>
+                                  <v-list-item-icon>
+                                    <v-icon>mdi-alert-circle-outline</v-icon>
+                                  </v-list-item-icon>
+                                  <v-list-item-content>
+                                    <v-list-item-title>
+                                      <strong>Cancellation Policy:</strong>
+                                      {{ booking.cancellationPolicy || 'N/A' }}
+                                    </v-list-item-title>
+                                  </v-list-item-content>
+                                </v-list-item> -->
+                          </v-list>
+                        </v-card>
+                      </v-col>
+                    </v-row>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
             </div>
           </div>
-          <div>If you want to book flight click here</div>
-          <v-btn
-            class="brown white--text py-5 mt-5 mr-5 px-12"
-            @click="openBookFlight"
-          >
-            Book Flight
-          </v-btn>
-          <br>
-          <!-- <NuxtLink to="/trips"> -->
-          <v-btn class="brown white--text py-5 mt-5 mr-5 px-12" @click="redirectPageTrips">
-            Check Trips
-          </v-btn>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <v-btn
+              class="brown white--text py-5 mt-5 mr-5 px-12"
+              @click="openBookFlight"
+            >
+              Book Flight
+            </v-btn>
+            <v-btn
+              class="brown white--text py-5 mt-5 mr-5 px-12"
+              @click="redirectPageTrips"
+            >
+              Check Trips
+            </v-btn>
+          </div>
+
           <!-- </NuxtLink> -->
         </div>
         <div v-if="$route.params.module === 'adventure'" class="flight-review-border">
@@ -839,6 +913,9 @@ export default {
     }
   },
   computed: {
+    multipleBookingResponse () {
+      return this.$store.getters['modules/booking/getMultipleBookingResponses']
+    },
     bookingResponse () {
       return this.$store.getters['modules/booking/getBookingResponse']
     }
@@ -873,6 +950,7 @@ export default {
   },
   mounted () {
     console.log('Stored booking response in Vuex:', this.$store.getters['modules/booking/getBookingResponse'])
+    console.log('Stored booking response in Vuex:', this.$store.getters['modules/booking/getMultipleBookingResponses'])
     // const queryParams = this.$route.query
     // console.log(queryParams)
     if (this.$route.params.module === 'cruise') {
@@ -955,7 +1033,8 @@ export default {
         this.packageTotalPrice = this.$store.state.travellersNumber.totalPrice
         this.packageTotalAllPrice = this.$store.state.travellersNumber.totalAllPrices
         this.priceSessionId = this.$store.state.travellersNumber.priceSessionId
-        this.hotelJPCode = this.$store.state.travellersNumber.hotelJPCode
+        this.hotelJPCode = this.multipleBookingResponse.code
+        console.log(this.hotelJPCode)
         this.finalBookHotelFormData = this.$store.state.travellersNumber.finalBookHotelFormData
         this.checkHasCruise = this.$store.state.travellersNumber.checkHasCruise
         // this.bookingIntCodes = this.$store.state.travellersNumber.bookingInfo.IntCode
@@ -1016,6 +1095,9 @@ export default {
     //   this.color = 'error'
     //   this.text = this.$route.query.response_message
     // }
+  },
+  beforeDestroy () {
+    window.location.reload()
   },
   methods: {
     adventuresTotalPrice () {
@@ -1106,7 +1188,7 @@ export default {
           children: this.numberOfPassenger.children,
           hotelIntCode: this.bookingIntCode,
           hotelLocator: this.bookingLocator,
-          hotelJPCode: this.hotelJPCode,
+          hotelJPCode: this.multipleBookingResponse?.[0]?.code || '',
           hotelStartDate: this.hotelStartDate,
           hotelEndDate: this.hotelEndDate,
           finalBookHotelFormData: this.finalBookHotelFormData,

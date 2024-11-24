@@ -787,13 +787,13 @@
                         </div>
                         <v-row class="pa-3">
                           <v-col cols="12" md="12">
-                            <div class="cruise-result-trip justify-space-between">
+                            <div>
                               <v-form ref="form" v-model="travellersFormValid">
                                 <p class="body-1 font-weight-bold text-h5 mb-4">
-                                  Holder Information
+                                  Booking Holder Information
                                 </p>
-                                <v-card class="pa-6 mb-5 rounded-xl" elevation="6">
-                                  <v-row dense>
+                                <v-card class="pa-3 mb-5">
+                                  <v-row>
                                     <v-col cols="4" md="2">
                                       <v-combobox
                                         v-model="title"
@@ -1003,7 +1003,7 @@
                       class="btn-beige"
                       @click="checkTheStepCurrent"
                     >
-                      Next
+                      Proceed With Booking
                     </v-btn>
                   </v-stepper-content>
 
@@ -1695,6 +1695,19 @@
                   </v-col>
                   <v-col cols="3" md="3">
                     <p>$ {{ initialPrice }}</p>
+                  </v-col>
+                </v-row>
+              </div>
+              <v-divider class="mb-4" />
+              <div>
+                <v-row class="mt-4">
+                  <v-col cols="9" md="9">
+                    <p class="font-weight-bold" style="font-size: 25px;color: #000;">
+                      Accommodation Cost
+                    </p>
+                  </v-col>
+                  <v-col cols="3" md="3">
+                    <p>$ {{ hotelPrices }}</p>
                   </v-col>
                 </v-row>
               </div>
@@ -3321,41 +3334,83 @@ export default {
     //   this.selectedCityHotelIndex = indexCity
     // },
     async showHotels (indexCity) {
+      // Initialize UI state
       this.showHotelsDialog = true
       this.isHotelsLoading = true
-      this.listGtaHotelJpds = []
+      this.listGtaHotelJpds = [] // Clear previous data
 
-      const getHotels = this.listGtaHotelDetails[indexCity]
-      if (getHotels.hotelJpds.length > 0) {
-        for (let index = 0; index < getHotels.hotelJpds.length; index++) {
-          if (getHotels.hotelJpds[index]) {
-            try {
-              const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
-              const response2 = await promise2
-              const results2 = response2?.data?.ContentRS?.Contents?.HotelContent
+      const cityHotels = this.listGtaHotelDetails[indexCity] // Get data for the specific city
+      if (!cityHotels || !cityHotels.hotelJpds || cityHotels.hotelJpds.length === 0) {
+        console.warn('No hotels found for the selected city.')
+        this.isHotelsLoading = false
+        return
+      }
 
-              if (!results2) {
-                console.warn('No hotel data found for this ID, skipping...')
-                continue // Skip this iteration if results2 is undefined
-              }
+      for (let i = 0; i < cityHotels.hotelJpds.length; i++) {
+        const hotelJpd = cityHotels.hotelJpds[i]
+        if (!hotelJpd) { continue }
 
-              results2.city_id = getHotels.city_id
-              results2.city_name = getHotels.city_name
-              results2.hotelIDs = getHotels.hotelIDs
-              results2.hotelJpds = getHotels.hotelJpds
-              results2.isAvailable = false
-              results2.isAvailableText = 'Not Checked with Dates'
-              this.listGtaHotelJpds.push(results2)
-              this.isHotelsLoading = false
-            } catch (error) {
-              console.warn(`Failed to retrieve hotel data: ${error.message}`)
-            }
+        try {
+          const response = await tripsServices.getGtaHotelDetails(hotelJpd)
+          const hotelDetails = response?.data?.ContentRS?.Contents?.HotelContent
+
+          if (!hotelDetails) {
+            console.warn(`No details found for hotel JP code: ${hotelJpd}`)
+            continue
           }
+
+          hotelDetails.city_id = cityHotels.city_id
+          hotelDetails.city_name = cityHotels.city_name
+          hotelDetails.hotelIDs = cityHotels.hotelIDs
+          hotelDetails.hotelJpds = cityHotels.hotelJpds
+          hotelDetails.isAvailable = false
+          hotelDetails.isAvailableText = 'Not Checked with Dates'
+
+          this.listGtaHotelJpds.push(hotelDetails)
+          this.isHotelsLoading = false
+        } catch (error) {
+          console.error(`Failed to fetch hotel details for JP code: ${hotelJpd}`, error)
         }
       }
-      // this.isHotelsLoading = false
+
       this.selectedCityHotelIndex = indexCity
     },
+    // async showHotels (indexCity) {
+    //   this.showHotelsDialog = true
+    //   this.isHotelsLoading = true
+    //   this.listGtaHotelJpds = []
+
+    //   const getHotels = this.listGtaHotelDetails[indexCity]
+    //   if (getHotels.hotelJpds.length > 0) {
+    //     for (let index = 0; index < getHotels.hotelJpds.length; index++) {
+    //       if (getHotels.hotelJpds[index]) {
+    //         try {
+    //           const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
+    //           const response2 = await promise2
+    //           const results2 = response2?.data?.ContentRS?.Contents?.HotelContent
+
+    //           if (!results2) {
+    //             console.warn('No hotel data found for this ID, skipping...')
+    //             continue // Skip this iteration if results2 is undefined
+    //           }
+
+    //           results2.city_id = getHotels.city_id
+    //           results2.city_name = getHotels.city_name
+    //           results2.hotelIDs = getHotels.hotelIDs
+    //           results2.hotelJpds = getHotels.hotelJpds
+    //           results2.isAvailable = false
+    //           results2.isAvailableText = 'Not Checked with Dates'
+    //           this.listGtaHotelJpds.push(results2)
+    //           this.isHotelsLoading = false
+    //         } catch (error) {
+    //           console.warn(`Failed to retrieve hotel data: ${error.message}`)
+    //         }
+    //       }
+    //     }
+    //   }
+    //   // this.isHotelsLoading = false
+    //   this.selectedCityHotelIndex = indexCity
+    // },
     // async getZonesperHotels (indexCity) {
     //   // this.hotelStartDateText = this.packageStartDayText
     //   // this.hotelStartDate = this.packageStartDay
@@ -3813,9 +3868,9 @@ export default {
           this.checkResponseCode = false
         }
       } catch (error) {
-        this.snackbar = true
-        this.color = 'error'
-        this.text = 'Something went wrong'
+        // this.snackbar = true
+        // this.color = 'error'
+        // this.text = 'Something went wrong'
         this.loaded = false
         this.checkResponseCode = false
       }
@@ -3959,9 +4014,9 @@ export default {
             this.isLoading = false
           }
         } catch (error) {
-          this.snackbar = true
-          this.color = 'error'
-          this.text = 'Something went wrong'
+          // this.snackbar = true
+          // this.color = 'error'
+          // this.text = 'Something went wrong'
           this.loaded = false
           this.checkResponseCode = false
           this.isLoading = false
@@ -3985,7 +4040,7 @@ export default {
         const formData = new FormData()
         formData.append('start_date', this.hotelStartDates[hotelIndex])
         formData.append('end_date', this.hotelEndDates[hotelIndex])
-        formData.append('board', this.boardType.Type || 'all')
+        formData.append('board', this.boardType.Type || '')
         formData.append('hotels[' + 0 + ']', hotelDetail.Code)
         formData.append('adults', this.travellers || 1)
         formData.append('children', this.children || 0)
@@ -4335,7 +4390,7 @@ export default {
           return total + rooms.reduce((sum, room) => sum + room.Prices.Price.TotalFixAmounts.Nett, 0)
         }, 0)
 
-        this.totalAllPrices = this.getFinalTotalPrices()
+        // this.totalAllPrices = this.getFinalTotalPrices()
         console.log('Total Hotel Prices:', this.hotelPrices, 'Total All Prices:', this.totalAllPrices)
       } else {
         console.error('Hotel or room data not found for hotelIndex', hotelIndex, 'and roomIndex', roomIndex)
@@ -4449,9 +4504,54 @@ export default {
     //   }
     // },
 
+    // async confirmSelectedRoom () {
+    //   this.isLoading = true
+    //   this.getbookingRules = [] // Initialize to avoid undefined errors
+
+    //   if (this.getRatePlanCodes.length > 0) {
+    //     for (let x = 0; x < this.getRatePlanCodes.length; x++) {
+    //       const formData = new FormData()
+    //       formData.append('RatePlanCode', this.getRatePlanCodes[x])
+    //       formData.append('StartDate', this.hotelStartDates[x])
+    //       formData.append('EndDate', this.hotelEndDates[x])
+    //       formData.append('HotelCode', this.selectedHotelCodes[x])
+
+    //       try {
+    //         const promise = tripsServices.getBookingRules(formData)
+    //         const response = await promise
+    //         console.log(response)
+    //         const results = response.data.BookingRulesRS
+
+    //         if (results.Errors !== undefined) {
+    //           // this.snackbar = true
+    //           // this.color = 'error'
+    //           // this.text = this.errorMessage(results.Errors.Error.Text)
+    //           this.loaded = false
+    //           this.checkResponseCode = false
+    //           this.isLoading = false
+    //         } else {
+    //           this.getbookingRules[x] = results.Results.HotelResult
+    //           this.getbookingRuleArray.push(results.Results.HotelResult)
+    //           this.confirmedSelectedRoom = true
+    //           this.isLoading = false
+    //         }
+    //       } catch (error) {
+    //         this.snackbar = true
+    //         this.color = 'error'
+    //         this.text = 'Something went wrong'
+    //         this.loaded = false
+    //         this.checkResponseCode = false
+    //         this.isLoading = false
+    //       }
+    //     }
+    //   }
+
+    //   console.log('getbookingRules after confirmSelectedRoom:', this.getbookingRules)
+    // },
     async confirmSelectedRoom () {
       this.isLoading = true
       this.getbookingRules = [] // Initialize to avoid undefined errors
+      this.$store.dispatch('modules/booking/resetMultipleBookingData') // Clear previous multiple bookings
 
       if (this.getRatePlanCodes.length > 0) {
         for (let x = 0; x < this.getRatePlanCodes.length; x++) {
@@ -4468,9 +4568,7 @@ export default {
             const results = response.data.BookingRulesRS
 
             if (results.Errors !== undefined) {
-              // this.snackbar = true
-              // this.color = 'error'
-              // this.text = this.errorMessage(results.Errors.Error.Text)
+              // Handle errors
               this.loaded = false
               this.checkResponseCode = false
               this.isLoading = false
@@ -4478,12 +4576,16 @@ export default {
               this.getbookingRules[x] = results.Results.HotelResult
               this.getbookingRuleArray.push(results.Results.HotelResult)
               this.confirmedSelectedRoom = true
+
+              // Dispatch data to store for multiple hotels
+              this.$store.dispatch('modules/booking/addMultipleBookingResponse', results)
+
               this.isLoading = false
             }
           } catch (error) {
-            this.snackbar = true
-            this.color = 'error'
-            this.text = 'Something went wrong'
+            // this.snackbar = true
+            // this.color = 'error'
+            // this.text = 'Something went wrong'
             this.loaded = false
             this.checkResponseCode = false
             this.isLoading = false
@@ -4790,6 +4892,7 @@ export default {
     // },
     async finalBookHotel () {
       this.isLoading = true
+      this.totalAllPrices = this.getFinalTotalPrices()
 
       // Filter out undefined entries from getbookingRules
       const validBookingRules = this.getbookingRules.filter(rule => rule)

@@ -7,6 +7,7 @@
       :preferred-countries="['US', 'EG']"
       :countries-height="25"
       no-flags
+      size="lg"
       class="mb-5"
       @update="assignPhone"
     >

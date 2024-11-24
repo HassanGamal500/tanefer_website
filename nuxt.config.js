@@ -1,6 +1,8 @@
 import axios from 'axios'
 
 export default {
+  ssr: true,
+  target: 'server',
   router: {
     // base: '/public/'
     base: ''
@@ -196,13 +198,11 @@ export default {
   //   ]
   // },
 
-  target: 'static',
   generate: {
     fallback: true,
     routes: async () => {
       const routes = [
         '/',
-        '/trips',
         '/booking/trip',
         '/adventures',
         '/booking/adventure',
@@ -217,7 +217,6 @@ export default {
 
         for (const city of cities) {
           routes.push(`/adventures/${city.citySlug}`)
-          routes.push(`/trips/${city.citySlug}`)
           routes.push(`/cruises/${city.citySlug}`)
         }
       } catch (error) {
@@ -226,7 +225,10 @@ export default {
       }
 
       return routes
-    }
+    },
+    exclude: [
+      /^\/trips/
+    ]
   },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
