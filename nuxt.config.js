@@ -1,8 +1,7 @@
 import axios from 'axios'
 
 export default {
-  ssr: true,
-  // target: 'server',
+
   router: {
     // base: '/public/'
     base: ''

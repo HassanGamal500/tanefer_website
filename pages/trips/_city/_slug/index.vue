@@ -111,6 +111,7 @@
                 <v-stepper-header>
                   <v-stepper-step
                     :complete="e1 > 1"
+                    color="#8e5b3c"
                     step="1"
                   >
                     Activity
@@ -120,14 +121,15 @@
 
                   <v-stepper-step
                     :complete="e1 > 2"
+                    color="#8e5b3c"
                     step="2"
                   >
-                    Acomidation
+                    Accommodation
                   </v-stepper-step>
 
                   <v-divider />
 
-                  <v-stepper-step step="3">
+                  <v-stepper-step step="3" color="#8e5b3c">
                     Trip Summary
                   </v-stepper-step>
                 </v-stepper-header>
@@ -349,14 +351,15 @@
                         </v-expansion-panels>
                       </div>
                     </v-card>
-
-                    <v-btn
-                      color="primary"
-                      :disabled="!isButtonEnabled"
-                      @click="checkPackageDateIsExist"
-                    >
-                      Next
-                    </v-btn>
+                    <v-col cols="12" class="d-flex justify-end">
+                      <v-btn
+                        class="btn-beige"
+                        :disabled="!isButtonEnabled"
+                        @click="checkPackageDateIsExist"
+                      >
+                        Next
+                      </v-btn>
+                    </v-col>
                   </v-stepper-content>
 
                   <v-stepper-content step="2">
@@ -376,7 +379,11 @@
                           </v-col>
                           <v-col cols="12" md="4" class="p-0">
                             <v-img
-                              :src="hotel.Images?.Image[1]?.Type === 'BIG' ? hotel.Images?.Image[1]?.FileName : hotel.Images?.Image[2]?.FileName"
+                              :src="hotel.Images?.Image[1]?.Type === 'BIG'
+                                ? hotel.Images?.Image[1]?.FileName
+                                : hotel.Images?.Image[2]?.Type === 'BIG'
+                                  ? hotel.Images?.Image[2]?.FileName
+                                  : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'"
                               alt="Hotel Image"
                               style="width: 100%; height: 260px; object-fit: cover;"
                               class="rounded-lg"
@@ -996,18 +1003,20 @@
                         </v-row>
                       </div>
                     </v-card>
-                    <v-btn
-                      class="btn-latte"
-                      @click="e1 = 1"
-                    >
-                      Back
-                    </v-btn>
-                    <v-btn
-                      class="btn-beige"
-                      @click="checkTheStepCurrent"
-                    >
-                      Proceed With Booking
-                    </v-btn>
+                    <div class="d-flex justify-space-between">
+                      <v-btn
+                        class="btn-latte"
+                        @click="e1 = 1"
+                      >
+                        Back
+                      </v-btn>
+                      <v-btn
+                        class="btn-beige"
+                        @click="checkTheStepCurrent"
+                      >
+                        {{ buttonText }}
+                      </v-btn>
+                    </div>
                   </v-stepper-content>
 
                   <v-stepper-content step="3">
@@ -1647,7 +1656,7 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showCheckout" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+      <!-- <v-dialog v-model="showCheckout" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
         <v-card>
           <v-card-title class="white--text" style="background-color: #4f3316;">
             Trip Summary
@@ -1775,7 +1784,151 @@
             </v-row>
           </v-card-actions>
         </v-card>
+      </v-dialog> -->
+      <v-dialog v-model="showCheckout" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+        <v-card elevation="2" class="rounded-lg" style="border: 1px solid #ddd; background-color: #f8f8f8;">
+          <v-card-title class="white--text" style="background-color: #4f3316; position: relative;">
+            <span class="font-weight-bold text-h6">Trip Summary</span>
+            <v-btn
+              text
+              elevation="0"
+              color="white"
+              style="position: absolute; top: 10px; right: 10px; background-color: transparent; border: 1px solid #fff;"
+              icon
+              small
+              @click="showCheckout = false"
+            >
+              <v-icon color="white">
+                mdi-close
+              </v-icon>
+            </v-btn>
+          </v-card-title>
+
+          <v-card-text>
+            <!-- Traveller Details -->
+            <v-row class="pt-4 pb-2">
+              <v-col cols="6" sm="3">
+                <v-text-field
+                  :value="travellers"
+                  label="Adults"
+                  prepend-inner-icon="mdi-account-group"
+                  dense
+                  outlined
+                  readonly
+                  class="rounded-lg"
+                />
+              </v-col>
+
+              <v-col cols="6" sm="3">
+                <v-text-field
+                  :value="children"
+                  label="Children"
+                  prepend-inner-icon="mdi-account-child"
+                  dense
+                  outlined
+                  readonly
+                  class="rounded-lg"
+                />
+              </v-col>
+            </v-row>
+
+            <v-divider class="my-3" />
+
+            <!-- Cost Summary -->
+            <div style="background-color: #fff; border-radius: 10px; padding: 16px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);">
+              <v-row class="py-2">
+                <v-col cols="9">
+                  <p class="font-weight-bold mb-0 text-h6">
+                    Adventures
+                  </p>
+                </v-col>
+                <v-col cols="3" class="text-right">
+                  <p class="font-weight-medium text-h6">
+                    $ {{ initialPrice }}
+                  </p>
+                </v-col>
+              </v-row>
+
+              <v-divider />
+
+              <v-row class="py-2">
+                <v-col cols="9">
+                  <p class="font-weight-bold mb-0 text-h6">
+                    Accommodation Cost
+                  </p>
+                </v-col>
+                <v-col cols="3" class="text-right">
+                  <p class="font-weight-medium text-h6">
+                    $ {{ hotelPrices.toFixed(2) }}
+                  </p>
+                </v-col>
+              </v-row>
+
+              <v-divider />
+
+              <v-row class="py-2">
+                <v-col cols="9">
+                  <p class="font-weight-bold mb-0 text-h6">
+                    Additional Cost
+                  </p>
+                </v-col>
+                <v-col cols="3" class="text-right">
+                  <p class="font-weight-medium text-h6">
+                    $ {{ additionalPrice }}
+                  </p>
+                </v-col>
+              </v-row>
+
+              <v-divider />
+
+              <v-row class="py-2">
+                <v-col cols="9">
+                  <p class="font-weight-bold mb-0 text-h6">
+                    Discount
+                  </p>
+                </v-col>
+                <v-col cols="3" class="text-right">
+                  <p class="font-weight-medium text-h6">
+                    % {{ discountPercentage }}
+                  </p>
+                </v-col>
+              </v-row>
+            </div>
+          </v-card-text>
+
+          <!-- Total & Checkout Button -->
+          <v-card-actions class="dialog-cart-footer" style="background-color: #fff; padding: 16px;">
+            <v-row align="center" justify="space-between" class="px-5">
+              <v-col cols="8">
+                <h5 class="text-h5 font-weight-bold">
+                  Total
+                </h5>
+              </v-col>
+              <v-col cols="4" class="text-right">
+                <h5 class="text-h5 font-weight-bold">
+                  $ {{ totalAllPrices.toFixed(2) }}
+                </h5>
+              </v-col>
+            </v-row>
+            <v-row justify="center">
+              <v-btn
+                class="rounded-lg"
+                style="margin-bottom: 15px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);"
+                x-large
+                elevation="2"
+                dark
+                color="#4f3316"
+                block
+                :disabled="!openProceed"
+                @click="bookAdventures"
+              >
+                Complete Checkout
+              </v-btn>
+            </v-row>
+          </v-card-actions>
+        </v-card>
       </v-dialog>
+
       <v-dialog v-model="showHotelsDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
         <v-card>
           <v-card-title class="white--text" style="background-color: #4f3316;">
@@ -1807,7 +1960,11 @@
                 <!-- Hotel Image -->
                 <v-col cols="12" md="4" class="p-0">
                   <v-img
-                    :src="hotel.Images?.Image[1]?.Type === 'BIG' ? hotel.Images?.Image[1]?.FileName : hotel.Images?.Image[2]?.FileName"
+                    :src="hotel.Images?.Image[1]?.Type === 'BIG'
+                      ? hotel.Images?.Image[1]?.FileName
+                      : hotel.Images?.Image[2]?.Type === 'BIG'
+                        ? hotel.Images?.Image[2]?.FileName
+                        : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'"
                     max-height="250"
                     max-width="100%"
                     class="rounded-lg"
@@ -2668,6 +2825,7 @@ import tripsServices from '~/services/tripsServices'
 import adventureServices from '~/services/activitiesServies'
 
 export default {
+  ssr: true,
   components: {
     LoadingScreen
   },
@@ -2922,7 +3080,8 @@ export default {
       isSelectionConfirmed: false,
       showInfoOfRooms: false,
       isRoomSelected: [],
-      isHotelsLoading: true
+      isHotelsLoading: true,
+      buttonText: 'Proceed With Booking without reserve accommodation'
     }
   },
   async fetch () {
@@ -2938,8 +3097,7 @@ export default {
     isNonRefundable () {
       return (roomIndex) => {
         const description = this.singleHotelData?.data?.HotelOptions?.HotelOption[roomIndex]?.CancellationPolicy?.Description || ''
-        // Updated pattern to match "0" followed by spaces or "&nbsp;", then "USD"
-        return !/0(?:\s|&nbsp;)+usd/i.test(description) // Returns false if "0&nbsp;USD" or "0 USD" is present
+        return !/0(?:\s|&nbsp;)+usd/i.test(description)
       }
     },
     isButtonEnabled () {
@@ -3011,20 +3169,32 @@ export default {
         const endDateFormatted = this.formatDate(endDate, 1, 'hotelEndDate')
         this.hotelEndDates = Array(this.listGtaHotelDetails.length).fill(endDate.toISOString().substr(0, 10))
         this.hotelEndDatesText = Array(this.listGtaHotelDetails.length).fill(endDateFormatted)
+        // added to define the activity days
+        const activities = this.packageDetails.activities
+        for (let i = 0; i < activities.length; i++) {
+          if (activities[i].type === 'adventure') {
+            const activity = activities[i].days
+            for (let x = 0; x < activity.length; x++) {
+              activity[x].start_day = ++this.startingDay
+              activity[x].start_format_day = this.formatDateAllDays(this.packageStartDay, activity[x].start_day, 'default')
+              activity[x].start_text_day = this.formatDateAllDays(this.packageStartDay, activity[x].start_day)
+            }
+          } else {
+            const startDay = this.startingDay + 1
+            this.startingDay += activities[i].days_number
+            const endDay = this.startingDay
+            activities[i].package_day = startDay + '-' + endDay
+            activities[i].package_text_day = this.packageStartDay != null ? (this.formatDateAllDays(this.packageStartDay, startDay) + ' - ' + this.formatDateAllDays(this.packageStartDay, endDay)) : null
+            activities[i].start_day = startDay
+            activities[i].end_day = endDay
+          }
+        }
       }
     }
   },
   mounted () {
     this.checkIfMobile()
     window.addEventListener('resize', this.checkIfMobile)
-    // const today = new Date()
-    // const todayFormatted = today.toISOString().substr(0, 10)
-    // const endDate = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000)
-    // const endDateFormatted = endDate.toISOString().substr(0, 10)
-    // this.hotelStartDates = Array(this.listGtaHotelDetails.length).fill(todayFormatted)
-    // this.hotelEndDates = Array(this.listGtaHotelDetails.length).fill(endDateFormatted)
-    // this.hotelStartDatesText = Array(this.listGtaHotelDetails.length).fill(todayFormatted)
-    // this.hotelEndDatesText = Array(this.listGtaHotelDetails.length).fill(endDateFormatted)
   },
   beforeDestroy () {
     window.removeEventListener('resize', this.checkIfMobile)
@@ -3034,7 +3204,7 @@ export default {
       this.showInfoOfRooms = true
     },
     showHotelDetailsObject (hotelCode) {
-      console.log(hotelCode) // Verify the hotel code
+      console.log(hotelCode)
 
       const url = this.$router.resolve({
         path: '/hotels/hotelInfo/packageHotelInfo',
@@ -3083,36 +3253,6 @@ export default {
     hiddenRoomCount (roomOptions) {
       return roomOptions.length - 2
     },
-    //   if (typeof description !== 'string') {
-    //     return 'No cancellation policy available'
-    //   }
-
-    //   const normalizeText = (text) => {
-    //     return text.toLowerCase().trim()
-    //   }
-
-    //   const percentagePattern = /\d{1,3}(?:\.\d+)?\s*%\s*of\s*total\s*amount/i
-    //   const pricePattern = /\b\d+(?:\.\d+)?\s+usd\b/i
-    //   const nightPattern = /\b\d+\s+night\b/i
-    //   const mostExpensiveNightPattern = /\bmost\s*expensive\s*night\b/i
-
-    //   const wrapRed = match => `<span style="color: red;">${match.replace(/\s*usd\b/i, '$')}</span>`
-
-    //   return description
-    //     .replace(/\*/g, '\n')
-    //     .split('\n')
-    //     .map((line) => {
-    //       const normalizedLine = normalizeText(line)
-    //       const highlightedLine = normalizedLine
-    //         .replace(percentagePattern, wrapRed)
-    //         .replace(pricePattern, wrapRed)
-    //         .replace(nightPattern, wrapRed)
-    //         .replace(mostExpensiveNightPattern, wrapRed)
-
-    //       return `<span style="color: grey;">${highlightedLine.trim()}</span>`
-    //     })
-    //     .join('<br>')
-    // },
     formatCancellationPolicy (description) {
       if (typeof description !== 'string') {
         return 'No cancellation policy available'
@@ -3198,29 +3338,7 @@ export default {
       }
     },
     formatDays (day, type) {
-      // let dayString = 0
-      // console.log('test day', day)
-      // if (!day) { return null }
-      // if (type === 'adventure') {
-      //   dayString++
-      //   this.startingDay = dayString
-      //   console.log(this.startingDay)
-      // } else {
-      //   // this.startingDay += 1
-      //   // return this.startingDay
-      //   console.log(type)
-      // }
       return ' ' + day
-      // if (day === 1) {
-      // this.startingDay += +day
-      // return this.startingDay
-      // dayString = this.startingDay
-      // return dayString
-      // } else {
-      //   this.startingDay += +day
-      //   dayString = this.startingDay
-      //   // return (dayString - 1) + ' ' + dayString
-      // }
     },
     async changeCounterAdult (num) {
       if (!this.packageStartDay) {
@@ -3282,7 +3400,7 @@ export default {
     },
     getAgeSelectErrorMessages (index) {
       if (!this.showAgesSelects) {
-        return [] // Skip error messages if age selects are hidden
+        return []
       }
       const ageSelect = this.ageSelects[index]
       if (ageSelect && ageSelect.age === null) {
@@ -3291,10 +3409,12 @@ export default {
       return []
     },
     checkPackageDateIsExist () {
-      if (!this.packageStartDay) {
+      console.log('travellers:', this.travellers, 'typeof travellers:', typeof this.travellers)
+
+      if (!this.packageStartDay || this.travellers === undefined || this.travellers === null || this.travellers <= 0) {
         this.snackbar = true
         this.color = 'error'
-        this.text = 'Please select start date to custom your trip'
+        this.text = 'Please select start date and set number of travellers'
         this.loaded = false
       } else {
         this.e1 = 2
@@ -3311,36 +3431,10 @@ export default {
         this.showCheckout = false
       }
     },
-    // async showHotels (indexCity) {
-    //   this.showHotelsDialog = true
-    //   this.isHotelsLoading = true
-    //   this.listGtaHotelJpds = []
-    //   const getHotels = this.listGtaHotelDetails[indexCity]
-    //   if (getHotels.hotelJpds.length > 0) {
-    //     for (let index = 0; index < getHotels.hotelJpds.length; index++) {
-    //       if (getHotels.hotelJpds[index]) {
-    //         const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
-    //         const response2 = await promise2
-    //         const results2 = response2?.data?.ContentRS?.Contents?.HotelContent
-    //         console.log('results: ', results2)
-    //         results2.city_id = getHotels.city_id
-    //         results2.city_name = getHotels.city_name
-    //         results2.hotelIDs = getHotels.hotelIDs
-    //         results2.hotelJpds = getHotels.hotelJpds
-    //         results2.isAvailable = false
-    //         results2.isAvailableText = 'Not Checked with Dates'
-    //         this.listGtaHotelJpds.push(results2)
-    //         this.isHotelsLoading = false
-    //       }
-    //     }
-    //   }
-    //   this.selectedCityHotelIndex = indexCity
-    // },
     async showHotels (indexCity) {
-      // Initialize UI state
       this.showHotelsDialog = true
       this.isHotelsLoading = true
-      this.listGtaHotelJpds = [] // Clear previous data
+      this.listGtaHotelJpds = []
 
       const cityHotels = this.listGtaHotelDetails[indexCity] // Get data for the specific city
       if (!cityHotels || !cityHotels.hotelJpds || cityHotels.hotelJpds.length === 0) {
@@ -3378,82 +3472,7 @@ export default {
 
       this.selectedCityHotelIndex = indexCity
     },
-    // async showHotels (indexCity) {
-    //   this.showHotelsDialog = true
-    //   this.isHotelsLoading = true
-    //   this.listGtaHotelJpds = []
-
-    //   const getHotels = this.listGtaHotelDetails[indexCity]
-    //   if (getHotels.hotelJpds.length > 0) {
-    //     for (let index = 0; index < getHotels.hotelJpds.length; index++) {
-    //       if (getHotels.hotelJpds[index]) {
-    //         try {
-    //           const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
-    //           const response2 = await promise2
-    //           const results2 = response2?.data?.ContentRS?.Contents?.HotelContent
-
-    //           if (!results2) {
-    //             console.warn('No hotel data found for this ID, skipping...')
-    //             continue // Skip this iteration if results2 is undefined
-    //           }
-
-    //           results2.city_id = getHotels.city_id
-    //           results2.city_name = getHotels.city_name
-    //           results2.hotelIDs = getHotels.hotelIDs
-    //           results2.hotelJpds = getHotels.hotelJpds
-    //           results2.isAvailable = false
-    //           results2.isAvailableText = 'Not Checked with Dates'
-    //           this.listGtaHotelJpds.push(results2)
-    //           this.isHotelsLoading = false
-    //         } catch (error) {
-    //           console.warn(`Failed to retrieve hotel data: ${error.message}`)
-    //         }
-    //       }
-    //     }
-    //   }
-    //   // this.isHotelsLoading = false
-    //   this.selectedCityHotelIndex = indexCity
-    // },
-    // async getZonesperHotels (indexCity) {
-    //   // this.hotelStartDateText = this.packageStartDayText
-    //   // this.hotelStartDate = this.packageStartDay
-    //   // this.hotelEndDateText = this.packageEndDay
-    //   this.listGtaHotelJpds = []
-    //   const getHotels = this.listGtaHotelDetails[indexCity]
-    //   if (getHotels.hotelJpds.length > 0) {
-    //     for (let index = 0; index < getHotels.hotelJpds.length; index++) {
-    //       if (getHotels.hotelJpds[index]) {
-    //         const promise2 = tripsServices.getGtaHotelDetails(getHotels.hotelJpds[index])
-    //         const response2 = await promise2
-    //         const results2 = response2.data.ContentRS.Contents.HotelContent
-    //         console.log('results: ', results2)
-    //         results2.city_id = getHotels.city_id
-    //         results2.city_name = getHotels.city_name
-    //         results2.hotelIDs = getHotels.hotelIDs
-    //         results2.hotelJpds = getHotels.hotelJpds
-    //         results2.isAvailable = false
-    //         results2.isAvailableText = 'Not Checked with Dates'
-    //         this.listGtaHotelJpds.push(results2)
-    //       }
-    //     }
-    //   }
-    //   this.selectedCityHotelIndex = indexCity
-    //   // this.showHotelsDialog = true
-    // },
     showRooms (HotelIndex) {
-      // if (this.listGtaHotelDetails.length > 1) {
-      //   this.hotelAvails = this.hotelAvailsArray[HotelIndex]
-      // }
-      // if (this.hotelAvails !== null) {
-      //   this.showRoomsDialog = true
-      // }
-      // alert('Please select city first')
-      // if (this.hotelAvailsList[HotelIndex] !== null) {
-      //   this.hotelAvails = this.hotelAvailsList[HotelIndex]
-      //   this.selectedHotelIndex = HotelIndex
-      //   this.showRoomsDialog = true
-      // }
-      // this.checkHotelAvailabilityByHotel(hotelDetail, HotelIndex)
       this.showRoomsDialog = true
     },
     async changeCounterRoom (index, type, value) {
@@ -3476,15 +3495,11 @@ export default {
             this.rooms = []
           }
         } else {
-          // Ensure the value is not negative
           const newValue = Math.max(0, this.rooms[index][type] + value)
-          // Update the value in the rooms array
           this.$set(this.rooms, index, {
             ...this.rooms[index],
             [type]: newValue
           })
-
-          // If the type is 'children' and the value is 1, add an age selection for the new child
           if (type === 'children') {
             this.addAgeSelection(index, value)
             this.showAgesSelects = true
@@ -3506,16 +3521,11 @@ export default {
       }
     },
     addAgeSelection (index, value) {
-      // Add an initial age selection for the new child
-      // this.$set(this.rooms[index].ageSelects, this.rooms[index].children, { age: null })
-
-      // Initialize ageSelects as an empty array if it doesn't exist
       if (!this.rooms[index].ageSelects) {
         this.$set(this.rooms[index], 'ageSelects', [])
       }
 
       if (value === 1) {
-        // Add an initial age selection for the new child
         this.rooms[index].ageSelects.push({ age: null })
       } else {
         this.rooms[index].ageSelects.splice(-1, 1)
@@ -3555,24 +3565,6 @@ export default {
           src: image.image
         }))
       }
-      // if (this.packageDetails.package_hotel.length > 0) {
-      //   const packageHotel = this.packageDetails.package_hotel
-      //   console.log(packageHotel)
-      //   for (let index = 0; index < packageHotel.length; index++) {
-      //     if (packageHotel[index].hotel.Jpd_code) {
-      //       const promise2 = tripsServices.getGtaHotelDetails(packageHotel[index].hotel.Jpd_code)
-      //       const response2 = await promise2
-      //       const results2 = response2.data.ContentRS.Contents.HotelContent
-      //       results2.city_id = packageHotel[index].city_id
-      //       results2.city_name = packageHotel[index].city_name
-      //       results2.hotelIDs = packageHotel[index].hotelIDs
-      //       results2.hotelJpds = packageHotel[index].hotelJpds
-      //       results2.isAvailable = false
-      //       results2.isAvailableText = 'Not Checked with Dates'
-      //       this.listGtaHotelDetails.push(results2)
-      //     }
-      //   }
-      // }
       if (this.packageDetails.package_hotel.length > 0) {
         const packageHotel = this.packageDetails.package_hotel[0] // Assuming you're only dealing with the first item in `package_hotel`
         const accommodations = packageHotel.accommodations
@@ -3611,7 +3603,6 @@ export default {
         }
       }
       this.calcDaysFromDetails()
-      // Initialize the 'panelExpandedActivities' array with all values set to 'true'
       this.panelExpandedActivities = this.packageDetails.activities.map(() => 0)
     },
     getCityImage (name) {
@@ -3688,8 +3679,6 @@ export default {
       }
     },
     async addNewAdventureToActivity (activityIndex, dayIndex, cityId, day, dayActivities) {
-      // console.log('dayActivities: ' + dayActivities)
-      // console.log('addNewAdventureToActivity', day)
       if (!this.packageStartDay) {
         this.snackbar = true
         this.color = 'error'
@@ -3712,7 +3701,6 @@ export default {
     },
     async getAdventures (cityId, day, activities) {
       this.isLoading = true
-      // console.log(cityId)
       try {
         const promise = adventureServices.getCityAdventures(cityId, 1, day, activities)
         const response = await promise
@@ -3825,7 +3813,6 @@ export default {
       formData.append('adults', this.travellers)
       formData.append('children', this.children)
       formData.append('date', this.packageStartDay)
-      // formData.append('date', this.selectedDateForAddNewAdventure)
       if (this.ageSelects.length > 0) {
         for (let x = 0; x < this.ageSelects.length; x++) {
           formData.append('ages[' + x + ']', this.ageSelects[x].age)
@@ -3901,8 +3888,8 @@ export default {
       }
     },
     bookAdventures () {
-      const calculatedTotalPrice = this.getFinalTotalPrices() // Ensure this returns the correct total
-      const calculatedFinalPrice = calculatedTotalPrice // Or apply any final adjustments
+      const calculatedTotalPrice = this.getFinalTotalPrices()
+      const calculatedFinalPrice = calculatedTotalPrice
       this.$store.dispatch('setTravellersNumber', {
         adults: this.travellers,
         children: this.children,
@@ -3962,12 +3949,6 @@ export default {
         for (let i = 0; i < hotels.length; i++) {
           formData.append('hotels[' + i + ']', hotels[i].JPCode)
         }
-        // if (hotels.length > 1) {
-        //   formData.append('hotels[' + 0 + ']', 'JP046300')
-        //   formData.append('hotels[' + 1 + ']', 'JP077424')
-        // } else {
-        //   formData.append('hotels[' + 0 + ']', 'JP046300')
-        // }
         formData.append('adults', this.travellers)
         formData.append('children', this.children)
         if (this.ageSelects.length > 0) {
@@ -4106,85 +4087,6 @@ export default {
         }
       }
     },
-    // async checkHotelAvailabilityByHotel (hotelDetail, hotelIndex) {
-    //   if (this.travellers === 0) {
-    //     this.snackbar = true
-    //     this.color = 'error'
-    //     this.text = 'Please select Number of Adult'
-    //     this.loaded = false
-    //   } else if (this.hotelStartDates[hotelIndex] === null || this.hotelEndDates[hotelIndex] === null) {
-    //     this.snackbar = true
-    //     this.color = 'error'
-    //     this.text = 'Please select Start Date and End Date'
-    //     this.loaded = false
-    //   } else {
-    //     this.isLoading = true
-    //     this.hotelAvailsArray = []
-    //     const formData = new FormData()
-    //     formData.append('start_date', this.hotelStartDates[hotelIndex])
-    //     formData.append('end_date', this.hotelEndDates[hotelIndex])
-    //     formData.append('board', this.boardType.Type || 'all')
-    //     formData.append('hotels[' + 0 + ']', hotelDetail.Code)
-    //     formData.append('adults', this.travellers || 1)
-    //     formData.append('children', this.children || 0)
-
-    //     if (this.ageSelects.length > 0) {
-    //       for (let x = 0; x < this.ageSelects.length; x++) {
-    //         formData.append('ages[' + x + ']', this.ageSelects[x].age)
-    //       }
-    //     }
-
-    //     if (this.rooms.length > 0) {
-    //       for (let r = 0; r < this.rooms.length; r++) {
-    //         formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-    //         formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-    //         if (this.rooms[r].ageSelects.length > 0) {
-    //           for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-    //             formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
-    //           }
-    //         }
-    //         formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-    //       }
-    //     }
-
-    //     try {
-    //       const promise = tripsServices.checkHotelAvailabilities(formData)
-    //       const response = await promise
-    //       const results = response.data.data?.AvailabilityRS?.Results.HotelResult
-    //       const singleHotelDataResponse = response.data?.data.AvailabilityRS?.Results?.HotelResult
-
-    //       // Set `singleHotelData` with both hotel data and index for correct display condition
-    //       this.singleHotelData = {
-    //         data: singleHotelDataResponse,
-    //         index: hotelIndex
-    //       }
-
-    //       if (results.Errors !== undefined) {
-    //         this.snackbar = true
-    //         this.color = 'error'
-    //         this.text = this.errorMessage(results.Errors.Error.Text)
-    //         this.loaded = false
-    //         this.checkResponseCode = false
-    //         this.isLoading = false
-    //       } else {
-    //         this.isAvailable = true
-    //         this.isAvailables[hotelIndex] = true
-    //         this.hotelAvails = results.Results.HotelResult
-    //         this.hotelAvailsList[hotelIndex] = results.Results.HotelResult
-    //         this.checkResponseCode = true
-    //         this.isLoading = false
-    //       }
-    //     } catch (error) {
-    //       this.snackbar = true
-    //       this.color = 'error'
-    //       this.text = 'Something went wrong'
-    //       this.loaded = false
-    //       this.checkResponseCode = false
-    //       this.isLoading = false
-    //     }
-    //   }
-    // },
-
     openBookFlight () {
       window.open('https://flights.tanefer.com', '_blank')
     },
@@ -4203,14 +4105,12 @@ export default {
       const additionalPrice = this.additionalPrice || 0
       const percentagePrice = this.discountPercentage || 0
 
-      // Calculate hotelAvailPrices, ensuring it only sums numeric values
       let hotelAvailPrices = 0
       for (let x = 0; x < hotelAvailPricesList.length; x++) {
         const price = hotelAvailPricesList[x] || 0
         hotelAvailPrices += price
       }
 
-      // Log each part to debug
       console.log('Initial Price:', initialPrice)
       console.log('Hotel Price:', hotelPrice)
       console.log('Hotel Available Prices Total:', hotelAvailPrices)
@@ -4228,125 +4128,6 @@ export default {
 
       return totalAllPrices
     },
-    // getFinalTotalPrices () {
-    //   const initalPrice = this.initialPrice
-    //   const hotelPrice = this.hotelPrices
-    //   const hotelAvailPricesList = this.hotelAvailPrices
-    //   let hotelAvailPrices = 0
-    //   for (let x = 0; x < hotelAvailPricesList.length; x++) {
-    //     hotelAvailPrices += hotelAvailPricesList[x]
-    //   }
-    //   const additionalPrice = this.additionalPrice
-    //   const percentagePrice = this.discountPercentage
-    //   const getAllPositivePrices = initalPrice + hotelPrice + hotelAvailPrices + additionalPrice
-    //   const getDiscountPercentagePrice = percentagePrice === 0 ? 0 : (getAllPositivePrices * percentagePrice / 100)
-    //   const totalAllPrices = getAllPositivePrices - getDiscountPercentagePrice
-    //   return totalAllPrices
-    // },
-    // selectRoomHotelGta (AvailIndex, hotelAvailListIndex) {
-    // selectRoomHotelGta (hotelIndex, roomIndex) {
-    //   // Access the hotel data from `singleHotelData` or `hotelAvailsList`
-    //   const hotelData = this.listGtaHotelDetails[hotelIndex]
-    //   const roomOptions = this.getRoomOptions(hotelData?.HotelOptions?.HotelOption)
-
-    //   if (hotelData && roomOptions && roomOptions[roomIndex]) {
-    //     const selectedRoom = roomOptions[roomIndex]
-
-    //     // Store selected room data
-    //     this.selectedRoomGtaArray[hotelIndex] = selectedRoom
-    //     this.getRatePlanCodes[hotelIndex] = selectedRoom.RatePlanCode
-    //     this.hotelAvailPrices[hotelIndex] = selectedRoom.Prices.Price.TotalFixAmounts.Nett
-
-    //     // Update hotel details for selected room
-    //     this.selectedHotelCodes[hotelIndex] = hotelData.Code
-    //     this.selectedHotelJPCodes[hotelIndex] = hotelData.JPCode
-    //     this.selectedHotelJPDCodes[hotelIndex] = hotelData.JPDCode
-
-    //     // Add room price to total price
-    //     this.hotelPrices += selectedRoom.Prices.Price.TotalFixAmounts.Nett
-    //     this.totalAllPrices = this.getFinalTotalPrices()
-    //   } else {
-    //     console.error('Hotel or room data not found for hotelIndex', hotelIndex, 'and roomIndex', roomIndex)
-    //   }
-
-    //   this.showRoomsDialog = false
-    // },
-    // selectRoomHotelGta (hotelIndex, roomIndex) {
-    //   // this.showHotelCards = false
-    //   // Access the hotel data from `singleHotelData`
-    //   const hotelData = this.singleHotelData?.data
-    //   const roomOptions = this.getRoomOptions(hotelData?.HotelOptions?.HotelOption)
-
-    //   if (roomOptions.length === 0) {
-    //     this.snackbar = true
-    //     this.color = 'error'
-    //     this.text = 'No rooms available for this hotel'
-    //     return
-    //   }
-
-    //   if (hotelData && roomOptions[roomIndex]) {
-    //     const selectedRoom = roomOptions[roomIndex]
-    //     this.isRoomChoosed = true
-    //     console.log(selectedRoom)
-    //     this.selectedRoomGtaArray[hotelIndex] = selectedRoom
-    //     console.log('the rooms array is:', this.selectedRoomGtaArray[hotelIndex])
-    //     this.getRatePlanCodes[hotelIndex] = selectedRoom.RatePlanCode
-    //     this.hotelAvailPrices[hotelIndex] = selectedRoom.Prices.Price.TotalFixAmounts.Nett
-
-    //     this.selectedHotelCodes[hotelIndex] = hotelData.Code
-    //     this.selectedHotelJPCodes[hotelIndex] = hotelData.JPCode
-    //     this.selectedHotelJPDCodes[hotelIndex] = hotelData.JPDCode
-
-    //     this.hotelPrices += selectedRoom.Prices.Price.TotalFixAmounts.Nett
-    //     this.totalAllPrices = this.getFinalTotalPrices()
-    //   } else {
-    //     console.error('Hotel or room data not found for hotelIndex', hotelIndex, 'and roomIndex', roomIndex)
-    //   }
-
-    //   this.showRoomsDialog = false
-    // },
-    // selectRoomHotelGta (hotelIndex, roomIndex) {
-    // // Ensure `isRoomSelected` is an array of objects for each hotel
-    //   if (!this.isRoomSelected[hotelIndex]) {
-    //     this.$set(this.isRoomSelected, hotelIndex, {})
-    //   }
-
-    //   // Update selection state for the specific hotel and room
-    //   this.$set(this.isRoomSelected[hotelIndex], roomIndex, true)
-
-    //   const hotelData = this.singleHotelData?.data
-    //   const roomOptions = this.getRoomOptions(hotelData?.HotelOptions?.HotelOption)
-
-    //   if (roomOptions.length === 0) {
-    //     this.snackbar = true
-    //     this.color = 'error'
-    //     this.text = 'No rooms available for this hotel'
-    //     return
-    //   }
-
-    //   if (hotelData && roomOptions[roomIndex]) {
-    //     const selectedRoom = roomOptions[roomIndex]
-    //     console.log(selectedRoom)
-    //     this.selectedRoomGtaArray[hotelIndex] = [selectedRoom]
-    //     console.log('the rooms array is:', this.selectedRoomGtaArray[hotelIndex])
-    //     if (!this.selectedRoomGtaArray[hotelIndex]) {
-    //       this.$set(this.selectedRoomGtaArray, hotelIndex, [])
-    //     }
-    //     this.getRatePlanCodes[hotelIndex] = selectedRoom.RatePlanCode
-    //     this.hotelAvailPrices[hotelIndex] = selectedRoom.Prices.Price.TotalFixAmounts.Nett
-
-    //     this.selectedHotelCodes[hotelIndex] = hotelData.Code
-    //     this.selectedHotelJPCodes[hotelIndex] = hotelData.JPCode
-    //     this.selectedHotelJPDCodes[hotelIndex] = hotelData.JPDCode
-
-    //     this.hotelPrices += selectedRoom.Prices.Price.TotalFixAmounts.Nett
-    //     this.totalAllPrices = this.getFinalTotalPrices()
-    //   } else {
-    //     console.error('Hotel or room data not found for hotelIndex', hotelIndex, 'and roomIndex', roomIndex)
-    //   }
-
-    //   this.showRoomsDialog = false
-    // },
     selectRoomHotelGta (hotelIndex, roomIndex) {
       // Ensure `isRoomSelected` is an array of objects for each hotel
       if (!this.isRoomSelected[hotelIndex]) {
@@ -4370,30 +4151,25 @@ export default {
         const selectedRoom = roomOptions[roomIndex]
         console.log('Selected Room:', selectedRoom)
 
-        // Ensure selectedRoomGtaArray is initialized for this hotelIndex
         if (!this.selectedRoomGtaArray[hotelIndex]) {
           this.$set(this.selectedRoomGtaArray, hotelIndex, [])
         }
 
-        // Add the selected room to the array if not already selected
         if (!this.selectedRoomGtaArray[hotelIndex].includes(selectedRoom)) {
           this.selectedRoomGtaArray[hotelIndex].push(selectedRoom)
           console.log('Updated rooms array for hotelIndex:', hotelIndex, this.selectedRoomGtaArray[hotelIndex])
         }
 
-        // Update rate plan and other hotel-related codes
         this.getRatePlanCodes[hotelIndex] = selectedRoom.RatePlanCode
         this.hotelAvailPrices[hotelIndex] = selectedRoom.Prices.Price.TotalFixAmounts.Nett
         this.selectedHotelCodes[hotelIndex] = hotelData.Code
         this.selectedHotelJPCodes[hotelIndex] = hotelData.JPCode
         this.selectedHotelJPDCodes[hotelIndex] = hotelData.JPDCode
 
-        // Recalculate the total price for all selected rooms
         this.hotelPrices = this.selectedRoomGtaArray.reduce((total, rooms) => {
           return total + rooms.reduce((sum, room) => sum + room.Prices.Price.TotalFixAmounts.Nett, 0)
         }, 0)
 
-        // this.totalAllPrices = this.getFinalTotalPrices()
         console.log('Total Hotel Prices:', this.hotelPrices, 'Total All Prices:', this.totalAllPrices)
       } else {
         console.error('Hotel or room data not found for hotelIndex', hotelIndex, 'and roomIndex', roomIndex)
@@ -4401,160 +4177,10 @@ export default {
 
       this.showRoomsDialog = false
     },
-
-    //   if (this.hotelAvailsArray.length > 0) {
-    //     this.selectedRoomGtaArray.push(this.hotelAvails.HotelOptions.HotelOption)
-    //     this.getRatePlanCodeArray.push(this.hotelAvails.HotelOptions.HotelOption.RatePlanCode)
-    //     this.getRatePlanCodes.push(this.hotelAvails.HotelOptions.HotelOption.RatePlanCode)
-    //     this.hotelPrices += this.hotelAvails.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
-    //     this.selectedHotelCodeArray.push(this.hotelAvails.Code)
-    //     this.selectedHotelJPCodeArray.push(this.hotelAvails.JPCode)
-    //     this.selectedHotelJPDCodeArray.push(this.hotelAvails.JPDCode)
-    //   } else {
-    //     const getHotelAvailInfo = this.hotelAvailsList[hotelAvailListIndex]
-    //     if (Array.isArray(getHotelAvailInfo.HotelOptions.HotelOption)) {
-    //       this.selectedRoomGtas[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex]
-    //       // this.selectedRoomGtaArray.push(getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex])
-    //       this.selectedRoomGtaArray[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex]
-    //       this.getRatePlanCodes[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex].RatePlanCode
-    //       this.hotelPrices = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
-    //       this.hotelAvailPrices[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption[AvailIndex].Prices.Price.TotalFixAmounts.Nett
-    //     } else {
-    //       this.selectedRoomGtas[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption
-    //       // this.selectedRoomGtaArray.push(getHotelAvailInfo.HotelOptions.HotelOption)
-    //       this.selectedRoomGtaArray[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption
-    //       this.getRatePlanCodes[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption.RatePlanCode
-    //       this.hotelPrices = getHotelAvailInfo.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
-    //       this.hotelAvailPrices[hotelAvailListIndex] = getHotelAvailInfo.HotelOptions.HotelOption.Prices.Price.TotalFixAmounts.Nett
-    //     }
-    //     this.selectedHotelCodes[hotelAvailListIndex] = getHotelAvailInfo.Code
-    //     this.selectedHotelJPCodes[hotelAvailListIndex] = getHotelAvailInfo.JPCode
-    //     this.selectedHotelJPDCodes[hotelAvailListIndex] = getHotelAvailInfo.JPDCode
-    //   }
-    //   this.totalAllPrices = this.getFinalTotalPrices()
-    //   this.showRoomsDialog = false
-    // },
-    // async confirmSelectedRoom () {
-    //   this.isLoading = true
-    //   if (this.getRatePlanCodes.length > 0) {
-    //     for (let x = 0; x < this.getRatePlanCodes.length; x++) {
-    //       const formData = new FormData()
-    //       formData.append('RatePlanCode', this.getRatePlanCodes[x])
-    //       formData.append('StartDate', this.hotelStartDates[x])
-    //       formData.append('EndDate', this.hotelEndDates[x])
-    //       formData.append('HotelCode', this.selectedHotelCodes[x])
-    //       try {
-    //         const promise = tripsServices.getBookingRules(formData)
-    //         const response = await promise
-    //         console.log(response)
-    //         const results = response.data.BookingRulesRS
-    //         if (results.Errors !== undefined) {
-    //           this.snackbar = true
-    //           this.color = 'error'
-    //           this.text = this.errorMessage(results.Errors.Error.Text)
-    //           this.loaded = false
-    //           this.checkResponseCode = false
-    //           this.isLoading = false
-    //         } else {
-    //           this.getbookingRules[x] = results.Results.HotelResult
-    //           this.getbookingRuleArray.push(results.Results.HotelResult)
-    //           this.confirmedSelectedRoom = true
-    //           this.isLoading = false
-    //         }
-    //       } catch (error) {
-    //         this.snackbar = true
-    //         this.color = 'error'
-    //         this.text = 'Something went wrong'
-    //         this.loaded = false
-    //         this.checkResponseCode = false
-    //         this.isLoading = false
-    //       }
-    //     }
-    //   }
-    //   if (this.getRatePlanCodes.length === 0 && this.getRatePlanCode) {
-    //     const formData = new FormData()
-    //     formData.append('RatePlanCode', this.getRatePlanCode)
-    //     // formData.append('StartDate', this.selectedHotelStartDate)
-    //     formData.append('StartDate', this.hotelStartDate)
-    //     // formData.append('EndDate', this.selectedHotelEndDate)
-    //     formData.append('EndDate', this.hotelEndDate)
-    //     formData.append('HotelCode', this.selectedHotelJPCode)
-    //     try {
-    //       const promise = tripsServices.getBookingRules(formData)
-    //       const response = await promise
-    //       console.log(response)
-    //       const results = response.data.BookingRulesRS
-    //       if (results.Errors !== undefined) {
-    //         this.snackbar = true
-    //         this.color = 'error'
-    //         this.text = this.errorMessage(results.Errors.Error.Text)
-    //         this.loaded = false
-    //         this.checkResponseCode = false
-    //         this.isLoading = false
-    //       } else {
-    //         this.getbookingRule = results.Results.HotelResult
-    //         this.confirmedSelectedRoom = true
-    //         this.isLoading = false
-    //       }
-    //     } catch (error) {
-    //       this.snackbar = true
-    //       this.color = 'error'
-    //       this.text = 'Something went wrong'
-    //       this.loaded = false
-    //       this.checkResponseCode = false
-    //       this.isLoading = false
-    //     }
-    //   }
-    // },
-
-    // async confirmSelectedRoom () {
-    //   this.isLoading = true
-    //   this.getbookingRules = [] // Initialize to avoid undefined errors
-
-    //   if (this.getRatePlanCodes.length > 0) {
-    //     for (let x = 0; x < this.getRatePlanCodes.length; x++) {
-    //       const formData = new FormData()
-    //       formData.append('RatePlanCode', this.getRatePlanCodes[x])
-    //       formData.append('StartDate', this.hotelStartDates[x])
-    //       formData.append('EndDate', this.hotelEndDates[x])
-    //       formData.append('HotelCode', this.selectedHotelCodes[x])
-
-    //       try {
-    //         const promise = tripsServices.getBookingRules(formData)
-    //         const response = await promise
-    //         console.log(response)
-    //         const results = response.data.BookingRulesRS
-
-    //         if (results.Errors !== undefined) {
-    //           // this.snackbar = true
-    //           // this.color = 'error'
-    //           // this.text = this.errorMessage(results.Errors.Error.Text)
-    //           this.loaded = false
-    //           this.checkResponseCode = false
-    //           this.isLoading = false
-    //         } else {
-    //           this.getbookingRules[x] = results.Results.HotelResult
-    //           this.getbookingRuleArray.push(results.Results.HotelResult)
-    //           this.confirmedSelectedRoom = true
-    //           this.isLoading = false
-    //         }
-    //       } catch (error) {
-    //         this.snackbar = true
-    //         this.color = 'error'
-    //         this.text = 'Something went wrong'
-    //         this.loaded = false
-    //         this.checkResponseCode = false
-    //         this.isLoading = false
-    //       }
-    //     }
-    //   }
-
-    //   console.log('getbookingRules after confirmSelectedRoom:', this.getbookingRules)
-    // },
     async confirmSelectedRoom () {
       this.isLoading = true
-      this.getbookingRules = [] // Initialize to avoid undefined errors
-      this.$store.dispatch('modules/booking/resetMultipleBookingData') // Clear previous multiple bookings
+      this.getbookingRules = []
+      this.$store.dispatch('modules/booking/resetMultipleBookingData')
 
       if (this.getRatePlanCodes.length > 0) {
         for (let x = 0; x < this.getRatePlanCodes.length; x++) {
@@ -4601,320 +4227,71 @@ export default {
     assignPhone (phone) {
       this.phone = phone
     },
-    // async finalBookHotel () {
-    //   this.isLoading = true
-    //   if (this.getbookingRules.length > 0) {
-    //     for (let x = 0; x < this.getbookingRules.length; x++) {
-    //       const formData = new FormData()
-    //       const bookingCode = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
-    //       const startDate = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
-    //       const endDate = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
-    //       const HotelCode = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
-    //       const minimumPrice = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
-    //       const maximumPrice = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
-    //       const currency = this.getbookingRules[x].HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
-    //       formData.append('bookingCode', bookingCode)
-    //       formData.append('startDate', startDate)
-    //       formData.append('endDate', endDate)
-    //       formData.append('HotelCode', HotelCode)
-    //       formData.append('minimumPrice', minimumPrice)
-    //       formData.append('maximumPrice', maximumPrice)
-    //       formData.append('currency', currency)
-    //       formData.append('phone_number', this.phone.formattedNumber)
-    //       formData.append('title', this.title)
-    //       formData.append('name', this.name)
-    //       formData.append('surname', this.surname)
-    //       formData.append('age', this.age)
-    //       formData.append('email', this.email)
-    //       formData.append('nationality', this.issueCountry)
-    //       formData.append('board', this.boardType.Type)
-    //       formData.append('identification_document_pax', this.identification_document_pax)
-    //       formData.append('address_pax', this.address_pax)
-    //       formData.append('city_pax', this.city_pax)
-    //       formData.append('country_pax', this.country_pax)
-    //       formData.append('postal_code_pax', this.postal_code_pax)
-    //       formData.append('book_after_payment', '1')
-    //       if (this.rooms.length > 0) {
-    //         for (let r = 0; r < this.rooms.length; r++) {
-    //           formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-    //           formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-    //           if (this.rooms[r].ageSelects.length > 0) {
-    //             for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-    //               formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
-    //             }
-    //           }
-    //           formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-    //         }
-    //       }
-    //       if (this.bNames.length > 0) {
-    //         for (let x = 0; x < this.bNames.length; x++) {
-    //           formData.append('names[' + x + ']', this.bNames[x])
-    //         }
-    //       }
-    //       if (this.bSurnames.length > 0) {
-    //         for (let y = 0; y < this.bSurnames.length; y++) {
-    //           formData.append('surnames[' + y + ']', this.bSurnames[y])
-    //         }
-    //       }
-    //       if (this.bAges.length > 0) {
-    //         for (let z = 0; z < this.bAges.length; z++) {
-    //           formData.append('ages[' + z + ']', this.bAges[z])
-    //         }
-    //       }
-    //       if (this.bNamesChild.length > 0) {
-    //         for (let xx = 0; xx < this.bNamesChild.length; xx++) {
-    //           formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
-    //         }
-    //       }
-    //       if (this.bSurnamesChild.length > 0) {
-    //         for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
-    //           formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
-    //         }
-    //       }
-    //       if (this.bAgesChild.length > 0) {
-    //         for (let zz = 0; zz < this.bAgesChild.length; zz++) {
-    //           formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
-    //         }
-    //       }
-
-    //       try {
-    //         const promise = tripsServices.finalBookHotel(formData)
-    //         const response = await promise
-    //         console.log(response)
-    //         // const results = response.data.BookingRS
-    //         const resultFormData = response.data.formDataId
-    //         this.finalBookHotelFormData = resultFormData
-    //         this.finalBookHotelsFormData[x] = resultFormData
-    //         this.isBooked = true
-    //         this.isLoading = false
-    //         // if (results.Errors !== undefined) {
-    //         //   this.snackbar = true
-    //         //   this.color = 'error'
-    //         //   this.text = this.errorMessage(results.Errors.Error.Text)
-    //         //   this.loaded = false
-    //         //   this.checkResponseCode = false
-    //         //   this.isBooked = true
-    //         //   this.isLoading = false
-    //         // } else {
-    //         //   this.getBookingCodeArray.push(results)
-    //         //   this.isBooked = true
-    //         //   this.isLoading = false
-    //         // }
-    //       } catch (error) {
-    //         this.snackbar = true
-    //         this.color = 'error'
-    //         this.text = 'Something went wrong'
-    //         this.loaded = false
-    //         this.checkResponseCode = false
-    //         this.isLoading = false
-    //       }
-    //     }
-    //   }
-    //   if (this.getbookingRules.length === 0 && this.getbookingRule) {
-    //     const formData = new FormData()
-    //     const bookingCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
-    //     const startDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
-    //     const endDate = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
-    //     const HotelCode = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
-    //     const minimumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
-    //     const maximumPrice = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
-    //     const currency = this.getbookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
-    //     formData.append('bookingCode', bookingCode)
-    //     formData.append('startDate', startDate)
-    //     formData.append('endDate', endDate)
-    //     formData.append('HotelCode', HotelCode)
-    //     formData.append('minimumPrice', minimumPrice)
-    //     formData.append('maximumPrice', maximumPrice)
-    //     formData.append('currency', currency)
-    //     formData.append('phone_number', this.phone.formattedNumber)
-    //     formData.append('title', this.title)
-    //     formData.append('name', this.name)
-    //     formData.append('surname', this.surname)
-    //     formData.append('age', this.age)
-    //     formData.append('email', this.email)
-    //     formData.append('nationality', this.issueCountry)
-    //     formData.append('board', this.boardType.Type)
-    //     formData.append('book_after_payment', '1')
-    //     if (this.rooms.length > 0) {
-    //       for (let r = 0; r < this.rooms.length; r++) {
-    //         formData.append('rooms[' + r + '][travellers]', this.rooms[r].travelers)
-    //         formData.append('rooms[' + r + '][children]', this.rooms[r].children)
-    //         if (this.rooms[r].ageSelects.length > 0) {
-    //           for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-    //             formData.append('rooms[' + r + '][ages][' + rx + ']', this.rooms[r].ageSelects[rx].age)
-    //           }
-    //         }
-    //         formData.append('rooms[' + r + '][category]', this.rooms[r].roomCategory.Type)
-    //       }
-    //     }
-    //     if (this.bNames.length > 0) {
-    //       for (let x = 0; x < this.bNames.length; x++) {
-    //         formData.append('names[' + x + ']', this.bNames[x])
-    //       }
-    //     }
-    //     if (this.bSurnames.length > 0) {
-    //       for (let y = 0; y < this.bSurnames.length; y++) {
-    //         formData.append('surnames[' + y + ']', this.bSurnames[y])
-    //       }
-    //     }
-    //     if (this.bAges.length > 0) {
-    //       for (let z = 0; z < this.bAges.length; z++) {
-    //         formData.append('ages[' + z + ']', this.bAges[z])
-    //       }
-    //     }
-    //     if (this.bNamesChild.length > 0) {
-    //       for (let xx = 0; xx < this.bNamesChild.length; xx++) {
-    //         formData.append('namesChild[' + xx + ']', this.bNamesChild[xx])
-    //       }
-    //     }
-    //     if (this.bSurnamesChild.length > 0) {
-    //       for (let yy = 0; yy < this.bSurnamesChild.length; yy++) {
-    //         formData.append('surnamesChild[' + yy + ']', this.bSurnamesChild[yy])
-    //       }
-    //     }
-    //     if (this.bAgesChild.length > 0) {
-    //       for (let zz = 0; zz < this.bAgesChild.length; zz++) {
-    //         formData.append('agesChild[' + zz + ']', this.bAgesChild[zz])
-    //       }
-    //     }
-
-    //     try {
-    //       const promise = tripsServices.finalBookHotel(formData)
-    //       const response = await promise
-    //       console.log(response)
-    //       // const results = response.data.BookingRS
-    //       const resultFormData = response.data.formDataId
-    //       this.finalBookHotelFormData = resultFormData
-    //       this.isBooked = true
-    //       this.isLoading = false
-    //       // if (results.Errors !== undefined) {
-    //       //   this.snackbar = true
-    //       //   this.color = 'error'
-    //       //   this.text = this.errorMessage(results.Errors.Error.Text)
-    //       //   this.loaded = false
-    //       //   this.checkResponseCode = false
-    //       //   this.isBooked = true
-    //       //   this.isLoading = false
-    //       // } else {
-    //       //   this.getBookingCode = results
-    //       //   this.isBooked = true
-    //       //   this.isLoading = false
-    //       // }
-    //     } catch (error) {
-    //       this.snackbar = true
-    //       this.color = 'error'
-    //       this.text = 'Something went wrong'
-    //       this.loaded = false
-    //       this.checkResponseCode = false
-    //       this.isLoading = false
-    //     }
-    //   }
-    // },
-    // async finalBookHotel () {
-    //   this.isLoading = true
-
-    //   if (this.getbookingRules.length > 0) {
-    //     for (let x = 0; x < this.getbookingRules.length; x++) {
-    //       const bookingRule = this.getbookingRules[x]
-    //       if (!bookingRule) {
-    //         console.error(`Booking rule at index ${x} is undefined.`)
-    //         continue // Skip this iteration if booking rule is undefined
-    //       }
-
-    //       const formData = new FormData()
-    //       const bookingCode = bookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode._
-    //       const startDate = bookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Start
-    //       const endDate = bookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.End
-    //       const HotelCode = bookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.HotelCode
-    //       const minimumPrice = bookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Minimum
-    //       const maximumPrice = bookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Maximum
-    //       const currency = bookingRule.HotelOptions.HotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo.Price.PriceRange.Currency
-
-    //       formData.append('bookingCode', bookingCode)
-    //       formData.append('startDate', startDate)
-    //       formData.append('endDate', endDate)
-    //       formData.append('HotelCode', HotelCode)
-    //       formData.append('minimumPrice', minimumPrice)
-    //       formData.append('maximumPrice', maximumPrice)
-    //       formData.append('currency', currency)
-    //       formData.append('phone_number', this.phone.formattedNumber)
-    //       formData.append('title', this.title)
-    //       formData.append('name', this.name)
-    //       formData.append('surname', this.surname)
-    //       formData.append('age', this.age)
-    //       formData.append('email', this.email)
-    //       formData.append('nationality', this.issueCountry)
-    //       formData.append('board', this.boardType.Type || 'all')
-    //       formData.append('identification_document_pax', this.identification_document_pax)
-    //       formData.append('address_pax', this.address_pax || '')
-    //       formData.append('city_pax', this.city_pax || '')
-    //       formData.append('country_pax', this.country_pax || '')
-    //       formData.append('postal_code_pax', this.postal_code_pax || '')
-    //       formData.append('book_after_payment', '1')
-
-    //       // Add room data and booking names
-    //       if (this.rooms.length > 0) {
-    //         for (let r = 0; r < this.rooms.length; r++) {
-    //           formData.append(`rooms[${r}][travellers]`, this.rooms[r].travelers)
-    //           formData.append(`rooms[${r}][children]`, this.rooms[r].children)
-    //           if (this.rooms[r].ageSelects.length > 0) {
-    //             for (let rx = 0; rx < this.rooms[r].ageSelects.length; rx++) {
-    //               formData.append(`rooms[${r}][ages][${rx}]`, this.rooms[r].ageSelects[rx].age)
-    //             }
-    //           }
-    //           formData.append(`rooms[${r}][category]`, this.rooms[r].roomCategory.Type)
-    //         }
-    //       }
-
-    //       // Handle booking names and surnames for both adults and children
-    //       const namesArray = { names: this.bNames, surnames: this.bSurnames, ages: this.bAges, namesChild: this.bNamesChild, surnamesChild: this.bSurnamesChild, agesChild: this.bAgesChild }
-    //       Object.entries(namesArray).forEach(([key, array]) => {
-    //         array.forEach((item, idx) => formData.append(`${key}[${idx}]`, item))
-    //       })
-
-    //       try {
-    //         const response = await tripsServices.finalBookHotel(formData)
-    //         console.log(response)
-    //         const resultFormData = response.data.formDataId
-    //         this.finalBookHotelFormData = resultFormData
-    //         this.finalBookHotelsFormData[x] = resultFormData
-    //         this.isBooked = true
-    //         this.isLoading = false
-    //       } catch (error) {
-    //         this.snackbar = true
-    //         this.color = 'error'
-    //         this.text = 'Something went wrong'
-    //         this.loaded = false
-    //         this.checkResponseCode = false
-    //         this.isLoading = false
-    //       }
-    //     }
-    //   } else {
-    //     console.error('getbookingRules array is empty or undefined.')
-    //   }
-    // },
     async finalBookHotel () {
       this.isLoading = true
+      this.buttonText = 'Proceed With Booking'
       this.totalAllPrices = this.getFinalTotalPrices()
 
-      // Filter out undefined entries from getbookingRules
+      // Validation Section with Snackbar Warnings
+      if (!this.name) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Name is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.email) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Email is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.identification_document_pax) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Identification document is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.issueCountry) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Issue country is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.age || this.age < 18) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Traveller age is required and must be above 18'
+        this.isLoading = false
+        return
+      }
+
+      if (this.bAgesChild.some(age => age >= 18)) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Child age must be below 18'
+        this.isLoading = false
+        return
+      }
+
       const validBookingRules = this.getbookingRules.filter(rule => rule)
 
       if (validBookingRules.length > 0) {
         for (let x = 0; x < validBookingRules.length; x++) {
           const bookingRule = validBookingRules[x]
 
-          // Check if HotelOption is an array or an object and handle accordingly
           const hotelOption = Array.isArray(bookingRule.HotelOptions?.HotelOption)
             ? bookingRule.HotelOptions.HotelOption[0]
             : bookingRule.HotelOptions?.HotelOption
 
           if (!hotelOption || !hotelOption.HotelRequiredFields?.HotelBooking) {
             console.error(`Hotel option or booking details missing at index ${x}`)
-            continue // Skip iteration if required booking data is missing
+            continue
           }
 
-          // Retrieve required fields safely
           const bookingCode = hotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.BookingCode?._
           const startDate = hotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo?.Start
           const endDate = hotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo?.End
@@ -4923,7 +4300,6 @@ export default {
           const maximumPrice = hotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo?.Price?.PriceRange?.Maximum
           const currency = hotelOption.HotelRequiredFields.HotelBooking.Elements.HotelElement.HotelBookingInfo?.Price?.PriceRange?.Currency
 
-          // Build formData for each booking
           const formData = new FormData()
           formData.append('bookingCode', bookingCode)
           formData.append('startDate', startDate)
@@ -4947,7 +4323,6 @@ export default {
           formData.append('postal_code_pax', this.postal_code_pax || '')
           formData.append('book_after_payment', '1')
 
-          // Add room data and booking names
           if (this.rooms.length > 0) {
             this.rooms.forEach((room, r) => {
               formData.append(`rooms[${r}][travellers]`, room.travelers)
@@ -4959,7 +4334,6 @@ export default {
             })
           }
 
-          // Handle booking names and surnames for both adults and children
           const namesArray = {
             names: this.bNames,
             surnames: this.bSurnames,
@@ -4985,15 +4359,18 @@ export default {
             this.snackbar = true
             this.color = 'error'
             this.text = 'Something went wrong'
-            this.loaded = false
-            this.checkResponseCode = false
             this.isLoading = false
           }
         }
       } else {
         console.error('getbookingRules array is empty or undefined.')
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Booking rules are empty or not defined.'
+        this.isLoading = false
       }
     },
+
     onlyUniqueArray (value, index, array) {
       return array.indexOf(value) === index
     },
@@ -5009,7 +4386,6 @@ export default {
       try {
         const promise = tripsServices.getHotelCatalogueData()
         const response = await promise
-        // console.log(response)
         const results = response.data.CatalogueDataRS
         if (results.Errors !== undefined) {
           this.snackbar = true
@@ -5034,9 +4410,7 @@ export default {
       await this.calculateAllPrice()
     },
     errorMessage (message) {
-      // Find the index of the last occurrence of ". "
       const lastIndex = message.lastIndexOf('. ')
-      // Extract the substring after the last occurrence of ". "
       return message.substring(lastIndex + 2)
     }
   }
@@ -5118,15 +4492,6 @@ export default {
   color: #ffffff !important;
 }
 
-/* .list-item::before {
-  content: '●';
-  color: #4f3316;
-  position: absolute;
-  left: 0;
-  top: 0;
-  font-size: 12px;
-  line-height: 14px;
-} */
 @media (max-width: 768px) {
   .my-chip {
     font-size: 8px !important;

@@ -242,9 +242,9 @@
           </aside>
         </v-row>
       </div>
-      <div v-if="confirmationPhase && !showTravellerData" class="tickit-box">
-        <div v-if="$route.params.module === 'trip'" class="flight-review-border">
-          <div class="airline-head">
+      <div v-if="confirmationPhase && !showTravellerData">
+        <div v-if="$route.params.module === 'trip'">
+          <!-- <div class="airline-head">
             <div class="airline-head-title">
               Your trip was booked successfully
             </div>
@@ -255,7 +255,6 @@
             </h2>
             <h5>Start on: <strong>{{ packageStartDay }}</strong> for <strong>{{ packageActivities.packageDuration }}</strong> Days / <strong>{{ packageActivities.packageNightsNumber }}</strong> Nights</h5>
             <h5 class="mb-5">
-              <!-- Price: <strong>${{ packageTotalPrice }}</strong> -->
               Price: <strong>${{ packageTotalAllPrice.toFixed(2) }}</strong>
             </h5>
             <div v-for="(activity, i) in packageActivities.activities" :key="i">
@@ -345,9 +344,7 @@
                 </v-expansion-panel>
               </v-expansion-panels>
             </div>
-            <!-- confirmation of accommodation -->
             <div>
-              <!-- <div v-if="numberOfPassenger.hotelJPCode !== NULL && numberOfPassenger.bookingRule"> -->
               <v-expansion-panels v-model="numberOfPassenger.hotelJPCode" focusable class="mb-5">
                 <v-expansion-panel style="border-radius: 18px;">
                   <v-expansion-panel-header class="font-weight-bold text-h6 change-icon-style" style="border-radius: 8px;">
@@ -358,9 +355,7 @@
                     </v-row>
                   </v-expansion-panel-header>
                   <v-expansion-panel-content class="my-8">
-                    <!-- my new design -->
                     <v-row>
-                      <!-- Loop through the multipleBookingResponse array -->
                       <v-col
                         v-for="(booking, index) in multipleBookingResponse"
                         :key="index"
@@ -368,10 +363,6 @@
                         md="12"
                       >
                         <v-card outlined class="pa-3 mb-4">
-                          <!-- Display booking details -->
-                          <!-- <h3 class="text-h6 font-weight-bold mb-3">
-                            Booking {{ index + 1 }}
-                          </h3> -->
                           <v-list dense>
                             <v-list-item>
                               <v-list-item-icon>
@@ -383,17 +374,6 @@
                                 </v-list-item-title>
                               </v-list-item-content>
                             </v-list-item>
-
-                            <!-- <v-list-item>
-                              <v-list-item-icon>
-                                <v-icon>mdi-star</v-icon>
-                              </v-list-item-icon>
-                              <v-list-item-content>
-                                <v-list-item-title>
-                                  <strong>Category:</strong> {{ booking.hotelCategory || 'N/A' }}
-                                </v-list-item-title>
-                              </v-list-item-content>
-                            </v-list-item> -->
 
                             <v-list-item>
                               <v-list-item-icon>
@@ -439,18 +419,6 @@
                                 </v-list-item-title>
                               </v-list-item-content>
                             </v-list-item>
-
-                            <!-- <v-list-item>
-                                  <v-list-item-icon>
-                                    <v-icon>mdi-alert-circle-outline</v-icon>
-                                  </v-list-item-icon>
-                                  <v-list-item-content>
-                                    <v-list-item-title>
-                                      <strong>Cancellation Policy:</strong>
-                                      {{ booking.cancellationPolicy || 'N/A' }}
-                                    </v-list-item-title>
-                                  </v-list-item-content>
-                                </v-list-item> -->
                           </v-list>
                         </v-card>
                       </v-col>
@@ -473,7 +441,54 @@
             >
               Check Trips
             </v-btn>
-          </div>
+          </div> -->
+          <v-container class="fill-height d-flex justify-center align-center" fluid>
+            <v-card
+              class="rounded-xl pa-5"
+              max-width="600"
+              elevation="3"
+              style="background-color: rgba(255, 255, 255, 0.69); border: 1px solid #ddd;"
+            >
+              <h5 class="text-center font-weight-bold text-h5">
+                Trip Booked Successfully!
+              </h5>
+              <v-card-subtitle class="text-center mt-2">
+                Thank you for choosing Tanefer!
+              </v-card-subtitle>
+              <v-card-text class="text-center mt-4">
+                <v-icon large color="success">
+                  mdi-check-circle-outline
+                </v-icon>
+                <p class="mt-4 text-h6 font-weight-medium">
+                  Your trip for the custom package
+                  <span class="font-weight-bold" style="color: #4f3316;">"{{ packageActivities.packageTitle }}"</span>
+                  is successfully booked.
+                </p>
+                <p class="mt-3">
+                  In a moment, you'll receive an email with all the details of your booking. Please check your inbox (and spam folder, just in case).
+                </p>
+              </v-card-text>
+              <v-divider class="my-4" />
+              <p class="text-center text-caption">
+                We are pleased to inform you that our website also offers a convenient flight booking service to complement your travel plans.
+              </p>
+              <!-- Buttons -->
+              <div style="display: flex; gap: 1rem; align-items: center; justify-content: center;">
+                <v-btn
+                  class="brown white--text py-5 px-12"
+                  @click="openBookFlight"
+                >
+                  Book Flight
+                </v-btn>
+                <v-btn
+                  class="brown white--text py-5 px-12"
+                  @click="redirectPageTrips"
+                >
+                  Check Trips
+                </v-btn>
+              </div>
+            </v-card>
+          </v-container>
 
           <!-- </NuxtLink> -->
         </div>
