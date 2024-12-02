@@ -1710,6 +1710,49 @@ export default {
       }
     },
     async finalBookHotel () {
+      if (!this.name) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Name is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.email) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Email is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.identification_document_pax) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Identification document is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.issueCountry) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Issue country is required'
+        this.isLoading = false
+        return
+      }
+      if (!this.age || this.age < 18) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Traveller age is required and must be above 18'
+        this.isLoading = false
+        return
+      }
+
+      if (this.bAgesChild.some(age => age >= 18)) {
+        this.snackbar = true
+        this.color = 'error'
+        this.text = 'Child age must be below 18'
+        this.isLoading = false
+        return
+      }
       this.isLoading = true
       if (this.getbookingRuleArray.length > 0) {
         for (let x = 0; x < this.getbookingRuleArray.length; x++) {

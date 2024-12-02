@@ -18,36 +18,38 @@
           v-on="on"
         />
       </template>
-      <v-card max-width="600" color="white">
-        <v-card-text style="max-height: 500px; overflow: auto;">
+      <v-card :max-width="$vuetify.breakpoint.smAndDown ? '100%' : '600px'" color="white">
+        <v-card-text :style="{ maxHeight: $vuetify.breakpoint.smAndDown ? '400px' : '500px', overflow: 'auto' }">
           <!-- Single Rooms Counter at the Top -->
-          <div class="rooms mb-3">
+          <div class="rooms mb-3 d-flex align-center justify-space-between">
             <span class="label">ROOMS</span>
-            <v-icon small color="white" class="minus" @click="decrease('rooms')">
-              mdi-minus
-            </v-icon>
-            <span class="number">{{ roomsNum }}</span>
-            <v-icon small color="white" class="plus" @click="increase('rooms')">
-              mdi-plus
-            </v-icon>
+            <div>
+              <v-icon small color="white" class="minus" @click="decrease('rooms')">
+                mdi-minus
+              </v-icon>
+              <span class="number mx-2">{{ roomsNum }}</span>
+              <v-icon small color="white" class="plus" @click="increase('rooms')">
+                mdi-plus
+              </v-icon>
+            </div>
           </div>
 
           <!-- Room Details Section -->
           <div v-for="(room, roomIndex) in roomsNum" :key="roomIndex" class="inputs">
-            <v-row class="align-center no-gutters mb-3" dense>
+            <v-row class="align-center mb-3" dense>
               <!-- Room Label -->
-              <v-col cols="12" class="mb-2 d-flex align-center justify-center room-label">
+              <v-col cols="12" class="mb-2 text-center">
                 <span class="room-text">ROOM {{ roomIndex + 1 }}</span>
               </v-col>
 
               <!-- Adults Section -->
-              <v-col cols="5" class="d-flex align-center justify-center">
-                <div class="adults mr-4">
-                  <span class="label">ADUTLS(+18)</span>
-                  <v-icon small color="white" class="minus" @click="decrease('adults', roomIndex)">
+              <v-col cols="12" sm="6" class="d-flex align-center justify-space-between mb-2">
+                <div class="adults d-flex align-center">
+                  <span class="label">ADULTS (+18)</span>
+                  <v-icon small color="white" class="minus ml-2" @click="decrease('adults', roomIndex)">
                     mdi-minus
                   </v-icon>
-                  <span class="number">{{ adults[roomIndex] }}</span>
+                  <span class="number mx-2">{{ adults[roomIndex] }}</span>
                   <v-icon small color="white" class="plus" @click="increase('adults', roomIndex)">
                     mdi-plus
                   </v-icon>
@@ -55,35 +57,34 @@
               </v-col>
 
               <!-- Children Section -->
-              <v-col cols="5" class="d-flex align-center justify-center">
-                <div class="children pa-0">
-                  <span class="label">CHILD(0-17)</span>
-                  <v-icon small color="white" class="minus" @click="decrease('children', roomIndex)">
+              <v-col cols="12" sm="6" class="d-flex align-center justify-space-between mb-2">
+                <div class="children d-flex align-center">
+                  <span class="label">CHILDREN (0-17)</span>
+                  <v-icon small color="white" class="minus ml-2" @click="decrease('children', roomIndex)">
                     mdi-minus
                   </v-icon>
-                  <span class="number">{{ children[roomIndex] }}</span>
+                  <span class="number mx-2">{{ children[roomIndex] }}</span>
                   <v-icon small color="white" class="plus" @click="increase('children', roomIndex)">
                     mdi-plus
                   </v-icon>
                 </div>
               </v-col>
 
-              <!-- Children's Ages (Appears Only If Children Count > 0) -->
-              <v-col v-if="children[roomIndex] > 0" cols="12" class="d-flex align-center justify-center mt-2">
+              <!-- Children's Ages -->
+              <v-col v-if="children[roomIndex] > 0" cols="12" class="mt-2">
+                <span class="label">CHILDREN AGES:</span>
+                <span class="text--caption">Enter children ages to get the best prices</span>
                 <v-row dense>
-                  <span class="label mt-1">CHILDREN AGES:</span>
-                  <span class="text--caption mt-1">Enter children ages on the date of the trip to get the best prices</span>
-                  <br>
                   <v-col
                     v-for="(age, ageIndex) in childrenAges[roomIndex]"
                     :key="ageIndex"
+                    cols="4"
                     class="d-flex align-center justify-center"
-                    style="width: 80px;"
                   >
                     <v-icon small color="white" class="minus" @click="decrease('age', roomIndex, ageIndex)">
                       mdi-minus
                     </v-icon>
-                    <span class="number">{{ age }}</span>
+                    <span class="number mx-2">{{ age }}</span>
                     <v-icon small color="white" class="plus" @click="increase('age', roomIndex, ageIndex)">
                       mdi-plus
                     </v-icon>
