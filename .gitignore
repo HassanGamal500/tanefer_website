@@ -91,3 +91,5 @@ sw.*
 
 #Compressed folders
 *.zip
+
+.history/
