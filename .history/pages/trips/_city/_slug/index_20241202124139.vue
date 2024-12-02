@@ -722,7 +722,6 @@
                             v-if="e1 === 2 && !confirmedSelectedRoom && !showInfoOfRooms"
                             class="white--text v-btn-brown"
                             elevation="6"
-                            :style="{ fontSize: $vuetify.breakpoint.smAndDown ? '11px' : '16px' }"
                             large
                             block
                             raised

@@ -19,19 +19,19 @@
 
 <script>
 export default {
-//   async asyncData ({ $axios }) {
-//     try {
-//       const response = await $axios.get('http://127.0.0.1:8000/api/v2/booking/histories')
-//       return {
-//         historyList: response.data.data.historyList
-//       }
-//     } catch (error) {
-//       // eslint-disable-next-line no-console
-//       console.error('Error fetching booking history:', error)
-//       return {
-//         historyList: []
-//       }
-//     }
-//   }
+  async asyncData ({ $axios }) {
+    try {
+      const response = await $axios.get('http://127.0.0.1:8000/api/v2/booking/histories')
+      return {
+        historyList: response.data.data.historyList
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching booking history:', error)
+      return {
+        historyList: []
+      }
+    }
+  }
 }
 </script>

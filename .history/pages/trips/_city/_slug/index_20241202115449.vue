@@ -361,7 +361,6 @@
                     </v-card>
                     <div class="d-flex justify-end">
                       <v-btn
-                        class="btn-beige"
                         color="#e8d2ac"
                         :disabled="!isButtonEnabled"
                         @click="checkPackageDateIsExist"
@@ -388,11 +387,7 @@
                           </v-col>
                           <v-col cols="12" md="4" class="p-0">
                             <v-img
-                              :src="hotel.Images?.Image[0]?.Type === 'BIG'
-                                ? hotel.Images?.Image[0]?.FileName
-                                : hotel.Images?.Image[0]?.Type === 'THB'
-                                  ? hotel.Images?.Image[0]?.FileName
-                                  : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'"
+                              :src="hotel.Images?.Image[1]?.Type === 'BIG' ? hotel.Images?.Image[1]?.FileName : hotel.Images?.Image[2]?.FileName"
                               alt="Hotel Image"
                               style="width: 100%; height: 260px; object-fit: cover;"
                               class="rounded-lg"
@@ -722,7 +717,6 @@
                             v-if="e1 === 2 && !confirmedSelectedRoom && !showInfoOfRooms"
                             class="white--text v-btn-brown"
                             elevation="6"
-                            :style="{ fontSize: $vuetify.breakpoint.smAndDown ? '11px' : '16px' }"
                             large
                             block
                             raised
@@ -1621,7 +1615,6 @@
                       v-if="e1 === 2 && !confirmedSelectedRoom && !showInfoOfRooms"
                       class="white--text v-btn-brown"
                       elevation="6"
-                      :style="{ fontSize: $vuetify.breakpoint.smAndDown ? '11px' : '16px' }"
                       large
                       block
                       raised
@@ -1974,10 +1967,10 @@
                 <!-- Hotel Image -->
                 <v-col cols="12" md="4" class="p-0">
                   <v-img
-                    :src="hotel.Images?.Image[0]?.Type === 'BIG'
-                      ? hotel.Images?.Image[0]?.FileName
-                      : hotel.Images?.Image[0]?.Type === 'THB'
-                        ? hotel.Images?.Image[0]?.FileName
+                    :src="hotel.Images?.Image[1]?.Type === 'BIG'
+                      ? hotel.Images?.Image[1]?.FileName
+                      : hotel.Images?.Image[2]?.Type === 'BIG'
+                        ? hotel.Images?.Image[2]?.FileName
                         : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'"
                     max-height="250"
                     max-width="100%"
@@ -2765,7 +2758,7 @@
                 <v-col cols="12" md="4" class="pt-4">
                   <v-img
                     max-height="400"
-                    :src="gtaHotelDetails.Images.Image[0] ? gtaHotelDetails.Images.Image[0].FileName : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'"
+                    :src="gtaHotelDetails.Images.Image[0] ? gtaHotelDetails.Images.Image[0].FileName : 'https://source.unsplash.com/user/c_v_r/1900x800'"
                     max-width="400"
                     class="rounded-lg"
                   />
@@ -3215,15 +3208,6 @@ export default {
     window.removeEventListener('resize', this.checkIfMobile)
   },
   methods: {
-    getImageUrl (hotel) {
-      if (hotel.Images && hotel.Images.length > 0) {
-        const image = hotel.Images.find(img => img.Type === 'THB')
-        return image ? image.FileName : 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      } else if (hotel.HotelInfo && hotel.HotelInfo.Images) {
-        return hotel.HotelInfo.Images.Image || 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-      }
-      return 'https://images.unsplash.com/photo-1496417263034-38ec4f0b665a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
-    },
     toggleRoomDetails () {
       this.showInfoOfRooms = true
     },
