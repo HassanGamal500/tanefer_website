@@ -21,7 +21,7 @@
       <v-card :max-width="$vuetify.breakpoint.smAndDown ? '100%' : '600px'" color="white">
         <v-card-text :style="{ maxHeight: $vuetify.breakpoint.smAndDown ? '400px' : '500px', overflow: 'auto' }">
           <!-- Single Rooms Counter at the Top -->
-          <div class="rooms mb-3 d-flex align-center justify-space-between">
+          <div class="rooms mb-3 d-flex align-center">
             <span class="label">ROOMS</span>
             <div>
               <v-icon small color="white" class="minus" @click="decrease('rooms')">

@@ -113,7 +113,7 @@
                   <v-stepper-step
                     :complete="e1 > 1"
                     color="#8e5b3c"
-                    :step="$vuetify.breakpoint.width >= 960 ? '1' : 'Activity'"
+                    :step="'1'"
                     class="step-title"
                   >
                     Activity
@@ -125,7 +125,7 @@
                   <v-stepper-step
                     :complete="e1 > 2"
                     color="#8e5b3c"
-                    :step="$vuetify.breakpoint.width >= 960 ? '2' : 'Accommodation'"
+                    :step="'2'"
                     class="step-title"
                   >
                     Accommodation
@@ -136,12 +136,13 @@
                   <!-- Step 3 -->
                   <v-stepper-step
                     color="#8e5b3c"
-                    :step="$vuetify.breakpoint.width >= 960 ? '3' : 'Trip Summary'"
+                    :step="'3'"
                     class="step-title"
                   >
                     Trip Summary
                   </v-stepper-step>
                 </v-stepper-header>
+
                 <v-stepper-items>
                   <v-stepper-content step="1">
                     <v-card
@@ -500,28 +501,34 @@
                                     class="room-card mb-3"
                                   >
                                     <v-col cols="12">
-                                      <v-row justify="space-between">
+                                      <!-- Header Section -->
+                                      <v-row justify="space-between" align="center">
+                                        <!-- Room Name -->
                                         <v-col cols="12" md="6">
                                           <h5 class="mb-0 brown--text text-decoration-underline">
                                             {{ roomOption.HotelRooms?.HotelRoom?.Name || 'Room Name Not Available' }}
                                           </h5>
                                         </v-col>
-                                        <v-col cols="12" md="6" class="text-right">
-                                          <p class="mr-3 font-weight-bold text-subtitle-1">
+
+                                        <!-- Price -->
+                                        <v-col cols="12" md="6" class="text-md-right text-left">
+                                          <p class="mr-md-3 font-weight-bold text-subtitle-1">
                                             $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
                                           </p>
                                         </v-col>
                                       </v-row>
 
-                                      <v-row class="d-flex align-center justify-space-between mt-2" no-gutters>
-                                        <v-col cols="4">
-                                          <p class="mb-0 font-weight-medium">
-                                            <span class="grey--text">
-                                              {{ roomOption.Board?._ || 'Board not available' }}
-                                            </span>
+                                      <!-- Details Section -->
+                                      <v-row class="d-flex align-center justify-space-between mt-2">
+                                        <!-- Board Information -->
+                                        <v-col cols="12" md="4">
+                                          <p class="mb-0 font-weight-medium grey--text">
+                                            {{ roomOption.Board?._ || 'Board not available' }}
                                           </p>
                                         </v-col>
-                                        <v-col cols="4" class="d-flex align-start">
+
+                                        <!-- Cancellation Policy -->
+                                        <v-col cols="12" md="4" class="d-flex align-start mt-2 mt-md-0">
                                           <v-btn
                                             small
                                             text
@@ -535,10 +542,12 @@
                                             </v-icon>
                                           </v-btn>
                                         </v-col>
-                                        <v-col cols="4" class="d-flex justify-end">
+
+                                        <!-- Select Room Button -->
+                                        <v-col cols="12" md="4" class="d-flex justify-md-end justify-center mt-2 mt-md-0">
                                           <v-btn
                                             small
-                                            class="mr-2 px-2 py-4 no-wrap v-btn-brown"
+                                            class="mr-md-2 px-2 py-4 no-wrap v-btn-brown"
                                             :disabled="isRoomSelected[h]?.[index]"
                                             @click="selectRoomHotelGta(h, index)"
                                           >
@@ -547,7 +556,8 @@
                                         </v-col>
                                       </v-row>
 
-                                      <v-row v-if="showFullCancellationPolicy[index]">
+                                      <!-- Cancellation Policy Details -->
+                                      <v-row v-if="showFullCancellationPolicy[index]" class="mt-3">
                                         <v-col cols="12">
                                           <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
                                             <tr style="background-color: #eaeaea;">
@@ -1799,9 +1809,10 @@
           </v-card-actions>
         </v-card>
       </v-dialog> -->
-      <v-dialog v-model="showCheckout" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
+      <v-dialog v-model="showCheckout" max-width="600" content-class="rounded-xl hide-overflow">
         <v-card elevation="2" class="rounded-lg" style="border: 1px solid #ddd; background-color: #f8f8f8;">
-          <v-card-title class="white--text" style="background-color: #4f3316; position: relative;">
+          <!-- Header -->
+          <v-card-title class="white--text py-2" style="background-color: #4f3316; position: relative;">
             <span class="font-weight-bold text-h6">Trip Summary</span>
             <v-btn
               text
@@ -1818,9 +1829,10 @@
             </v-btn>
           </v-card-title>
 
-          <v-card-text>
+          <!-- Card Content -->
+          <v-card-text style="overflow-y: auto; max-height: 400px;">
             <!-- Traveller Details -->
-            <v-row class="pt-4 pb-2">
+            <v-row class="pt-4 pb-2" justify="center">
               <v-col cols="6" sm="3">
                 <v-text-field
                   :value="travellers"
@@ -1832,7 +1844,6 @@
                   class="rounded-lg"
                 />
               </v-col>
-
               <v-col cols="6" sm="3">
                 <v-text-field
                   :value="children"
@@ -1851,98 +1862,93 @@
             <!-- Cost Summary -->
             <div style="background-color: #fff; border-radius: 10px; padding: 16px; box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);">
               <v-row class="py-2">
-                <v-col cols="9">
-                  <p class="font-weight-bold mb-0 text-h6">
+                <v-col cols="8" class="text-left">
+                  <p class="font-weight-bold text-body-1 mb-0">
                     Adventures
                   </p>
                 </v-col>
-                <v-col cols="3" class="text-right">
-                  <p class="font-weight-medium text-h6">
+                <v-col cols="4" class="text-right">
+                  <p class="font-weight-medium text-body-1">
                     $ {{ initialPrice }}
                   </p>
                 </v-col>
               </v-row>
-
               <v-divider />
 
               <v-row class="py-2">
-                <v-col cols="9">
-                  <p class="font-weight-bold mb-0 text-h6">
+                <v-col cols="8" class="text-left">
+                  <p class="font-weight-bold text-body-1 mb-0">
                     Accommodation Cost
                   </p>
                 </v-col>
-                <v-col cols="3" class="text-right">
-                  <p class="font-weight-medium text-h6">
+                <v-col cols="4" class="text-right">
+                  <p class="font-weight-medium text-body-1">
                     $ {{ hotelPrices.toFixed(2) }}
                   </p>
                 </v-col>
               </v-row>
-
               <v-divider />
 
               <v-row class="py-2">
-                <v-col cols="9">
-                  <p class="font-weight-bold mb-0 text-h6">
+                <v-col cols="8" class="text-left">
+                  <p class="font-weight-bold text-body-1 mb-0">
                     Additional Cost
                   </p>
                 </v-col>
-                <v-col cols="3" class="text-right">
-                  <p class="font-weight-medium text-h6">
+                <v-col cols="4" class="text-right">
+                  <p class="font-weight-medium text-body-1">
                     $ {{ additionalPrice }}
                   </p>
                 </v-col>
               </v-row>
-
               <v-divider />
 
               <v-row class="py-2">
-                <v-col cols="9">
-                  <p class="font-weight-bold mb-0 text-h6">
+                <v-col cols="8" class="text-left">
+                  <p class="font-weight-bold text-body-1 mb-0">
                     Discount
                   </p>
                 </v-col>
-                <v-col cols="3" class="text-right">
-                  <p class="font-weight-medium text-h6">
+                <v-col cols="4" class="text-right">
+                  <p class="font-weight-medium text-body-1">
                     % {{ discountPercentage }}
+                  </p>
+                </v-col>
+              </v-row>
+              <v-row class="py-1">
+                <v-col cols="6" class="text-left">
+                  <p class="font-weight-bold text-subtitle-1 mb-0">
+                    Total
+                  </p>
+                </v-col>
+                <v-col cols="6" class="text-right">
+                  <p class="font-weight-bold text-subtitle-1">
+                    $ {{ totalAllPrices.toFixed(2) }}
                   </p>
                 </v-col>
               </v-row>
             </div>
           </v-card-text>
-
-          <!-- Total & Checkout Button -->
-          <v-card-actions class="dialog-cart-footer" style="background-color: #fff; padding: 16px;">
-            <v-row align="center" justify="space-between" class="px-5">
-              <v-col cols="8">
-                <h5 class="text-h5 font-weight-bold">
-                  Total
-                </h5>
+          <v-card-actions class="dialog-cart-footer" style="background-color: #fff;">
+            <!-- Total Row -->
+            <v-row>
+              <v-col cols="12">
+                <v-btn
+                  class="rounded-lg ma-2"
+                  style="box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);"
+                  dark
+                  color="#4f3316"
+                  block
+                  :disabled="!openProceed"
+                  @click="bookAdventures"
+                >
+                  Complete Checkout
+                </v-btn>
               </v-col>
-              <v-col cols="4" class="text-right">
-                <h5 class="text-h5 font-weight-bold">
-                  $ {{ totalAllPrices.toFixed(2) }}
-                </h5>
-              </v-col>
-            </v-row>
-            <v-row justify="center">
-              <v-btn
-                class="rounded-lg"
-                style="margin-bottom: 15px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);"
-                x-large
-                elevation="2"
-                dark
-                color="#4f3316"
-                block
-                :disabled="!openProceed"
-                @click="bookAdventures"
-              >
-                Complete Checkout
-              </v-btn>
             </v-row>
           </v-card-actions>
         </v-card>
       </v-dialog>
-
       <v-dialog v-model="showHotelsDialog" max-width="900" content-class="rounded-xl hide-overflow" scrollable>
         <v-card>
           <v-card-title class="white--text" style="background-color: #4f3316;">
@@ -3096,7 +3102,8 @@ export default {
       isRoomSelected: [],
       isHotelsLoading: true,
       buttonText: 'Proceed without accommodation',
-      appendedCity: ''
+      appendedCity: '',
+      hotelCache: new Map()
     }
   },
   async fetch () {
@@ -3455,12 +3462,123 @@ export default {
         this.showCheckout = false
       }
     },
+    // async showHotels (indexCity) {
+    //   this.showHotelsDialog = true
+    //   this.isHotelsLoading = true
+    //   this.listGtaHotelJpds = []
+
+    //   const cityHotels = this.listGtaHotelDetails[indexCity]
+    //   if (!cityHotels || !cityHotels.hotelJpds || cityHotels.hotelJpds.length === 0) {
+    //     console.warn('No hotels found for the selected city.')
+    //     this.isHotelsLoading = false
+    //     return
+    //   }
+
+    //   for (let i = 0; i < cityHotels.hotelJpds.length; i++) {
+    //     const hotelJpd = cityHotels.hotelJpds[i]
+    //     if (!hotelJpd) { continue }
+
+    //     try {
+    //       const response = await tripsServices.getGtaHotelDetails(hotelJpd)
+    //       const hotelDetails = response?.data?.ContentRS?.Contents?.HotelContent
+
+    //       if (!hotelDetails) {
+    //         console.warn(`No details found for hotel JP code: ${hotelJpd}`)
+    //         continue
+    //       }
+
+    //       hotelDetails.city_id = cityHotels.city_id
+    //       hotelDetails.city_name = cityHotels.city_name
+    //       hotelDetails.hotelIDs = cityHotels.hotelIDs
+    //       hotelDetails.hotelJpds = cityHotels.hotelJpds
+    //       hotelDetails.isAvailable = false
+    //       hotelDetails.isAvailableText = 'Not Checked with Dates'
+
+    //       this.listGtaHotelJpds.push(hotelDetails)
+    //       this.isHotelsLoading = false
+    //     } catch (error) {
+    //       console.error(`Failed to fetch hotel details for JP code: ${hotelJpd}`, error)
+    //     }
+    //   }
+
+    //   this.selectedCityHotelIndex = indexCity
+    // },
+    // async showHotels (indexCity) {
+    //   this.showHotelsDialog = true
+    //   this.isHotelsLoading = true
+
+    //   // Initialize a Set to track fetched JPDs
+    //   const fetchedHotelJpds = new Set()
+
+    //   // Clear the list for the selected city
+    //   this.listGtaHotelJpds = []
+
+    //   const cityHotels = this.listGtaHotelDetails[indexCity]
+    //   if (!cityHotels || !cityHotels.hotelJpds || cityHotels.hotelJpds.length === 0) {
+    //     console.warn('No hotels found for the selected city.')
+    //     this.isHotelsLoading = false
+    //     return
+    //   }
+
+    //   for (let i = 0; i < cityHotels.hotelJpds.length; i++) {
+    //     // Check if the dialog is still open
+    //     if (!this.showHotelsDialog) {
+    //       console.warn('Fetching stopped as dialog was closed.')
+    //       this.isHotelsLoading = false
+    //       return // Stop further processing
+    //     }
+
+    //     const hotelJpd = cityHotels.hotelJpds[i]
+
+    //     if (!hotelJpd || fetchedHotelJpds.has(hotelJpd)) {
+    //       // Skip if the hotel JPD is invalid or already fetched
+    //       continue
+    //     }
+
+    //     // Mark this JPD as fetched
+    //     fetchedHotelJpds.add(hotelJpd)
+
+    //     try {
+    //       const response = await tripsServices.getGtaHotelDetails(hotelJpd)
+    //       const hotelDetails = response?.data?.ContentRS?.Contents?.HotelContent
+
+    //       if (!hotelDetails) {
+    //         console.warn(`No details found for hotel JP code: ${hotelJpd}`)
+    //         continue
+    //       }
+
+    //       // Add additional city details
+    //       hotelDetails.city_id = cityHotels.city_id
+    //       hotelDetails.city_name = cityHotels.city_name
+    //       hotelDetails.hotelIDs = cityHotels.hotelIDs
+    //       hotelDetails.hotelJpds = cityHotels.hotelJpds
+    //       hotelDetails.isAvailable = false
+    //       hotelDetails.isAvailableText = 'Not Checked with Dates'
+
+    //       // Push the details to the list immediately
+    //       this.listGtaHotelJpds.push(hotelDetails)
+    //     } catch (error) {
+    //       console.error(`Failed to fetch hotel details for JP code: ${hotelJpd}`, error)
+    //     }
+    //   }
+
+    //   // Mark loading as complete if the dialog is still open
+    //   if (this.showHotelsDialog) {
+    //     this.isHotelsLoading = false
+    //   }
+    //   this.selectedCityHotelIndex = indexCity
+    // },
     async showHotels (indexCity) {
       this.showHotelsDialog = true
       this.isHotelsLoading = true
+
+      // Initialize a Set to track fetched JPDs
+      const fetchedHotelJpds = new Set()
+
+      // Clear the list for the selected city
       this.listGtaHotelJpds = []
 
-      const cityHotels = this.listGtaHotelDetails[indexCity] // Get data for the specific city
+      const cityHotels = this.listGtaHotelDetails[indexCity]
       if (!cityHotels || !cityHotels.hotelJpds || cityHotels.hotelJpds.length === 0) {
         console.warn('No hotels found for the selected city.')
         this.isHotelsLoading = false
@@ -3468,11 +3586,31 @@ export default {
       }
 
       for (let i = 0; i < cityHotels.hotelJpds.length; i++) {
+        if (!this.showHotelsDialog) {
+          console.warn('Fetching stopped as dialog was closed.')
+          this.isHotelsLoading = false
+          return // Exit early
+        }
+
         const hotelJpd = cityHotels.hotelJpds[i]
-        if (!hotelJpd) { continue }
+
+        if (!hotelJpd || fetchedHotelJpds.has(hotelJpd)) {
+          // Skip if the hotel JPD is invalid or already fetched
+          continue
+        }
+
+        // Mark this JPD as fetched
+        fetchedHotelJpds.add(hotelJpd)
 
         try {
-          const response = await tripsServices.getGtaHotelDetails(hotelJpd)
+          // Race the API call with a timeout
+          const response = await Promise.race([
+            tripsServices.getGtaHotelDetails(hotelJpd),
+            new Promise((resolve, reject) =>
+              setTimeout(() => reject(new Error('Request timed out')), 200) // 200ms timeout
+            )
+          ])
+
           const hotelDetails = response?.data?.ContentRS?.Contents?.HotelContent
 
           if (!hotelDetails) {
@@ -3480,6 +3618,7 @@ export default {
             continue
           }
 
+          // Add additional city details
           hotelDetails.city_id = cityHotels.city_id
           hotelDetails.city_name = cityHotels.city_name
           hotelDetails.hotelIDs = cityHotels.hotelIDs
@@ -3487,14 +3626,25 @@ export default {
           hotelDetails.isAvailable = false
           hotelDetails.isAvailableText = 'Not Checked with Dates'
 
+          // Push the details to the list immediately (updates UI in real time)
           this.listGtaHotelJpds.push(hotelDetails)
-          this.isHotelsLoading = false
         } catch (error) {
-          console.error(`Failed to fetch hotel details for JP code: ${hotelJpd}`, error)
+          console.warn(`Skipping hotel JP code: ${hotelJpd}. Reason: ${error.message}`)
         }
       }
 
+      if (this.showHotelsDialog) {
+        this.isHotelsLoading = false
+      }
       this.selectedCityHotelIndex = indexCity
+    },
+    isCacheValid (indexCity) {
+      const cacheEntry = this.hotelCache.get(indexCity)
+      if (!cacheEntry) { return false } // No cache entry means it's invalid
+
+      const now = Date.now()
+      const cacheAge = now - cacheEntry.timestamp // Calculate how old the cache is
+      return cacheAge < 5 * 60 * 1000 // Cache is valid if it's less than 5 minutes old
     },
     showRooms (HotelIndex) {
       this.showRoomsDialog = true
@@ -4686,7 +4836,7 @@ export default {
   color: #ffffff !important;
 }
 
-@media (max-width: 960px) {
+/* @media (max-width: 960px) {
   ::v-deep .v-stepper-step {
     background: none !important;
     border: none !important;
@@ -4706,7 +4856,7 @@ export default {
     padding: 0 !important;
     text-align: center;
   }
-}
+} */
 
 @media (max-width: 600px) {
   .my-chip {

@@ -5,7 +5,29 @@ import clientAuthAPI from './axiosAuthConfig'
 // const baseURL = 'http://localhost:8000/api/v2'
 // const baseURL = 'https://tanefer.nahrdev.com/api/v2'
 const baseURL = 'https://api.tanefer.com/api/v2'
+// Create a map to track ongoing requests
+const pendingRequests = new Map()
+
+function getGtaHotelDetails (jpdCode) {
+  if (pendingRequests.has(jpdCode)) {
+    return pendingRequests.get(jpdCode)
+  }
+  const request = clientAPI(baseURL).get(`/packages/get-content?hotelCode=${jpdCode}`)
+  pendingRequests.set(jpdCode, request)
+
+  return request
+    .then((response) => {
+      pendingRequests.delete(jpdCode)
+      return response // Return the response
+    })
+    .catch((error) => {
+      pendingRequests.delete(jpdCode)
+      throw error
+    })
+}
+
 export default {
+  getGtaHotelDetails,
   // get all cities for search
   getCities (type) {
     return clientAPI(baseURL).get(`/tours/list-city?type=${type}`)
@@ -82,9 +104,9 @@ export default {
   },
 
   // get hotel destails
-  getGtaHotelDetails (jpdCode) {
-    return clientAPI(baseURL).get(`/packages/get-content?hotelCode=${jpdCode}`)
-  },
+  // getGtaHotelDetails (jpdCode) {
+  //   return clientAPI(baseURL).get(`/packages/get-content?hotelCode=${jpdCode}`)
+  // },
 
   checkHotelAvailabilities (payload) {
     return clientAPI(baseURL).post('/packages/get-availability', payload)

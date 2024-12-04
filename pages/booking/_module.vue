@@ -472,24 +472,30 @@
               <p class="text-center text-caption">
                 We are pleased to inform you that our website also offers a convenient flight booking service to complement your travel plans.
               </p>
+
               <!-- Buttons -->
-              <div style="display: flex; gap: 1rem; align-items: center; justify-content: center;">
-                <v-btn
-                  class="brown white--text py-5 px-12"
-                  @click="openBookFlight"
-                >
-                  Book Flight
-                </v-btn>
-                <v-btn
-                  class="brown white--text py-5 px-12"
-                  @click="redirectPageTrips"
-                >
-                  Check Trips
-                </v-btn>
-              </div>
+              <v-row class="d-flex justify-space-between" align="center" spacing="4">
+                <v-col :cols="12" sm="6" md="4">
+                  <v-btn
+                    class="brown white--text py-5 px-5"
+                    block
+                    @click="openBookFlight"
+                  >
+                    Book Flight
+                  </v-btn>
+                </v-col>
+                <v-col :cols="12" sm="6" md="4">
+                  <v-btn
+                    class="brown white--text py-5 px-5"
+                    block
+                    @click="redirectPageTrips"
+                  >
+                    Check Trips
+                  </v-btn>
+                </v-col>
+              </v-row>
             </v-card>
           </v-container>
-
           <!-- </NuxtLink> -->
         </div>
         <div v-if="$route.params.module === 'adventure'" class="flight-review-border">

@@ -63,7 +63,7 @@
                   />
                 </v-menu>
 
-                <rooms-and-guests @save="setGuests" />
+                <rooms-and-guests-cruise @save="setGuests" />
 
                 <!-- <h6 class="body-1 font-weight-bold">
                   Price: $ {{ initialPrice }}

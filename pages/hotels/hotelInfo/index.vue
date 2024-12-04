@@ -85,19 +85,25 @@
             </v-col>
           </v-card-title>
           <v-card-text>
-            <v-row v-for="(roomOption, index) in roomOptions" :key="index" class="room-card">
+            <!-- new design -->
+            <v-row
+              v-for="(roomOption, index) in roomOptions"
+              :key="index"
+              class="room-card"
+            >
               <v-col cols="12">
+                <!-- Room Name -->
                 <v-row justify="space-between">
                   <v-col cols="12" md="6">
-                    <!-- Room Name -->
                     <h5 class="mb-0 brown--text text-decoration-underline">
                       {{ roomOption.HotelRooms?.HotelRoom?.Name || 'Room Name Not Available' }}
                     </h5>
                   </v-col>
                 </v-row>
 
-                <v-row class="d-flex align-center justify-space-between" no-gutters>
-                  <v-col cols="4">
+                <!-- Details Section -->
+                <v-row class="d-flex align-center justify-space-between">
+                  <v-col cols="12" sm="4">
                     <!-- Board Type -->
                     <p class="mb-0 font-weight-medium">
                       <span class="grey--text">
@@ -106,42 +112,47 @@
                     </p>
                   </v-col>
 
-                  <v-col cols="4" class="d-flex align-start">
+                  <v-col cols="12" sm="4" class="d-flex align-start">
                     <!-- Non-refundable Button -->
-                    <v-btn small text :color="nonRefundableStatus(roomOption) ? 'red' : 'green'" class="text-decoration-underline" @click="toggleCancellationPolicy(index)">
+                    <v-btn
+                      small
+                      text
+                      :color="nonRefundableStatus(roomOption) ? 'red' : 'green'"
+                      class="text-decoration-underline"
+                      @click="toggleCancellationPolicy(index)"
+                    >
                       {{ nonRefundableStatus(roomOption) ? 'Non-refundable' : 'Cancellation Available' }}
                       <v-icon small class="ml-1">
-                        {{ showFullCancellationPolicy[h] && showFullCancellationPolicy[h][index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                        {{ showFullCancellationPolicy[index] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                       </v-icon>
                     </v-btn>
                   </v-col>
 
-                  <v-col cols="4" class="d-flex justify-end">
-                    <!-- Price -->
+                  <v-col cols="12" sm="4" class="d-flex justify-end">
+                    <!-- Price and Book Button -->
                     <p class="mr-3 font-weight-bold text-subtitle-1">
                       $ {{ roomOption.Prices?.Price?.TotalFixAmounts?.Gross || 'Price not available' }}
                     </p>
-                    <v-btn small class="mr-2 px-8 py-4 no-wrap v-btn-brown" @click="bookRoom(roomOption)">
+                    <v-btn
+                      small
+                      class="mr-2 px-8 py-4 no-wrap v-btn-brown"
+                      @click="bookRoom(roomOption)"
+                    >
                       Book
                     </v-btn>
                   </v-col>
                 </v-row>
 
                 <!-- Cancellation Policy -->
-                <v-row v-if="showFullCancellationPolicy[index]">
+                <v-row v-if="showFullCancellationPolicy[index]" class="mt-2">
                   <v-col cols="12">
-                    <table width="100%" style="border-collapse: collapse; margin-top: 10px;">
+                    <table
+                      width="100%"
+                      style="border-collapse: collapse;"
+                    >
                       <tr style="background-color: #eaeaea;">
                         <td style="padding: 10px;">
                           <strong>Cancellation Charges:</strong>
-                        </td>
-                      </tr>
-                      <tr style="background-color: rgb(255,239.5,193);">
-                        <td style="padding: 10px; color: rgb(134.5,100.875,0);">
-                          <v-icon color="rgb(134.5,100.875,0)" class="mr-1">
-                            mdi-alert
-                          </v-icon>
-                          Booking subject to cancellation charges
                         </td>
                       </tr>
                       <tr>

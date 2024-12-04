@@ -21,7 +21,7 @@
     <div v-else class="gray-wrapper">
       <div v-if="!$fetchState.error">
         <!-- packages fetched successfuly -->
-        <div v-if="trips.length && !$fetchState.pendeing" class="t-container">
+        <div v-if="tripsResults.length && !$fetchState.pendeing" class="t-container">
           <div class="flight-head">
             <div class="flight-title">
               <div class="d-flex-middle-fh">
@@ -49,7 +49,7 @@
             <!-- <span>&lt; Filters</span> -->
           </div>
           <div class="flight-serch-result">
-            <aside id="aside-filter-trip" data-w-id="1b2006bd-cf9d-42e1-d991-e4049c7b4038" class="aside-filter">
+            <!-- <aside id="aside-filter-trip" data-w-id="1b2006bd-cf9d-42e1-d991-e4049c7b4038" class="aside-filter">
               <div class="aside-inner">
                 <div id="close-filter" class="close-filter" @click="closeFilter">
                   <img src="images/close-icon.png" loading="lazy" alt="">
@@ -88,9 +88,9 @@
                   </div>
                 </div>
               </div>
-            </aside>
+            </aside> -->
             <div class="results-block">
-              <div v-for="trip in trips" :key="trip.id" class="cruise-result-block pa-5">
+              <!-- <div v-for="trip in trips" :key="trip.id" class="cruise-result-block pa-5">
                 <v-row v-if="trip" class="pr-3">
                   <v-col cols="12" md="3" class="pa-0" @click="$router.push({name: 'trips-city-slug', params: {city: tripsCity.CityName, slug: trip.packageSlug || trip.packageTitle}})">
                     <v-img height="100%" max-width="350px" :src="trip.packageImage" />
@@ -107,7 +107,6 @@
                       {{ trip.packageTitle }}<br>
                     </div>
                     <div class="more-text">
-                      <!-- eslint-disable-next-line vue/html-self-closing -->
                       <p v-html="trip.packageOverview"></p>
                     </div>
                     <v-btn
@@ -122,17 +121,11 @@
                     </v-btn>
                   </v-col>
                   <v-col cols="12" md="3" align-self="center">
-                    <!-- <div v-if="trip.expected_price && trip.expected_price !== '0' && trip.expected_price !== 'null'">
-                      Expected Price
-                    </div>
-                    <div v-if="trip.expected_price && trip.expected_price !== '0' && trip.expected_price !== 'null'" class="hotel-totlal-price">
-                      ${{ trip.expected_price }}
-                    </div> -->
-                    <div v-if="trip.intialprice && trip.intialprice !== '0' && trip.intialprice !== 'null'">
+                    <div v-if="trip.initialPrice && trip.initialPrice !== '0' && trip.initialPrice !== 'null'">
                       Initial Price
                     </div>
-                    <div v-if="trip.intialprice && trip.intialprice !== '0' && trip.intialprice !== 'null'" class="hotel-totlal-price">
-                      ${{ trip.intialprice }}
+                    <div v-if="trip.initialPrice && trip.initialPrice !== '0' && trip.initialPrice !== 'null'" class="hotel-totlal-price">
+                      ${{ trip.initialPrice }}
                     </div>
                     <div v-if="trip.starting_airport && trip.starting_airport !== 'null' && trip.starting_airport !== null && trip.starting_airport !== 'undefined'">
                       Package Starting airport
@@ -157,18 +150,71 @@
                     </div>
                   </v-col>
                 </v-row>
-              </div>
+              </div> -->
             </div>
           </div>
+          <v-row>
+            <v-col v-for="trip in tripsResults" :key="trip.packageID" cols="12" md="4">
+              <v-card class="package-card" elevation="2">
+                <!-- Image Header -->
+                <v-img
+                  :src="trip.packageImage.startsWith('http')
+                    ? trip.packageImage
+                    : `https://api.tanefer.com/storage/package/banner/${trip.packageImage}`"
+                  height="200"
+                  class="white--text package-card-header"
+                >
+                  <div class="package-title">
+                    {{ trip.packageTitle || 'No Title Available' }}
+                  </div>
+                </v-img>
+
+                <!-- Main Details -->
+                <v-card-text>
+                  <div class="package-details">
+                    <!-- <div class="detail-item">
+                      <v-icon small>
+                        mdi-map-marker
+                      </v-icon>
+                      {{ trip.packageCities?.map(city => city.cityName).join(', ') || 'Unknown City' }}
+                    </div> -->
+                    <div class="detail-item">
+                      <v-icon small>
+                        mdi-calendar
+                      </v-icon>
+                      {{ trip.packageNightsNumber || 'N/A' }} Nights
+                    </div>
+                    <div class="detail-item">
+                      <v-icon small>
+                        mdi-currency-usd
+                      </v-icon>
+                      Starting From: {{ trip.intialprice }}
+                    </div>
+                    <div v-if="trip.packageOverview" class="detail-item">
+                      <v-icon small>
+                        mdi-information
+                      </v-icon>
+                      {{ trip.packageOverview || 'No Overview Available' }}
+                    </div>
+                  </div>
+                </v-card-text>
+
+                <!-- CTA Button -->
+                <v-card-actions>
+                  <v-btn color="#bd9468" @click="$router.push({name: 'trips-city-slug', params: {city: tripsCity.citySlug, slug: trip.packageSlug}})">
+                    View Details
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-col>
+          </v-row>
         </div>
 
-        <!-- no packages available -->
         <p v-else-if="!trips.length && !$fetchState.pendeing" class="text-center headline font-weight-light">
           Currently, no available packages for this city
         </p>
       </div>
 
-      <!-- error in getting packages -->
       <p v-else class="text-center headline font-weight-light">
         Couldn't retrieve trips!
       </p>
@@ -312,7 +358,7 @@ export default {
         //     tours.push(trip)
         //   }
         // }
-        if (this.prices[1] >= trip.intialprice && trip.intialprice >= this.prices[0]) {
+        if (this.prices[1] >= trip.initialPrice && trip.initialPrice >= this.prices[0]) {
           if (this.durations[1] >= trip.packageDuration && trip.packageDuration >= this.durations[0]) {
             tours.push(trip)
           }
@@ -326,33 +372,86 @@ export default {
         })
       } else { filtered = tours }
       this.trips = filtered
-      this.tripsCount = this.trips.length
+      this.tripsCount = this.tripsResults?.length
     },
+    // async getTrips () {
+    //   if (this.tripsCity) {
+    //     this.$store.dispatch('setTripCity', this.cities.find(el => el.citySlug === this.$route.params.city))
+    //     this.lastCity = this.cities.find(el => el.citySlug === this.$route.params.city)
+    //   }
+    //   // this.$store.dispatch('removeTripsResults')
+    //   // this.lastCity = this.$store.state.tripsCity
+    //   this.trips = []
+    //   const res = tripsServices.getCityTrips(this.tripsCity.CityID)
+    //   const results = await res
+    //   const trips = results.data.data
+    //   // console.log(trips)
+    //   // this.$store.dispatch('setTripsResults', trips.tripList)
+    //   this.tripsResults = trips.tripList.flatMap(trip => trip)
+    //   console.log('trips results', this.tripsResults)
+    //   this.trips = this.tripsResults.filter(item => item.intialprice > 0)
+    //   // if (trips.tripList.length > 0) {
+    //   //   // this.trips = trips.tripList.filter(item => item.expected_price > 0)
+    //   //   // this.tripsCount = trips.tripList.filter(item => item.expected_price > 0).length
+    //   //   // this.min = trips.tripList.filter(item => item.expected_price > 0)[this.tripsCount - 1].expected_price
+    //   //   // this.max = trips.tripList.filter(item => item.expected_price > 0)[0].expected_price
+    //   //   // this.trips = trips.tripList.filter(item => item.initialPrice > 0)
+    //   //   // this.tripsCount = trips.tripList.filter(item => item.initialPrice > 0).length
+    //   //   // this.min = trips.tripList.filter(item => item.initialPrice > 0)[this.tripsCount - 1].initialPrice
+    //   //   // this.max = trips.tripList.filter(item => item.initialPrice > 0)[0].initialPrice
+    //   //   // this.prices = [this.min, this.max]
+    //   //   this.trips = trips.tripList.filter(item => item.initialPrice > 0)
+    //   //   this.tripsCount = trips.tripList.filter(item => item.initialPrice > 0).length
+    //   //   this.min = trips.tripList.filter(item => item.initialPrice > 0)[this.tripsCount - 1].initialPrice
+    //   //   this.max = trips.tripList.filter(item => item.initialPrice > 0)[0].initialPrice
+    //   // }
+    //   if (trips.tripList.length > 0) {
+    //     // Filter trips with valid intialprice > 0
+    //     const validTrips = trips.tripList.filter(item => item.intialprice > 0)
+
+    //     // Only proceed if validTrips is not empty
+    //     if (validTrips.length > 0) {
+    //       this.trips = validTrips
+    //       this.tripsCount = validTrips.length
+    //       this.min = validTrips[this.tripsCount - 1].intialprice
+    //       this.max = validTrips[0].intialprice
+    //       this.prices = [this.min, this.max]
+    //     } else {
+    //     // Handle case where no trips match the filter
+    //       this.trips = []
+    //       this.tripsCount = 0
+    //       this.min = 0
+    //       this.max = 0
+    //       this.prices = [0, 0]
+    //     }
+    //   } else {
+    //     // Handle case where tripList is empty
+    //     this.trips = []
+    //     this.tripsCount = 0
+    //     this.min = 0
+    //     this.max = 0
+    //     this.prices = [0, 0]
+    //   }
+    // },
     async getTrips () {
       if (this.tripsCity) {
         this.$store.dispatch('setTripCity', this.cities.find(el => el.citySlug === this.$route.params.city))
         this.lastCity = this.cities.find(el => el.citySlug === this.$route.params.city)
       }
-      // this.$store.dispatch('removeTripsResults')
-      // this.lastCity = this.$store.state.tripsCity
-      this.trips = []
+
+      // Clear trips before fetching
+      this.tripsResults = []
+
+      // Fetch trips
       const res = tripsServices.getCityTrips(this.tripsCity.CityID)
       const results = await res
       const trips = results.data.data
-      // console.log(trips)
-      // this.$store.dispatch('setTripsResults', trips.tripList)
+
+      // Assign tripList directly to tripsResults
       this.tripsResults = trips.tripList
-      if (trips.tripList.length > 0) {
-        // this.trips = trips.tripList.filter(item => item.expected_price > 0)
-        // this.tripsCount = trips.tripList.filter(item => item.expected_price > 0).length
-        // this.min = trips.tripList.filter(item => item.expected_price > 0)[this.tripsCount - 1].expected_price
-        // this.max = trips.tripList.filter(item => item.expected_price > 0)[0].expected_price
-        this.trips = trips.tripList.filter(item => item.intialprice > 0)
-        this.tripsCount = trips.tripList.filter(item => item.intialprice > 0).length
-        this.min = trips.tripList.filter(item => item.intialprice > 0)[this.tripsCount - 1].intialprice
-        this.max = trips.tripList.filter(item => item.intialprice > 0)[0].intialprice
-        this.prices = [this.min, this.max]
-      }
+
+      // Debugging log to verify data
+      console.log('Trips results:', this.tripsResults)
     },
     async getTripsFilters () {
       if (this.tripsCity) {
@@ -429,4 +528,38 @@ export default {
     height: 44px;
     overflow: hidden;
   }
+
+  .package-card {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.package-card-header {
+  position: relative;
+}
+
+.package-title {
+  position: absolute;
+  bottom: 10px;
+  left: 15px;
+  font-weight: bold;
+  font-size: 1.2rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.package-details {
+  margin-top: 10px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.detail-item v-icon {
+  margin-right: 5px;
+}
   </style>
